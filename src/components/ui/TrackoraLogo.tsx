@@ -16,7 +16,7 @@ export default function TrackoraLogo({ size = 40, showText = true, textSize = 20
       />
       {showText && (
         <span style={{ fontSize: textSize, fontWeight: 800, letterSpacing: '-0.5px', lineHeight: 1 }}>
-          <span style={{ color: 'rgba(200,212,235,0.72)' }}>Track</span>
+          <span style={{ color: 'rgba(248,250,252,0.95)' }}>Track</span>
           <span style={{ color: '#5068e8' }}>ora</span>
         </span>
       )}
