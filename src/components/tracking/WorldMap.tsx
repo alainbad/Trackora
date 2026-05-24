@@ -134,13 +134,20 @@ export default function WorldMap({ animated = false, route, points }: WorldMapPr
             <circle cx={x2} cy={y2} r="4" fill={color} opacity="0.8" filter="url(#glow)" />
             <circle cx={x2} cy={y2} r="8" fill={color} opacity="0.15" />
             {animated && (
-              <circle r="4" fill={color} filter="url(#strong-glow)" opacity="0.9">
+              <g fill={color} opacity="0.95" filter="url(#strong-glow)">
+                {/* Plane (top-view, nose pointing +x; rotate="auto" aligns it to the flight path) */}
+                <path d="M 12 0 L 4 -1.6 L -9 -1.4 L -11 0 L -9 1.4 L 4 1.6 Z" />
+                <path d="M 3 -1 L -5 -8 L -1.5 -8.5 L 5 -1 Z" />
+                <path d="M 3 1 L -5 8 L -1.5 8.5 L 5 1 Z" />
+                <path d="M -8 -1 L -12 -4.5 L -9.5 -5 L -6 -1 Z" />
+                <path d="M -8 1 L -12 4.5 L -9.5 5 L -6 1 Z" />
                 <animateMotion
                   dur={`${8 + i * 2}s`}
                   repeatCount="indefinite"
+                  rotate="auto"
                   path={`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`}
                 />
-              </circle>
+              </g>
             )}
           </g>
         )
