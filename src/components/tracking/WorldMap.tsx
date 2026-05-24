@@ -135,12 +135,49 @@ export default function WorldMap({ animated = false, route, points }: WorldMapPr
             <circle cx={x2} cy={y2} r="8" fill={color} opacity="0.15" />
             {animated && (
               <g fill={color} opacity="0.95" filter="url(#strong-glow)">
-                {/* Plane (top-view, nose pointing +x; rotate="auto" aligns it to the flight path) */}
-                <path d="M 12 0 L 4 -1.6 L -9 -1.4 L -11 0 L -9 1.4 L 4 1.6 Z" />
-                <path d="M 3 -1 L -5 -8 L -1.5 -8.5 L 5 -1 Z" />
-                <path d="M 3 1 L -5 8 L -1.5 8.5 L 5 1 Z" />
-                <path d="M -8 -1 L -12 -4.5 L -9.5 -5 L -6 -1 Z" />
-                <path d="M -8 1 L -12 4.5 L -9.5 5 L -6 1 Z" />
+                {/* Each vehicle drawn nose/front/bow pointing +x; rotate="auto" aligns it to the path */}
+
+                {/* TRAIN — blue route (i=0) */}
+                {i % 4 === 0 && (
+                  <>
+                    <path d="M -12 -4.5 L 5 -4.5 L 8.5 -0.5 L 8.5 4 L -12 4 Z" />
+                    <circle cx="-8" cy="5.4" r="1.6" />
+                    <circle cx="-3" cy="5.4" r="1.6" />
+                    <circle cx="3" cy="5.4" r="1.6" />
+                  </>
+                )}
+
+                {/* SHIP — purple route (i=1) */}
+                {i % 4 === 1 && (
+                  <>
+                    <path d="M -12 0 L 7 0 L 12 2.5 L 7 5 L -10 5 L -12 2.5 Z" />
+                    <path d="M -6 0 L 0 0 L 0 -4.5 L -6 -4.5 Z" />
+                    <path d="M 1 0 L 4 0 L 4 -2.5 L 1 -2.5 Z" />
+                  </>
+                )}
+
+                {/* TRUCK — green route (i=2) */}
+                {i % 4 === 2 && (
+                  <>
+                    <path d="M -12 -5 L 1 -5 L 1 2.5 L -12 2.5 Z" />
+                    <path d="M 1 -1.5 L 6 -1.5 L 8.5 2.5 L 1 2.5 Z" />
+                    <circle cx="-8" cy="4" r="1.7" />
+                    <circle cx="-3" cy="4" r="1.7" />
+                    <circle cx="5.5" cy="4" r="1.7" />
+                  </>
+                )}
+
+                {/* PLANE — yellow route (i=3) */}
+                {i % 4 === 3 && (
+                  <>
+                    <path d="M 12 0 L 4 -1.6 L -9 -1.4 L -11 0 L -9 1.4 L 4 1.6 Z" />
+                    <path d="M 3 -1 L -5 -8 L -1.5 -8.5 L 5 -1 Z" />
+                    <path d="M 3 1 L -5 8 L -1.5 8.5 L 5 1 Z" />
+                    <path d="M -8 -1 L -12 -4.5 L -9.5 -5 L -6 -1 Z" />
+                    <path d="M -8 1 L -12 4.5 L -9.5 5 L -6 1 Z" />
+                  </>
+                )}
+
                 <animateMotion
                   dur={`${8 + i * 2}s`}
                   repeatCount="indefinite"
