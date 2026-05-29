@@ -1,40 +1,34 @@
 import { Search, Zap, Bell, BarChart3, ChevronRight } from 'lucide-react'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 const STEPS = [
   {
-    step: '01',
-    icon: Search,
-    color: '#22d3ee',
+    step: '01', icon: Search, color: '#22d3ee',
     title: 'Enter Any Tracking ID',
     desc: 'Paste any tracking number — we auto-detect the carrier and freight type instantly. Works with 1,200+ carriers worldwide.',
   },
   {
-    step: '02',
-    icon: Zap,
-    color: '#818cf8',
+    step: '02', icon: Zap, color: '#818cf8',
     title: 'Get Live Intelligence',
     desc: 'See your shipment on a live map with real-time status, route history, and AI-predicted delivery window in seconds.',
   },
   {
-    step: '03',
-    icon: Bell,
-    color: '#10b981',
+    step: '03', icon: Bell, color: '#10b981',
     title: 'Smart Notifications',
     desc: 'Get proactive alerts before delays happen. Choose email, SMS, Slack, or webhook — customizable per shipment.',
   },
   {
-    step: '04',
-    icon: BarChart3,
-    color: '#f59e0b',
+    step: '04', icon: BarChart3, color: '#f59e0b',
     title: 'Analyse & Optimise',
     desc: 'Your dashboard builds carrier performance profiles over time, revealing savings and reliability insights automatically.',
   },
 ]
 
 export default function HowItWorks() {
+  const isMobile = useIsMobile()
+
   return (
-    <section style={{ padding: '100px 24px', position: 'relative' }}>
-      {/* Background glow */}
+    <section style={{ padding: isMobile ? '72px 20px' : '100px 24px', position: 'relative' }}>
       <div style={{
         position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
         width: '600px', height: '300px',
@@ -43,36 +37,37 @@ export default function HowItWorks() {
       }} />
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative' }}>
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+        <div style={{ textAlign: 'center', marginBottom: isMobile ? '48px' : '64px' }}>
           <h2 style={{
-            fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 800,
-            letterSpacing: '-1.5px', color: '#f8fafc', marginBottom: '16px', lineHeight: 1.1,
+            fontSize: isMobile ? '28px' : 'clamp(32px, 5vw, 48px)',
+            fontWeight: 800, letterSpacing: '-1.5px', color: '#f8fafc', marginBottom: '16px', lineHeight: 1.1,
           }}>
             How it works
           </h2>
-          <p style={{ fontSize: '18px', color: 'rgba(248,250,252,0.55)', maxWidth: '480px', margin: '0 auto', lineHeight: 1.6 }}>
+          <p style={{ fontSize: isMobile ? '15px' : '18px', color: 'rgba(248,250,252,0.55)', maxWidth: '480px', margin: '0 auto', lineHeight: 1.6 }}>
             From tracking number to full intelligence in under 3 seconds.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0', position: 'relative' }}>
-          {/* Connector line */}
-          <div style={{
-            position: 'absolute', top: '40px', left: '15%', right: '15%', height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.3), rgba(22,211,238,0.3), transparent)',
-            display: 'none',
-          }} />
-
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: isMobile ? '20px' : '0',
+          position: 'relative',
+        }}>
           {STEPS.map((step, i) => {
             const Icon = step.icon
             return (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px', textAlign: 'center', position: 'relative' }}>
-                {/* Connector arrow between steps */}
-                {i < STEPS.length - 1 && (
+              <div key={i} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                padding: isMobile ? '20px 12px' : '24px',
+                textAlign: 'center', position: 'relative',
+              }}>
+                {/* Connector arrow — desktop only, not on last item */}
+                {!isMobile && i < STEPS.length - 1 && (
                   <div style={{
-                    position: 'absolute', right: '-16px', top: '36px',
-                    color: 'rgba(248,250,252,0.2)',
-                    zIndex: 2,
+                    position: 'absolute', right: '-12px', top: '36px',
+                    color: 'rgba(248,250,252,0.2)', zIndex: 2,
                   }}>
                     <ChevronRight size={24} />
                   </div>
@@ -80,37 +75,38 @@ export default function HowItWorks() {
 
                 {/* Icon */}
                 <div style={{
-                  width: '72px', height: '72px', borderRadius: '20px',
+                  width: isMobile ? '56px' : '72px',
+                  height: isMobile ? '56px' : '72px',
+                  borderRadius: '20px',
                   background: `${step.color}15`,
                   border: `1px solid ${step.color}30`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: '20px',
+                  marginBottom: isMobile ? '14px' : '20px',
                   position: 'relative',
                 }}>
-                  <Icon size={28} color={step.color} />
+                  <Icon size={isMobile ? 22 : 28} color={step.color} />
                   <div style={{
-                    position: 'absolute', top: '-10px', right: '-10px',
-                    width: '24px', height: '24px', borderRadius: '8px',
+                    position: 'absolute', top: '-8px', right: '-8px',
+                    width: '20px', height: '20px', borderRadius: '6px',
                     background: step.color,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '10px', fontWeight: 800, color: 'white',
+                    fontSize: '9px', fontWeight: 800, color: 'white',
                   }}>
                     {i + 1}
                   </div>
                 </div>
 
-                <div style={{
-                  fontSize: '11px', fontWeight: 700, color: step.color,
-                  letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px',
-                }}>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: step.color, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '8px' }}>
                   Step {step.step}
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#f8fafc', marginBottom: '12px' }}>
+                <h3 style={{ fontSize: isMobile ? '14px' : '18px', fontWeight: 700, color: '#f8fafc', marginBottom: isMobile ? '6px' : '12px', lineHeight: 1.3 }}>
                   {step.title}
                 </h3>
-                <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.55)', lineHeight: 1.65 }}>
-                  {step.desc}
-                </p>
+                {!isMobile && (
+                  <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.55)', lineHeight: 1.65 }}>
+                    {step.desc}
+                  </p>
+                )}
               </div>
             )
           })}

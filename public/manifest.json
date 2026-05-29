@@ -1,0 +1,42 @@
+{
+  "name": "Trackora — Global Shipment Tracker",
+  "short_name": "Trackora",
+  "description": "Track any shipment in real time across 1,200+ carriers worldwide. Free forever.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0f1e",
+  "theme_color": "#6366f1",
+  "lang": "en-US",
+  "categories": ["business", "logistics", "productivity"],
+  "icons": [
+    {
+      "src": "/trackora-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/trackora-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Track a Shipment",
+      "short_name": "Track",
+      "description": "Enter a tracking number for instant results",
+      "url": "/track",
+      "icons": [{ "src": "/trackora-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Dashboard",
+      "short_name": "Dashboard",
+      "description": "View all your saved shipments",
+      "url": "/dashboard",
+      "icons": [{ "src": "/trackora-icon.png", "sizes": "96x96" }]
+    }
+  ]
+}

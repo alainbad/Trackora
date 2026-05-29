@@ -33,6 +33,7 @@ export interface Shipment {
   waypoints: Array<{ lat: number; lng: number; label: string }>
   delayRisk: 'low' | 'medium' | 'high'
   delayReason?: string
+  dangerousGoods?: boolean
 }
 
 const SHIPMENTS: Record<string, Shipment> = {

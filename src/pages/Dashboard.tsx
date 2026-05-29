@@ -1,74 +1,202 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Filter, Plane, Ship, Truck, Package, Brain, Leaf, TrendingUp, AlertTriangle, CheckCircle2, Clock, BarChart3, Zap } from 'lucide-react'
-import { getAllShipments, type Shipment } from '../data/mockShipments'
+import { useSEO } from '../hooks/useSEO'
+import {
+  Plus, Search, Plane, Ship, Truck, Package, Brain,
+  TrendingUp, AlertTriangle, CheckCircle2, Clock,
+  BarChart3, Zap, PackageSearch, Trash2, ChevronDown,
+} from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface DashboardShipment {
+  id:               string
+  trackingNumber:   string
+  carrier:          string
+  carrierSlug:      string
+  freightType:      'air' | 'sea' | 'land' | 'express'
+  status:           string
+  origin:           { city: string }
+  destination:      { city: string }
+  estimatedDelivery: string
+  delayRisk:        'low' | 'medium' | 'high'
+  updatedAt:        string
+}
+
+type SortKey = 'newest' | 'oldest' | 'eta' | 'carrier' | 'status'
+
+interface DbRow {
+  id: string
+  tracking_number: string
+  carrier_name: string
+  carrier_slug: string
+  freight_type: string
+  status: string
+  origin_city: string
+  dest_city: string
+  est_delivery: string
+  updated_at: string
+}
+
+/**
+ * Known parcel-courier names that use a NNN-NNNNNNNN tracking format similar to
+ * an air waybill (MAWB) but are ground/express shipments, not air cargo.
+ * Used to avoid misclassifying e.g. BRT (Italian courier) or DHL domestic as air.
+ */
+const PARCEL_CARRIER_RE = /\b(fedex|ups|dhl|usps|aramex|brt|gls|dpd|hermes|evri|postnl|royal\s*mail|parcelforce|colissimo|correos|chronopost|laposte|yanwen|yun\s*express|4px|cainiao|sf\s*express)\b/i
+
+/**
+ * Infer freight type from DB row, correcting rows stored as 'express' before
+ * the full airline-slug list was in place.
+ *
+ * Rule: MAWB format (NNN-NNNNNNNN) whose carrier is NOT a known parcel courier
+ * → treat as air freight.  No keyword check needed: covers airlines like
+ * "Saudia", "Turkish Cargo", "Ethiopian Airlines" whose names don't contain
+ * the word "air" or "cargo".
+ */
+function inferFreightType(row: DbRow): DashboardShipment['freightType'] {
+  const stored = (row.freight_type || 'express') as DashboardShipment['freightType']
+  if (stored !== 'express') return stored          // sea / land / air already set — trust it
+
+  const tn = (row.tracking_number || '').trim()
+  if (!/^\d{3}-\d{8}$/.test(tn)) return stored    // not MAWB format — leave as express
+
+  const carrier = (row.carrier_name || '').toLowerCase()
+  if (PARCEL_CARRIER_RE.test(carrier)) return stored  // known parcel courier — keep express
+
+  // MAWB format + non-parcel carrier → air cargo
+  return 'air'
+}
+
+function fromDbRow(row: DbRow): DashboardShipment {
+  const status      = row.status      || 'in_transit'
+  const freightType = inferFreightType(row)
+  return {
+    id:               row.id,
+    trackingNumber:   row.tracking_number,
+    carrier:          row.carrier_name  || 'Unknown',
+    carrierSlug:      row.carrier_slug  || '',
+    freightType,
+    status,
+    origin:           { city: row.origin_city || '—' },
+    destination:      { city: row.dest_city   || '—' },
+    estimatedDelivery: row.est_delivery || 'TBD',
+    delayRisk:        status === 'delayed' ? 'high' : status === 'customs' ? 'medium' : 'low',
+    updatedAt:        row.updated_at,
+  }
+}
+
+/**
+ * AfterShip hosts carrier logos at this CDN.
+ * If the DB row has no carrier_slug yet, derive one from the carrier name
+ * (e.g. "Bpost international" → "bpost-international", "Dhl" → "dhl").
+ */
+function carrierLogoUrl(slug: string, carrierName: string): string {
+  const resolved = slug || carrierName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  return resolved ? `https://assets.aftership.com/couriers/svg/${resolved}.svg` : ''
+}
+
+// ── Lookup maps ───────────────────────────────────────────────────────────────
 const TYPE_META = {
-  air: { icon: Plane, color: '#22d3ee', bg: 'rgba(6,182,212,0.12)' },
-  sea: { icon: Ship, color: '#6366f1', bg: 'rgba(99,102,241,0.12)' },
-  land: { icon: Truck, color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  express: { icon: Package, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+  air:     { icon: Plane,   color: '#22d3ee', bg: 'rgba(6,182,212,0.12)'   },
+  sea:     { icon: Ship,    color: '#6366f1', bg: 'rgba(99,102,241,0.12)'  },
+  land:    { icon: Truck,   color: '#10b981', bg: 'rgba(16,185,129,0.12)'  },
+  express: { icon: Package, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
 }
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string; icon: typeof CheckCircle2 }> = {
-  in_transit: { bg: 'rgba(99,102,241,0.12)', color: '#818cf8', label: 'In Transit', icon: Clock },
-  delivered: { bg: 'rgba(16,185,129,0.12)', color: '#10b981', label: 'Delivered', icon: CheckCircle2 },
-  customs: { bg: 'rgba(245,158,11,0.12)', color: '#f59e0b', label: 'Customs', icon: AlertTriangle },
-  delayed: { bg: 'rgba(239,68,68,0.12)', color: '#ef4444', label: 'Delayed', icon: AlertTriangle },
-  picked_up: { bg: 'rgba(6,182,212,0.12)', color: '#22d3ee', label: 'Picked Up', icon: Clock },
-  out_for_delivery: { bg: 'rgba(16,185,129,0.12)', color: '#34d399', label: 'Delivering', icon: Truck },
+  in_transit:       { bg: 'rgba(99,102,241,0.12)',  color: '#818cf8', label: 'In Transit', icon: Clock       },
+  delivered:        { bg: 'rgba(16,185,129,0.12)',  color: '#10b981', label: 'Delivered',  icon: CheckCircle2 },
+  customs:          { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b', label: 'Customs',    icon: AlertTriangle},
+  delayed:          { bg: 'rgba(239,68,68,0.12)',   color: '#ef4444', label: 'Delayed',    icon: AlertTriangle},
+  picked_up:        { bg: 'rgba(6,182,212,0.12)',   color: '#22d3ee', label: 'Picked Up',  icon: Clock       },
+  out_for_delivery: { bg: 'rgba(16,185,129,0.12)',  color: '#34d399', label: 'Delivering', icon: Truck       },
 }
+const FALLBACK_STATUS = STATUS_STYLES['in_transit']
 
-function ShipmentCard({ shipment }: { shipment: Shipment }) {
-  const navigate = useNavigate()
-  const type = TYPE_META[shipment.freightType]
-  const TypeIcon = type.icon
-  const status = STATUS_STYLES[shipment.status]
+// ── ShipmentCard ──────────────────────────────────────────────────────────────
+function ShipmentCard({
+  shipment,
+  onDelete,
+}: {
+  shipment: DashboardShipment
+  onDelete: (id: string) => void
+}) {
+  const navigate   = useNavigate()
+  const type       = TYPE_META[shipment.freightType] ?? TYPE_META.express
+  const TypeIcon   = type.icon
+  const status     = STATUS_STYLES[shipment.status] ?? FALLBACK_STATUS
   const StatusIcon = status.icon
+  const [logoOk, setLogoOk]         = useState(true)  // attempt logo for every carrier; onError falls back
+  const [deleting, setDeleting]     = useState(false)
+  const [confirmDel, setConfirmDel] = useState(false)
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!confirmDel) { setConfirmDel(true); return }
+    setDeleting(true)
+    if (supabase) {
+      await supabase.from('shipments').delete().eq('id', shipment.id)
+    }
+    onDelete(shipment.id)
+  }
+
+  function handleDeleteBlur() {
+    // Reset confirmation if user moves away without confirming
+    setTimeout(() => setConfirmDel(false), 200)
+  }
 
   return (
     <div
       onClick={() => navigate(`/track/${shipment.trackingNumber}`)}
       style={{
-        padding: '20px 24px',
-        borderRadius: '16px',
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        display: 'flex',
-        gap: '20px',
-        alignItems: 'center',
+        padding: '16px 20px', borderRadius: '16px',
+        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+        cursor: 'pointer', transition: 'all 0.2s',
+        display: 'flex', gap: '16px', alignItems: 'center',
       }}
       onMouseEnter={e => {
-        (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.06)'
-        ;(e.currentTarget as HTMLDivElement).style.borderColor = `${type.color}30`
-        ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
+        const el = e.currentTarget as HTMLDivElement
+        el.style.background  = 'rgba(255,255,255,0.06)'
+        el.style.borderColor = `${type.color}30`
+        el.style.transform   = 'translateY(-2px)'
       }}
       onMouseLeave={e => {
-        (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)'
-        ;(e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.07)'
-        ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'
+        const el = e.currentTarget as HTMLDivElement
+        el.style.background  = 'rgba(255,255,255,0.03)'
+        el.style.borderColor = 'rgba(255,255,255,0.07)'
+        el.style.transform   = 'translateY(0)'
       }}
     >
-      {/* Type Icon */}
-      <div style={{
-        width: '44px', height: '44px', borderRadius: '12px',
-        background: type.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        <TypeIcon size={20} color={type.color} />
-      </div>
+      {/* Carrier logo / freight-type icon */}
+      {logoOk ? (
+        <img
+          src={carrierLogoUrl(shipment.carrierSlug, shipment.carrier)}
+          alt={shipment.carrier}
+          onError={() => setLogoOk(false)}
+          style={{ width: '40px', height: '40px', objectFit: 'contain', flexShrink: 0, borderRadius: '10px' }}
+        />
+      ) : (
+        <div style={{
+          width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
+          background: type.bg,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <TypeIcon size={20} color={type.color} />
+        </div>
+      )}
 
       {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc', fontFamily: 'monospace' }}>
             {shipment.trackingNumber}
           </span>
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px',
-            padding: '2px 10px', borderRadius: '100px',
+            padding: '2px 9px', borderRadius: '100px',
             background: status.bg, fontSize: '11px', fontWeight: 600, color: status.color,
           }}>
             <StatusIcon size={10} />
@@ -77,7 +205,7 @@ function ShipmentCard({ shipment }: { shipment: Shipment }) {
           {shipment.delayRisk !== 'low' && (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: '4px',
-              padding: '2px 10px', borderRadius: '100px',
+              padding: '2px 9px', borderRadius: '100px',
               background: shipment.delayRisk === 'high' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
               fontSize: '11px', fontWeight: 600,
               color: shipment.delayRisk === 'high' ? '#ef4444' : '#f59e0b',
@@ -86,101 +214,302 @@ function ShipmentCard({ shipment }: { shipment: Shipment }) {
             </span>
           )}
         </div>
-        <div style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)' }}>
-          {shipment.carrier} · {shipment.origin.city} → {shipment.destination.city}
+        <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.45)' }}>
+          {shipment.carrier}
+          {(shipment.origin.city !== '—' || shipment.destination.city !== '—') && (
+            <> · {shipment.origin.city} → {shipment.destination.city}</>
+          )}
         </div>
       </div>
 
       {/* ETA */}
-      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.4)', marginBottom: '2px' }}>Est. delivery</div>
-        <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>{shipment.estimatedDelivery}</div>
-        <div style={{ fontSize: '11px', color: '#818cf8', marginTop: '2px' }}>AI: {shipment.etaConfidence}% conf.</div>
+      <div style={{ textAlign: 'right', flexShrink: 0, marginRight: '4px' }}>
+        <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.35)', marginBottom: '2px' }}>Est. delivery</div>
+        <div style={{ fontSize: '13px', fontWeight: 700, color: shipment.estimatedDelivery === 'TBD' ? 'rgba(248,250,252,0.35)' : '#f8fafc' }}>
+          {shipment.estimatedDelivery}
+        </div>
       </div>
+
+      {/* Delete button */}
+      <button
+        onClick={handleDelete}
+        onBlur={handleDeleteBlur}
+        disabled={deleting}
+        title={confirmDel ? 'Click again to confirm delete' : 'Remove shipment'}
+        style={{
+          flexShrink: 0,
+          display: 'flex', alignItems: 'center', gap: '5px',
+          padding: confirmDel ? '6px 10px' : '6px 8px',
+          borderRadius: '8px', border: 'none', cursor: deleting ? 'wait' : 'pointer',
+          background: confirmDel ? 'rgba(239,68,68,0.18)' : 'rgba(255,255,255,0.05)',
+          color: confirmDel ? '#ef4444' : 'rgba(248,250,252,0.35)',
+          fontSize: '11px', fontWeight: 600,
+          transition: 'all 0.15s',
+        }}
+        onMouseEnter={e => {
+          e.stopPropagation()
+          if (!confirmDel) (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'
+        }}
+        onMouseLeave={e => {
+          e.stopPropagation()
+          if (!confirmDel) (e.currentTarget as HTMLButtonElement).style.color = 'rgba(248,250,252,0.35)'
+        }}
+      >
+        <Trash2 size={13} />
+        {confirmDel && 'Confirm'}
+      </button>
     </div>
   )
 }
 
+// ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const shipments = getAllShipments()
-  const [filter, setFilter] = useState<string>('all')
-  const navigate = useNavigate()
+  useSEO({
+    title:       'Shipment Dashboard — Monitor All Your Shipments | Trackora',
+    description: 'View, manage, and monitor all your tracked shipments in one place. AI delay insights, real-time status updates, and carrier analytics across all your shipments.',
+    canonical:   'https://www.track-ora.com/dashboard',
+  })
 
-  const filtered = filter === 'all' ? shipments : shipments.filter(s => s.freightType === filter || s.status === filter)
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
+
+  const [shipments,  setShipments]  = useState<DashboardShipment[]>([])
+  const [loading,    setLoading]    = useState(true)
+  const [filter,     setFilter]     = useState('all')
+  const [search,     setSearch]     = useState('')
+  const [sort,       setSort]       = useState<SortKey>('newest')
+  const [sortOpen,   setSortOpen]   = useState(false)
+  const sortRef = useRef<HTMLDivElement>(null)
+
+  // ── Fetch from Supabase ───────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user || !supabase) { setLoading(false); return }
+
+    setLoading(true)
+    supabase
+      .from('shipments')
+      .select('id, tracking_number, carrier_name, carrier_slug, freight_type, status, origin_city, dest_city, est_delivery, updated_at')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) setShipments((data as DbRow[]).map(fromDbRow))
+        setLoading(false)
+      })
+  }, [user])
+
+  // Close sort dropdown on outside click
+  useEffect(() => {
+    if (!sortOpen) return
+    const handler = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [sortOpen])
+
+  function handleDelete(id: string) {
+    setShipments(prev => prev.filter(s => s.id !== id))
+  }
+
+  const [confirmClear, setConfirmClear] = useState(false)
+  const [clearing,     setClearing]     = useState(false)
+
+  async function handleClearAll() {
+    if (!confirmClear) { setConfirmClear(true); return }
+    if (!user) return
+    setClearing(true)
+    try {
+      await supabase!.from('shipments').delete().eq('user_id', user.id)
+      setShipments([])
+    } finally {
+      setClearing(false)
+      setConfirmClear(false)
+    }
+  }
+
+  // ── Derived data ──────────────────────────────────────────────────────────
+  const STATUS_ORDER: Record<string, number> = { out_for_delivery: 0, in_transit: 1, customs: 2, picked_up: 3, delayed: 4, delivered: 5 }
+
+  const filtered = shipments
+    .filter(s => {
+      const matchFilter = filter === 'all' || s.freightType === filter || s.status === filter
+      const matchSearch = !search || s.trackingNumber.toLowerCase().includes(search.toLowerCase()) ||
+                          s.carrier.toLowerCase().includes(search.toLowerCase())
+      return matchFilter && matchSearch
+    })
+    .sort((a, b) => {
+      switch (sort) {
+        case 'oldest':  return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+        case 'eta':     return (a.estimatedDelivery === 'TBD' ? 1 : 0) - (b.estimatedDelivery === 'TBD' ? 1 : 0) ||
+                               a.estimatedDelivery.localeCompare(b.estimatedDelivery)
+        case 'carrier': return a.carrier.localeCompare(b.carrier)
+        case 'status':  return (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9)
+        default:        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime() // newest
+      }
+    })
+
+  const activeCount    = shipments.filter(s => s.status !== 'delivered').length
+  const deliveredCount = shipments.filter(s => s.status === 'delivered').length
+  const delayCount     = shipments.filter(s => s.delayRisk !== 'low').length
+  const onTimeRate     = shipments.length
+    ? Math.round((shipments.filter(s => s.delayRisk === 'low').length / shipments.length) * 100)
+    : 0
 
   const stats = [
-    { label: 'Active Shipments', value: shipments.length, icon: Package, color: '#6366f1' },
-    { label: 'On-Time Rate', value: '87%', icon: TrendingUp, color: '#10b981' },
-    { label: 'CO₂ This Month', value: `${shipments.reduce((a, s) => a + s.carbonKg, 0).toLocaleString()} kg`, icon: Leaf, color: '#34d399' },
-    { label: 'Delay Alerts', value: shipments.filter(s => s.delayRisk !== 'low').length, icon: AlertTriangle, color: '#f59e0b' },
+    { label: 'Active Shipments', value: activeCount,                              icon: Package,       color: '#6366f1' },
+    { label: 'Delivered',        value: deliveredCount,                            icon: CheckCircle2,  color: '#10b981' },
+    { label: 'On-Time Rate',     value: shipments.length ? `${onTimeRate}%` : '—', icon: TrendingUp,   color: '#22d3ee' },
+    { label: 'Delay Alerts',     value: delayCount,                                icon: AlertTriangle, color: '#f59e0b' },
   ]
 
-  return (
-    <div style={{ minHeight: '100vh', paddingTop: '72px' }}>
-      {/* Pro Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08))',
-        borderBottom: '1px solid rgba(99,102,241,0.2)',
-        padding: '12px 24px',
-        textAlign: 'center',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
-      }}>
-        <Zap size={14} color="#818cf8" />
-        <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>
-          You're on the <strong style={{ color: '#818cf8' }}>Free plan</strong>. Upgrade to Pro for unlimited shipments, AI predictions & more.
-        </span>
-        <button style={{
-          padding: '4px 14px', borderRadius: '100px',
-          background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-          border: 'none', color: 'white', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-        }}>
-          Upgrade →
-        </button>
-      </div>
+  // Dynamic AI insights based on real data
+  const insights: string[] = []
+  const delayed   = shipments.filter(s => s.delayRisk === 'high')
+  const delivering = shipments.filter(s => s.status === 'out_for_delivery')
+  const inTransit = shipments.filter(s => s.status === 'in_transit')
+  if (delayed.length)    insights.push(`⚠️ ${delayed.length} shipment${delayed.length > 1 ? 's' : ''} flagged as high-risk — check timeline for details.`)
+  if (delivering.length) insights.push(`🚚 ${delivering.length} shipment${delivering.length > 1 ? 's are' : ' is'} out for delivery today.`)
+  if (inTransit.length)  insights.push(`📦 ${inTransit.length} shipment${inTransit.length > 1 ? 's' : ''} currently in transit.`)
+  if (!insights.length && shipments.length)  insights.push('✅ All shipments are on track with no alerts.')
+  if (!insights.length && !shipments.length) insights.push('Track your first shipment to start seeing insights here.')
 
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.5px', marginBottom: '4px' }}>
-              Shipment Dashboard
-            </h1>
-            <p style={{ color: 'rgba(248,250,252,0.45)', fontSize: '14px' }}>
-              Track and manage all your shipments in one place
-            </p>
-          </div>
+  // ── Logged-out state ──────────────────────────────────────────────────────
+  if (!user) {
+    return (
+      <div style={{ minHeight: '100vh', paddingTop: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', padding: '48px 24px', maxWidth: '420px' }}>
+          <div style={{ fontSize: '56px', marginBottom: '20px' }}>🔒</div>
+          <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#f8fafc', marginBottom: '10px', letterSpacing: '-0.5px' }}>
+            Sign in to view your dashboard
+          </h2>
+          <p style={{ color: 'rgba(248,250,252,0.5)', lineHeight: 1.6, marginBottom: '28px' }}>
+            Track, save, and monitor all your shipments in one place. Your data syncs automatically whenever you track a number.
+          </p>
           <button
             onClick={() => navigate('/track')}
             style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              padding: '10px 20px', borderRadius: '12px',
+              padding: '12px 28px', borderRadius: '12px',
               background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: 'white', fontSize: '14px', fontWeight: 600,
-              cursor: 'pointer', boxShadow: '0 4px 15px rgba(99,102,241,0.35)',
+              border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
+              cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
             }}
           >
-            <Plus size={16} />
-            Add Shipment
+            Track a shipment →
           </button>
         </div>
+      </div>
+    )
+  }
 
-        {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+  // ── Loading state ─────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', paddingTop: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid rgba(99,102,241,0.3)', borderTopColor: '#6366f1', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <p style={{ color: 'rgba(248,250,252,0.5)', fontSize: '14px' }}>Loading your shipments…</p>
+        </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', paddingTop: '72px' }}>
+      {/* ── Pro Banner ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08))',
+        borderBottom: '1px solid rgba(99,102,241,0.2)',
+        padding: isMobile ? '12px 20px' : '12px 24px',
+        display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+        alignItems: 'center', justifyContent: 'center',
+        gap: isMobile ? '8px' : '12px', textAlign: 'center',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+          <Zap size={14} color="#818cf8" />
+          <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>
+            You're on the <strong style={{ color: '#818cf8' }}>Free plan</strong>.{' '}
+            {!isMobile && 'Upgrade to Pro for unlimited shipments & advanced analytics.'}
+          </span>
+        </div>
+        <button
+          onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
+          style={{
+            padding: '5px 16px', borderRadius: '100px',
+            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+            border: 'none', color: 'white', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+          }}
+        >
+          Upgrade to Pro →
+        </button>
+      </div>
+
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '24px 16px' : '32px 24px' }}>
+        {/* ── Header ── */}
+        <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '16px' }}>
+          <div>
+            <h1 style={{ fontSize: isMobile ? '22px' : '28px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.5px', marginBottom: '4px' }}>
+              Shipment Dashboard
+            </h1>
+            <p style={{ color: 'rgba(248,250,252,0.45)', fontSize: '14px' }}>
+              {shipments.length > 0
+                ? `${shipments.length} shipment${shipments.length > 1 ? 's' : ''} tracked`
+                : 'Track your first shipment to get started'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+            {shipments.length > 0 && (
+              <button
+                onClick={handleClearAll}
+                onBlur={() => setTimeout(() => setConfirmClear(false), 200)}
+                disabled={clearing}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '7px',
+                  padding: '10px 14px', borderRadius: '12px',
+                  background: confirmClear ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${confirmClear ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                  color: confirmClear ? '#f87171' : 'rgba(248,250,252,0.5)',
+                  fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                  transition: 'all 0.2s', flex: isMobile ? 1 : 'none',
+                  justifyContent: isMobile ? 'center' : 'flex-start',
+                }}
+              >
+                <Trash2 size={14} />
+                {clearing ? 'Clearing…' : confirmClear ? 'Confirm?' : 'Clear All'}
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/track')}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '10px 16px', borderRadius: '12px',
+                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                border: 'none', color: 'white', fontSize: '13px', fontWeight: 600,
+                cursor: 'pointer', boxShadow: '0 4px 15px rgba(99,102,241,0.35)',
+                flex: isMobile ? 1 : 'none',
+              }}
+            >
+              <Plus size={15} />
+              Add Shipment
+            </button>
+          </div>
+        </div>
+
+        {/* ── Stats Grid ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '24px' }}>
           {stats.map((stat, i) => {
             const Icon = stat.icon
             return (
               <div key={i} style={{
-                padding: '20px 24px',
-                borderRadius: '16px',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.07)',
+                padding: '20px 24px', borderRadius: '16px',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
                 display: 'flex', alignItems: 'center', gap: '16px',
               }}>
                 <div style={{
                   width: '44px', height: '44px', borderRadius: '12px',
                   background: `${stat.color}15`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                 }}>
                   <Icon size={20} color={stat.color} />
                 </div>
@@ -195,99 +524,192 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* AI Insights Strip */}
+        {/* ── AI Insights ── */}
         <div style={{
-          padding: '16px 20px',
-          borderRadius: '16px',
-          background: 'rgba(99,102,241,0.06)',
-          border: '1px solid rgba(99,102,241,0.18)',
-          display: 'flex', alignItems: 'center', gap: '14px',
-          marginBottom: '24px', flexWrap: 'wrap',
+          padding: '16px 20px', borderRadius: '16px',
+          background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)',
+          display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px', flexWrap: 'wrap',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <Brain size={18} color="#818cf8" />
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8' }}>AI Insights</span>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8' }}>Insights</span>
           </div>
           <div style={{ flex: 1, display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            {[
-              '📦 MAD3456789 may arrive 1 day early due to favorable currents.',
-              '⚠️ MAWB001-12345678 has a customs hold — document upload needed.',
-              '🚛 CNTR8872341 is on time with 97% confidence for today.',
-            ].map((insight, i) => (
-              <span key={i} style={{ fontSize: '13px', color: 'rgba(248,250,252,0.65)' }}>{insight}</span>
+            {insights.map((msg, i) => (
+              <span key={i} style={{ fontSize: '13px', color: 'rgba(248,250,252,0.65)' }}>{msg}</span>
             ))}
           </div>
         </div>
 
-        {/* Filters + List */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: '200px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0 12px' }}>
-            <Search size={14} color="rgba(248,250,252,0.4)" />
-            <input placeholder="Search shipments..." style={{ background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '13px', padding: '8px 4px', flex: 1 }} />
+        {/* ── Empty state ── */}
+        {shipments.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '60px 24px', borderRadius: '20px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: '40px' }}>
+            <PackageSearch size={48} color="rgba(248,250,252,0.15)" style={{ marginBottom: '16px' }} />
+            <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+              No shipments tracked yet
+            </h3>
+            <p style={{ color: 'rgba(248,250,252,0.4)', maxWidth: '340px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+              Enter any tracking number on the Track page — it'll be saved here automatically when you're signed in.
+            </p>
+            <button
+              onClick={() => navigate('/track')}
+              style={{
+                padding: '11px 28px', borderRadius: '12px',
+                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                border: 'none', color: 'white', fontSize: '14px', fontWeight: 700,
+                cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
+              }}
+            >
+              Track your first shipment →
+            </button>
           </div>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            {[
-              { label: 'All', value: 'all' },
-              { label: '✈ Air', value: 'air' },
-              { label: '🚢 Sea', value: 'sea' },
-              { label: '🚛 Land', value: 'land' },
-              { label: '📦 Express', value: 'express' },
-            ].map(f => (
-              <button key={f.value} onClick={() => setFilter(f.value)} style={{
-                padding: '6px 14px', borderRadius: '8px',
-                background: filter === f.value ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${filter === f.value ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                color: filter === f.value ? '#818cf8' : 'rgba(248,250,252,0.6)',
-                fontSize: '12px', fontWeight: 500, cursor: 'pointer',
+        )}
+
+        {/* ── Filters + List ── */}
+        {shipments.length > 0 && (
+          <>
+            {/* Search + Filter + Sort toolbar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+              {/* Search */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                flex: 1, minWidth: '200px',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '10px', padding: '0 12px',
               }}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(248,250,252,0.6)', fontSize: '12px', cursor: 'pointer' }}>
-            <Filter size={13} />
-            Sort
-          </button>
-        </div>
+                <Search size={14} color="rgba(248,250,252,0.4)" />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search by tracking number or carrier…"
+                  style={{ background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '13px', padding: '8px 4px', flex: 1 }}
+                />
+              </div>
 
-        {/* Shipment List */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '40px' }}>
-          {filtered.map(s => <ShipmentCard key={s.id} shipment={s} />)}
-        </div>
+              {/* Filter chips */}
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                {[
+                  { label: 'All',      value: 'all'     },
+                  { label: '✈ Air',   value: 'air'     },
+                  { label: '🚢 Sea',  value: 'sea'     },
+                  { label: '🚛 Land', value: 'land'    },
+                  { label: '📦 Express', value: 'express' },
+                ].map(f => (
+                  <button key={f.value} onClick={() => setFilter(f.value)} style={{
+                    padding: '6px 14px', borderRadius: '8px', cursor: 'pointer',
+                    background: filter === f.value ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${filter === f.value ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                    color: filter === f.value ? '#818cf8' : 'rgba(248,250,252,0.6)',
+                    fontSize: '12px', fontWeight: 500,
+                  }}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
 
-        {/* Analytics Preview (locked) */}
+              {/* Sort dropdown */}
+              <div ref={sortRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setSortOpen(v => !v)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',
+                    background: sortOpen ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${sortOpen ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                    color: sortOpen ? '#818cf8' : 'rgba(248,250,252,0.6)',
+                    fontSize: '12px', fontWeight: 500,
+                  }}>
+                  Sort: {
+                    { newest: 'Newest', oldest: 'Oldest', eta: 'ETA', carrier: 'Carrier', status: 'Status' }[sort]
+                  }
+                  <ChevronDown size={12} style={{ transition: 'transform 0.2s', transform: sortOpen ? 'rotate(180deg)' : 'none' }} />
+                </button>
+
+                {sortOpen && (
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', right: 0,
+                    background: 'rgba(15,20,40,0.97)', backdropFilter: 'blur(16px)',
+                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+                    overflow: 'hidden', zIndex: 50, minWidth: '160px',
+                  }}>
+                    {([
+                      { key: 'newest',  label: '🕐 Newest first'  },
+                      { key: 'oldest',  label: '🕰 Oldest first'  },
+                      { key: 'status',  label: '📊 By status'     },
+                      { key: 'eta',     label: '📅 By ETA'        },
+                      { key: 'carrier', label: '🏢 By carrier'    },
+                    ] as { key: SortKey; label: string }[]).map(opt => (
+                      <button
+                        key={opt.key}
+                        onClick={() => { setSort(opt.key); setSortOpen(false) }}
+                        style={{
+                          display: 'block', width: '100%', textAlign: 'left',
+                          padding: '10px 16px', border: 'none', cursor: 'pointer', fontSize: '13px',
+                          background: sort === opt.key ? 'rgba(99,102,241,0.2)' : 'transparent',
+                          color: sort === opt.key ? '#818cf8' : 'rgba(248,250,252,0.7)',
+                          fontWeight: sort === opt.key ? 600 : 400,
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Result count */}
+            {(search || filter !== 'all') && (
+              <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.35)', marginBottom: '10px' }}>
+                {filtered.length} of {shipments.length} shipment{shipments.length !== 1 ? 's' : ''}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '40px' }}>
+              {filtered.length > 0
+                ? filtered.map(s => <ShipmentCard key={s.id} shipment={s} onDelete={handleDelete} />)
+                : (
+                  <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(248,250,252,0.4)', fontSize: '14px' }}>
+                    No shipments match your filter.
+                  </div>
+                )
+              }
+            </div>
+          </>
+        )}
+
+        {/* ── Analytics (locked) ── */}
         <div style={{
-          padding: '40px',
-          borderRadius: '20px',
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden',
+          padding: '40px', borderRadius: '20px',
+          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+          textAlign: 'center', position: 'relative', overflow: 'hidden',
         }}>
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(to bottom, transparent 30%, rgba(10,15,30,0.95))',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end',
-            padding: '40px',
-            zIndex: 2,
+            padding: '40px', zIndex: 2,
           }}>
             <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>
               <BarChart3 size={24} color="#818cf8" />
             </div>
             <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>Advanced Analytics</h3>
             <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.5)', maxWidth: '360px', marginBottom: '20px', lineHeight: 1.6 }}>
-              Carrier performance, on-time rates, cost analysis & CO₂ trends. Unlock with Pro.
+              Carrier performance, on-time rates, cost analysis &amp; CO₂ trends. Unlock with Pro.
             </p>
-            <button style={{
-              padding: '12px 28px', borderRadius: '12px',
-              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: 'white', fontSize: '14px', fontWeight: 700,
-              cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-              display: 'flex', alignItems: 'center', gap: '8px',
-            }}>
+            <button
+              onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
+              style={{
+                padding: '12px 28px', borderRadius: '12px',
+                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                border: 'none', color: 'white', fontSize: '14px', fontWeight: 700,
+                cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
+                display: 'flex', alignItems: 'center', gap: '8px',
+              }}
+            >
               <Zap size={16} />
-              Upgrade to Pro — $19/mo
+              Upgrade to Pro — $4.99/mo
             </button>
           </div>
           {/* Blurred chart mockup */}

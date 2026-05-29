@@ -1,0 +1,31 @@
+name: Notify Status Changes
+
+on:
+  schedule:
+    # Runs every hour at minute 0 (UTC)
+    - cron: '0 * * * *'
+  workflow_dispatch:   # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  notify:
+    name: Check shipment statuses & send emails
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger notify-status-changes edge function
+        run: |
+          HTTP_STATUS=$(curl -s -o /tmp/response.json -w "%{http_code}" \
+            -X POST \
+            "https://uosefhniaxtyjaweuqbo.supabase.co/functions/v1/notify-status-changes" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_KEY }}" \
+            -H "Content-Type: application/json")
+
+          echo "HTTP Status: $HTTP_STATUS"
+          echo "Response:"
+          cat /tmp/response.json
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Edge function returned non-2xx status: $HTTP_STATUS"
+            exit 1
+          fi

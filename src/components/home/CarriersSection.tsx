@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
-import { ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Search, X } from 'lucide-react'
 
 type Category = 'all' | 'express' | 'sea' | 'air' | 'land' | 'rail' | 'post'
 
@@ -8,63 +9,65 @@ interface Carrier {
   domain: string
   accentColor: string
   category: Exclude<Category, 'all'>
+  track: string        // official tracking page — opened when the chip is clicked
+  featured?: boolean   // shown in the default "All Carriers" view on the home page
 }
 
 const CARRIERS: Carrier[] = [
   // Express
-  { name: 'UPS',            domain: 'ups.com',               accentColor: '#8B5E3C', category: 'express' },
-  { name: 'FedEx',          domain: 'fedex.com',             accentColor: '#FF6200', category: 'express' },
-  { name: 'DHL',            domain: 'dhl.com',               accentColor: '#FFCC00', category: 'express' },
-  { name: 'TNT',            domain: 'tnt.com',               accentColor: '#FF6600', category: 'express' },
-  { name: 'DPD',            domain: 'dpd.com',               accentColor: '#dc0032', category: 'express' },
-  { name: 'GLS',            domain: 'gls-group.com',         accentColor: '#f5a623', category: 'express' },
-  { name: 'Hermes',         domain: 'hermesworld.com',       accentColor: '#009FE3', category: 'express' },
-  { name: 'Amazon',         domain: 'amazon.com',            accentColor: '#FF9900', category: 'express' },
-  { name: 'SF Express',     domain: 'sf-express.com',        accentColor: '#E3000F', category: 'express' },
-  { name: 'Aramex',         domain: 'aramex.com',            accentColor: '#E31937', category: 'express' },
+  { name: 'UPS',            domain: 'ups.com',               accentColor: '#8B5E3C', category: 'express', featured: true,  track: 'https://www.ups.com/track' },
+  { name: 'FedEx',          domain: 'fedex.com',             accentColor: '#FF6200', category: 'express', featured: true,  track: 'https://www.fedex.com/fedextrack/' },
+  { name: 'DHL',            domain: 'dhl.com',               accentColor: '#FFCC00', category: 'express', featured: true,  track: 'https://www.dhl.com/en/express/tracking.html' },
+  { name: 'TNT',            domain: 'tnt.com',               accentColor: '#FF6600', category: 'express',                  track: 'https://www.tnt.com/express/en_us/site/tracking.html' },
+  { name: 'DPD',            domain: 'dpd.com',               accentColor: '#dc0032', category: 'express',                  track: 'https://www.dpd.com/tracking' },
+  { name: 'GLS',            domain: 'gls-group.com',         accentColor: '#f5a623', category: 'express',                  track: 'https://gls-group.com/track' },
+  { name: 'Hermes',         domain: 'hermesworld.com',       accentColor: '#009FE3', category: 'express',                  track: 'https://www.evri.com/track-a-parcel' },
+  { name: 'Amazon',         domain: 'amazon.com',            accentColor: '#FF9900', category: 'express',                  track: 'https://www.amazon.com/progress-tracker/package' },
+  { name: 'SF Express',     domain: 'sf-express.com',        accentColor: '#E3000F', category: 'express',                  track: 'https://www.sf-express.com/' },
+  { name: 'Aramex',         domain: 'aramex.com',            accentColor: '#E31937', category: 'express', featured: true,  track: 'https://www.aramex.com/track/shipments' },
   // Sea
-  { name: 'Maersk',         domain: 'maersk.com',            accentColor: '#42ADEF', category: 'sea' },
-  { name: 'MSC',            domain: 'msc.com',               accentColor: '#003087', category: 'sea' },
-  { name: 'CMA CGM',        domain: 'cma-cgm.com',           accentColor: '#C41230', category: 'sea' },
-  { name: 'COSCO',          domain: 'cosco.com',             accentColor: '#C8102E', category: 'sea' },
-  { name: 'Hapag-Lloyd',    domain: 'hapag-lloyd.com',       accentColor: '#f59e0b', category: 'sea' },
-  { name: 'Evergreen',      domain: 'evergreen-marine.com',  accentColor: '#00693E', category: 'sea' },
-  { name: 'ONE',            domain: 'one-line.com',          accentColor: '#E4003B', category: 'sea' },
-  { name: 'Yang Ming',      domain: 'yangming.com',          accentColor: '#003DA5', category: 'sea' },
+  { name: 'Maersk',         domain: 'maersk.com',            accentColor: '#42ADEF', category: 'sea',    featured: true,  track: 'https://www.maersk.com/tracking' },
+  { name: 'MSC',            domain: 'msc.com',               accentColor: '#003087', category: 'sea',                     track: 'https://www.msc.com/en/track-a-shipment' },
+  { name: 'CMA CGM',        domain: 'cma-cgm.com',           accentColor: '#C41230', category: 'sea',    featured: true,  track: 'https://www.cma-cgm.com/ebusiness/tracking' },
+  { name: 'COSCO',          domain: 'cosco.com',             accentColor: '#C8102E', category: 'sea',                     track: 'https://elines.coscoshipping.com/ebusiness/cargoTracking' },
+  { name: 'Hapag-Lloyd',    domain: 'hapag-lloyd.com',       accentColor: '#f59e0b', category: 'sea',                     track: 'https://www.hapag-lloyd.com/en/online-business/track/track-by-container-solution.html' },
+  { name: 'Evergreen',      domain: 'evergreen-marine.com',  accentColor: '#00693E', category: 'sea',                     track: 'https://www.evergreen-line.com/' },
+  { name: 'ONE',            domain: 'one-line.com',          accentColor: '#E4003B', category: 'sea',                     track: 'https://ecomm.one-line.com/one-ecom/manage-shipment/cargo-tracking' },
+  { name: 'Yang Ming',      domain: 'yangming.com',          accentColor: '#003DA5', category: 'sea',                     track: 'https://www.yangming.com/e-service/Track_Trace/track_trace_cargo_tracking.aspx' },
   // Air
-  { name: 'Lufthansa Cargo',domain: 'lufthansa-cargo.com',   accentColor: '#FFAD00', category: 'air' },
-  { name: 'Emirates',       domain: 'skycargo.com',          accentColor: '#C41230', category: 'air' },
-  { name: 'Singapore Air',  domain: 'singaporeair.com',      accentColor: '#FFD700', category: 'air' },
-  { name: 'Qatar Cargo',    domain: 'qatarairways.com',      accentColor: '#5C0632', category: 'air' },
-  { name: 'Cathay Cargo',   domain: 'cathaypacific.com',     accentColor: '#006564', category: 'air' },
-  { name: 'Air France KLM', domain: 'airfrancecargo.com',    accentColor: '#0032A0', category: 'air' },
-  { name: 'Turkish Cargo',  domain: 'turkishcargo.com',      accentColor: '#E30A17', category: 'air' },
-  { name: 'IAG Cargo',      domain: 'iagcargo.com',          accentColor: '#5321A8', category: 'air' },
+  { name: 'Lufthansa Cargo',domain: 'lufthansa-cargo.com',   accentColor: '#FFAD00', category: 'air',                     track: 'https://lufthansa-cargo.com/eservices/tools/tracking' },
+  { name: 'Emirates',       domain: 'skycargo.com',          accentColor: '#C41230', category: 'air',                     track: 'https://www.skycargo.com/track-shipment/' },
+  { name: 'Singapore Air',  domain: 'singaporeair.com',      accentColor: '#FFD700', category: 'air',                     track: 'https://www.siacargo.com/' },
+  { name: 'Qatar Cargo',    domain: 'qatarairways.com',      accentColor: '#5C0632', category: 'air',                     track: 'https://www.qrcargo.com/s/track-shipment' },
+  { name: 'Cathay Cargo',   domain: 'cathaypacific.com',     accentColor: '#006564', category: 'air',                     track: 'https://www.cathaycargo.com/track-your-shipment/' },
+  { name: 'Air France KLM', domain: 'airfrancecargo.com',    accentColor: '#0032A0', category: 'air',                     track: 'https://www.afklcargo.com/mycargo/shipment/detail' },
+  { name: 'Turkish Cargo',  domain: 'turkishcargo.com',      accentColor: '#E30A17', category: 'air',                     track: 'https://www.turkishcargo.com/en/online-services/track-trace' },
+  { name: 'IAG Cargo',      domain: 'iagcargo.com',          accentColor: '#5321A8', category: 'air',                     track: 'https://www.iagcargo.com/en/track-and-trace' },
   // Land
-  { name: 'DB Schenker',    domain: 'dbschenker.com',        accentColor: '#E10019', category: 'land' },
-  { name: 'DSV',            domain: 'dsv.com',               accentColor: '#EE1C25', category: 'land' },
-  { name: 'Kuehne+Nagel',   domain: 'kuehne-nagel.com',      accentColor: '#003087', category: 'land' },
-  { name: 'XPO',            domain: 'xpo.com',               accentColor: '#E31937', category: 'land' },
-  { name: 'Geodis',         domain: 'geodis.com',            accentColor: '#00A3E0', category: 'land' },
-  { name: 'Ceva Logistics', domain: 'cevalogistics.com',     accentColor: '#E4002B', category: 'land' },
+  { name: 'DB Schenker',    domain: 'dbschenker.com',        accentColor: '#E10019', category: 'land',                    track: 'https://www.dbschenker.com/app/tracking-public' },
+  { name: 'DSV',            domain: 'dsv.com',               accentColor: '#EE1C25', category: 'land',   featured: true,  track: 'https://www.dsv.com/en/track-and-trace' },
+  { name: 'Kuehne+Nagel',   domain: 'kuehne-nagel.com',      accentColor: '#003087', category: 'land',   featured: true,  track: 'https://onlineservices.kuehne-nagel.com/public-tracking/shipments' },
+  { name: 'XPO',            domain: 'xpo.com',               accentColor: '#E31937', category: 'land',                    track: 'https://www.xpo.com/track/' },
+  { name: 'Geodis',         domain: 'geodis.com',            accentColor: '#00A3E0', category: 'land',                    track: 'https://www.geodis.com/tracktrace' },
+  { name: 'Ceva Logistics', domain: 'cevalogistics.com',     accentColor: '#E4002B', category: 'land',                    track: 'https://www.cevalogistics.com/en/ceva-trackit' },
   // Rail
-  { name: 'DB Cargo',       domain: 'dbcargo.com',           accentColor: '#E10019', category: 'rail' },
-  { name: 'Rail Cargo',     domain: 'railcargo.com',         accentColor: '#E30613', category: 'rail' },
-  { name: 'SNCF Fret',      domain: 'sncf.com',              accentColor: '#A0006E', category: 'rail' },
-  { name: 'PKP Cargo',      domain: 'pkpcargo.com',          accentColor: '#003087', category: 'rail' },
-  { name: 'BNSF Railway',   domain: 'bnsf.com',              accentColor: '#FF6600', category: 'rail' },
-  { name: 'Union Pacific',  domain: 'unionpacific.com',      accentColor: '#FFD700', category: 'rail' },
-  { name: 'Trenitalia',     domain: 'trenitalia.com',        accentColor: '#C8102E', category: 'rail' },
-  { name: 'CR Express',     domain: 'china-railway.com.cn',  accentColor: '#C8102E', category: 'rail' },
+  { name: 'DB Cargo',       domain: 'dbcargo.com',           accentColor: '#E10019', category: 'rail',                    track: 'https://www.dbcargo.com/rail-deutschland-en' },
+  { name: 'Rail Cargo',     domain: 'railcargo.com',         accentColor: '#E30613', category: 'rail',                    track: 'https://www.railcargo.com/en' },
+  { name: 'SNCF Fret',      domain: 'sncf.com',              accentColor: '#A0006E', category: 'rail',                    track: 'https://www.sncf.com/en' },
+  { name: 'PKP Cargo',      domain: 'pkpcargo.com',          accentColor: '#003087', category: 'rail',                    track: 'https://www.pkpcargo.com/en/' },
+  { name: 'BNSF Railway',   domain: 'bnsf.com',              accentColor: '#FF6600', category: 'rail',                    track: 'https://www.bnsf.com/' },
+  { name: 'Union Pacific',  domain: 'unionpacific.com',      accentColor: '#FFD700', category: 'rail',                    track: 'https://www.up.com/customers/track-record/' },
+  { name: 'Trenitalia',     domain: 'trenitalia.com',        accentColor: '#C8102E', category: 'rail',                    track: 'https://www.trenitalia.com/' },
+  { name: 'CR Express',     domain: 'china-railway.com.cn',  accentColor: '#C8102E', category: 'rail',                    track: 'http://www.china-railway.com.cn/' },
   // Post
-  { name: 'USPS',           domain: 'usps.com',              accentColor: '#E31837', category: 'post' },
-  { name: 'Royal Mail',     domain: 'royalmail.com',         accentColor: '#D0021B', category: 'post' },
-  { name: 'Deutsche Post',  domain: 'deutschepost.de',       accentColor: '#FFCC00', category: 'post' },
-  { name: 'La Poste',       domain: 'laposte.fr',            accentColor: '#FFCD00', category: 'post' },
-  { name: 'Japan Post',     domain: 'japanpost.jp',          accentColor: '#E31937', category: 'post' },
-  { name: 'Australia Post', domain: 'auspost.com.au',        accentColor: '#E31837', category: 'post' },
-  { name: 'China Post',     domain: 'chinapost.com.cn',      accentColor: '#00843D', category: 'post' },
-  { name: 'PostNL',         domain: 'postnl.nl',             accentColor: '#FF6600', category: 'post' },
+  { name: 'USPS',           domain: 'usps.com',              accentColor: '#E31837', category: 'post',                    track: 'https://tools.usps.com/go/TrackConfirmAction' },
+  { name: 'Royal Mail',     domain: 'royalmail.com',         accentColor: '#D0021B', category: 'post',                    track: 'https://www.royalmail.com/track-your-item' },
+  { name: 'Deutsche Post',  domain: 'deutschepost.de',       accentColor: '#FFCC00', category: 'post',                    track: 'https://www.deutschepost.de/sendung/simpleQuery.html' },
+  { name: 'La Poste',       domain: 'laposte.fr',            accentColor: '#FFCD00', category: 'post',                    track: 'https://www.laposte.fr/outils/suivre-vos-envois' },
+  { name: 'Japan Post',     domain: 'japanpost.jp',          accentColor: '#E31937', category: 'post',                    track: 'https://trackings.post.japanpost.jp/services/srv/search/input?locale=en' },
+  { name: 'Australia Post', domain: 'auspost.com.au',        accentColor: '#E31837', category: 'post',                    track: 'https://auspost.com.au/mypost/track/' },
+  { name: 'China Post',     domain: 'chinapost.com.cn',      accentColor: '#00843D', category: 'post',                    track: 'http://yjcx.ems.com.cn/qps/yjcx' },
+  { name: 'PostNL',         domain: 'postnl.nl',             accentColor: '#FF6600', category: 'post',                    track: 'https://www.postnl.nl/en/tracktrace/' },
 ]
 
 const CATEGORIES: { id: Category; label: string; emoji: string }[] = [
@@ -95,27 +98,57 @@ function CarrierTextLogo({ carrier }: { carrier: Carrier }) {
   )
 }
 
+// Carriers whose domain exposes no fetchable favicon — every aggregator (Google, favicone,
+// DuckDuckGo) just returns a generic globe placeholder. A meaningless globe looks worse than
+// the brand name, so for these we render the clean branded text logo directly.
+const NO_LOGO = new Set([
+  'sf-express.com', 'cosco.com', 'hapag-lloyd.com',
+  'evergreen-marine.com', 'yangming.com', 'iagcargo.com', 'airfrancecargo.com',
+  'china-railway.com.cn', 'japanpost.jp', 'chinapost.com.cn',
+])
+
+// Carriers Google has no favicon for, but favicone.com serves their real brand icon — try it first.
+const FAVICONE_FIRST = new Set([
+  'gls-group.com',
+])
+
 function CarrierChip({ carrier }: { carrier: Carrier }) {
   const [hovered, setHovered] = useState(false)
-  const attempt = useRef(0)
-  const [imgSrc, setImgSrc] = useState(`https://logo.clearbit.com/${carrier.domain}`)
-  const [imgFailed, setImgFailed] = useState(false)
-  const isFavicon = imgSrc.includes('google.com')
+  const navigate = useNavigate()
+  // Real-logo source chain — tried in order; falls back to branded text only if all fail.
+  // (Clearbit's Logo API was shut down, so we use favicon providers that return the actual brand mark.)
+  const google = `https://www.google.com/s2/favicons?domain=${carrier.domain}&sz=128`
+  const favicone = `https://favicone.com/${carrier.domain}?s=128`
+  const ddg = `https://icons.duckduckgo.com/ip3/${carrier.domain}.ico`
+  const sources = FAVICONE_FIRST.has(carrier.domain)
+    ? [favicone, google, ddg]
+    : [google, ddg, favicone]
+  const [srcIndex, setSrcIndex] = useState(0)
+  const [imgFailed, setImgFailed] = useState(NO_LOGO.has(carrier.domain))
+  const imgSrc = sources[srcIndex]
 
   const handleError = () => {
-    if (attempt.current === 0) {
-      attempt.current = 1
-      setImgSrc(`https://www.google.com/s2/favicons?domain=${carrier.domain}&sz=64`)
+    if (srcIndex < sources.length - 1) {
+      setSrcIndex(i => i + 1)
     } else {
       setImgFailed(true)
     }
   }
 
+  // Some favicon sources return a tiny/empty placeholder — treat that as a failure too.
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    if (e.currentTarget.naturalWidth < 12) handleError()
+  }
+
   return (
     <div
+      role="button"
+      title={`Track with ${carrier.name}`}
+      onClick={() => navigate(`/track?carrier=${encodeURIComponent(carrier.name)}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
+        textDecoration: 'none',
         borderRadius: '14px',
         overflow: 'hidden',
         border: `1px solid ${hovered ? carrier.accentColor + '55' : 'rgba(255,255,255,0.08)'}`,
@@ -128,45 +161,31 @@ function CarrierChip({ carrier }: { carrier: Carrier }) {
         background: hovered ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '14px 10px 12px',
+        alignItems: 'stretch',
+        justifyContent: 'flex-start',
+        padding: 0,
         minHeight: '105px',
         position: 'relative',
-        gap: '8px',
       }}
     >
-      {/* Brand accent bar at top */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
-        background: carrier.accentColor,
-        opacity: hovered ? 1 : 0.55,
-        transition: 'opacity 0.25s',
-      }} />
-
       {/* Glow radial on hover */}
       <div style={{
         position: 'absolute', inset: 0,
         background: hovered
-          ? `radial-gradient(ellipse at 50% 30%, ${carrier.accentColor}18, transparent 70%)`
+          ? `radial-gradient(ellipse at 50% 40%, ${carrier.accentColor}18, transparent 70%)`
           : 'transparent',
         transition: 'background 0.3s',
         pointerEvents: 'none',
-        borderRadius: '14px',
+        zIndex: 2,
       }} />
 
-      {/* Logo in white pill */}
+      {/* Logo — white box fills full card width, clipped by parent overflow:hidden */}
       <div style={{
-        width: '84px', height: '42px',
+        width: '100%',
+        flex: 1,
         background: '#ffffff',
-        borderRadius: '8px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden',
-        flexShrink: 0,
-        boxShadow: hovered
-          ? `0 4px 20px ${carrier.accentColor}50`
-          : '0 2px 8px rgba(0,0,0,0.4)',
-        transition: 'box-shadow 0.25s',
         position: 'relative',
         zIndex: 1,
       }}>
@@ -175,9 +194,10 @@ function CarrierChip({ carrier }: { carrier: Carrier }) {
             src={imgSrc}
             alt={carrier.name}
             onError={handleError}
+            onLoad={handleLoad}
             style={{
-              width: isFavicon ? '34px' : '76px',
-              height: isFavicon ? '34px' : '36px',
+              width: '44px',
+              height: '44px',
               objectFit: 'contain',
             }}
           />
@@ -186,13 +206,16 @@ function CarrierChip({ carrier }: { carrier: Carrier }) {
         )}
       </div>
 
-      {/* Name label */}
+      {/* Name label — sits in the dark bottom strip */}
       <div style={{
+        padding: '7px 8px',
         fontSize: '11px', fontWeight: 600,
         color: hovered ? 'rgba(248,250,252,0.85)' : 'rgba(248,250,252,0.45)',
         textAlign: 'center', lineHeight: 1.2,
         transition: 'color 0.2s',
         position: 'relative', zIndex: 1,
+        borderTop: `1px solid ${hovered ? carrier.accentColor + '30' : 'rgba(255,255,255,0.06)'}`,
+        background: hovered ? `${carrier.accentColor}10` : 'transparent',
       }}>
         {carrier.name}
       </div>
@@ -200,12 +223,34 @@ function CarrierChip({ carrier }: { carrier: Carrier }) {
   )
 }
 
+// How many carriers to show per category tab (top N) before requiring a manual search.
+const CATEGORY_LIMIT = 15
+
+import { useIsMobile } from '../../hooks/useIsMobile'
+
 export default function CarriersSection() {
   const [active, setActive] = useState<Category>('all')
-  const filtered = active === 'all' ? CARRIERS : CARRIERS.filter(c => c.category === active)
+  const [query, setQuery] = useState('')
+  const isMobile = useIsMobile()
+  const q = query.trim().toLowerCase()
+
+  // Display rules:
+  // • Searching → match across ALL 1,200-style list by name (ignores the active tab)
+  // • "All Carriers" tab → only the featured 10 (keeps the home page tidy)
+  // • A specific category → its top carriers, capped at CATEGORY_LIMIT
+  let filtered: Carrier[]
+  if (q) {
+    filtered = CARRIERS.filter(c => c.name.toLowerCase().includes(q) || c.domain.toLowerCase().includes(q))
+  } else if (active === 'all') {
+    filtered = CARRIERS.filter(c => c.featured)
+  } else {
+    filtered = CARRIERS.filter(c => c.category === active).slice(0, CATEGORY_LIMIT)
+  }
+
+  const selectCategory = (id: Category) => { setActive(id); setQuery('') }
 
   return (
-    <section style={{ padding: '100px 24px', background: 'rgba(5,8,20,0.5)' }}>
+    <section style={{ padding: isMobile ? '72px 20px' : '100px 24px', background: 'rgba(5,8,20,0.5)' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
@@ -220,17 +265,47 @@ export default function CarriersSection() {
             }}>one place</span>
           </h2>
           <p style={{ fontSize: '17px', color: 'rgba(248,250,252,0.5)', maxWidth: '500px', margin: '0 auto', lineHeight: 1.6 }}>
-            Stop switching between carrier websites. Every major forwarder, one search.
+            Stop switching between carrier websites. Click any carrier to open its live tracking.
           </p>
         </div>
 
+        {/* Search */}
+        <div style={{ maxWidth: '440px', margin: '0 auto 28px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '10px 16px', borderRadius: '12px',
+            background: 'rgba(255,255,255,0.04)',
+            border: `1px solid ${q ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.1)'}`,
+            transition: 'border-color 0.2s',
+          }}>
+            <Search size={16} color="rgba(248,250,252,0.4)" style={{ flexShrink: 0 }} />
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search 1,200+ carriers by name…"
+              style={{
+                flex: 1, background: 'none', border: 'none', outline: 'none',
+                color: '#f8fafc', fontSize: '14px',
+              }}
+            />
+            {query && (
+              <button onClick={() => setQuery('')} style={{
+                background: 'none', border: 'none', cursor: 'pointer', display: 'flex',
+                color: 'rgba(248,250,252,0.4)', padding: 0,
+              }}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Category Tabs */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '40px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '40px', flexWrap: 'wrap', opacity: q ? 0.4 : 1, pointerEvents: q ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
           {CATEGORIES.map(cat => {
             const count = cat.id === 'all' ? CARRIERS.length : CARRIERS.filter(c => c.category === cat.id).length
             const isActive = active === cat.id
             return (
-              <button key={cat.id} onClick={() => setActive(cat.id)} style={{
+              <button key={cat.id} onClick={() => selectCategory(cat.id)} style={{
                 display: 'flex', alignItems: 'center', gap: '7px',
                 padding: '9px 18px', borderRadius: '100px',
                 border: `1px solid ${isActive ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.08)'}`,
@@ -258,28 +333,33 @@ export default function CarriersSection() {
         </div>
 
         {/* Carrier Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))',
-          gap: '14px',
-          marginBottom: '36px',
-        }}>
-          {filtered.map((carrier, i) => (
-            <CarrierChip key={`${carrier.name}-${i}`} carrier={carrier} />
-          ))}
-        </div>
-
-        {/* View all */}
-        <div style={{ textAlign: 'center' }}>
-          <button style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            padding: '11px 28px', borderRadius: '12px',
-            background: 'rgba(99,102,241,0.08)',
-            border: '1px solid rgba(99,102,241,0.25)',
-            color: '#818cf8', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+        {filtered.length > 0 ? (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(auto-fill, minmax(145px, 1fr))',
+            gap: isMobile ? '10px' : '14px',
+            marginBottom: '28px',
           }}>
-            View all 1,200+ supported carriers <ChevronRight size={16} />
-          </button>
+            {filtered.map((carrier, i) => (
+              <CarrierChip key={`${carrier.name}-${i}`} carrier={carrier} />
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: 'rgba(248,250,252,0.45)' }}>
+            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
+            <p style={{ fontSize: '15px' }}>No carrier matches “{query}”. Try a different name.</p>
+          </div>
+        )}
+
+        {/* Hint */}
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}>
+            {q
+              ? `${filtered.length} carrier${filtered.length === 1 ? '' : 's'} found · click to open tracking`
+              : active === 'all'
+              ? `Showing ${filtered.length} popular carriers — search above or pick a category for 1,200+ more.`
+              : 'Click any carrier to open its live tracking · search above for 1,200+ more.'}
+          </p>
         </div>
       </div>
     </section>

@@ -1,0 +1,136 @@
+<h2>OG Image — 3 new directions</h2>
+<p class="subtitle">All using the real Trackora logo. Pick the one that feels right, or tell me what to change.</p>
+
+<style>
+  .og-wrap {
+    width: 600px; height: 315px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    flex-shrink: 0;
+  }
+  .cards { gap: 32px; }
+  .card { gap: 0; padding: 0; background: transparent; border: 2px solid rgba(255,255,255,0.08); border-radius: 14px; overflow: hidden; }
+  .card.selected { border-color: #6366f1 !important; }
+  .card-image { padding: 0; background: transparent; }
+  .card-body { padding: 14px 20px; background: rgba(255,255,255,0.04); }
+  .card-body h3 { color: #f8fafc; margin: 0 0 4px; font-size: 15px; }
+  .card-body p { color: rgba(248,250,252,0.55); margin: 0; font-size: 13px; line-height: 1.5; }
+</style>
+
+<div class="cards">
+
+  <!-- Option D: Premium Centered -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="og-wrap" style="background: radial-gradient(ellipse 80% 60% at 50% 40%, #1a1060 0%, #0a0f1e 60%);">
+        <!-- Subtle dot grid -->
+        <div style="position:absolute;inset:0;opacity:0.15;background-image:radial-gradient(circle,#6366f1 1px,transparent 1px);background-size:28px 28px;"></div>
+        <!-- Top glow -->
+        <div style="position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:260px;background:radial-gradient(ellipse,rgba(99,102,241,0.35) 0%,transparent 65%);pointer-events:none"></div>
+        <!-- Bottom-right cyan accent -->
+        <div style="position:absolute;bottom:-40px;right:-40px;width:220px;height:220px;background:radial-gradient(ellipse,rgba(34,211,238,0.18) 0%,transparent 65%);pointer-events:none"></div>
+
+        <!-- Center content -->
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:0">
+          <!-- Logo -->
+          <img src="trackora-logo.png" style="height:72px;width:auto;margin-bottom:18px;filter:drop-shadow(0 0 20px rgba(99,102,241,0.6))" alt="Trackora"/>
+          <!-- Tagline -->
+          <div style="font-size:18px;font-weight:600;color:rgba(248,250,252,0.75);margin-bottom:20px;letter-spacing:0.2px">Track any shipment, anywhere in the world.</div>
+          <!-- Pills row -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+            <span style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.35);color:#a5b4fc;border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600">1,200+ Carriers</span>
+            <span style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.25);color:#67e8f9;border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600">Real-time</span>
+            <span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#6ee7b7;border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600">Free Forever</span>
+          </div>
+        </div>
+        <!-- Bottom strip -->
+        <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#6366f1,#22d3ee,#6366f1)"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>D — Centered, premium glow</h3>
+      <p>Logo front-and-centre with a deep indigo radial glow. Minimal and confident.</p>
+    </div>
+  </div>
+
+  <!-- Option E: Left logo + Right carrier showcase -->
+  <div class="card" data-choice="e" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="og-wrap" style="background: linear-gradient(120deg, #0a0f1e 0%, #0d1220 100%);">
+        <!-- Vertical divider glow -->
+        <div style="position:absolute;left:290px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,transparent,rgba(99,102,241,0.4),transparent)"></div>
+        <!-- Left: logo + tagline -->
+        <div style="position:absolute;left:0;top:0;bottom:0;width:290px;display:flex;flex-direction:column;justify-content:center;padding:0 36px">
+          <img src="trackora-logo.png" style="height:56px;width:auto;margin-bottom:16px" alt="Trackora"/>
+          <div style="font-size:15px;color:rgba(248,250,252,0.65);line-height:1.5;font-weight:400">One search.<br><span style="color:#f8fafc;font-weight:700">Every carrier.</span></div>
+          <div style="margin-top:18px;font-size:11px;color:#6366f1;font-weight:700;letter-spacing:1px;text-transform:uppercase">track-ora.com</div>
+        </div>
+        <!-- Right: carrier grid -->
+        <div style="position:absolute;right:0;top:0;bottom:0;width:310px;display:flex;flex-direction:column;justify-content:center;padding:24px 28px;gap:8px">
+          <div style="font-size:10px;font-weight:700;color:rgba(248,250,252,0.3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Trusted carriers</div>
+          <!-- Row 1 -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">FedEx</div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">DHL</div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">UPS</div>
+          </div>
+          <!-- Row 2 -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">Maersk</div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">MSC</div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">Aramex</div>
+          </div>
+          <!-- Row 3 -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">CMA CGM</div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:#f8fafc;text-align:center">COSCO</div>
+            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:700;color:rgba(99,102,241,0.9);text-align:center;border-color:rgba(99,102,241,0.2)">+1,200</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>E — Split: logo + carrier grid</h3>
+      <p>Logo and tagline left, carrier name tiles right. Instantly communicates breadth of coverage.</p>
+    </div>
+  </div>
+
+  <!-- Option F: Hero tagline + logo bottom-left -->
+  <div class="card" data-choice="f" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="og-wrap" style="background: #050810;">
+        <!-- Background gradient sweep -->
+        <div style="position:absolute;inset:0;background:linear-gradient(135deg,#0d0f2e 0%,#050810 50%,#060d1f 100%)"></div>
+        <!-- Indigo beam top-left -->
+        <div style="position:absolute;top:-100px;left:-80px;width:400px;height:400px;background:conic-gradient(from 200deg at 30% 20%,transparent 60%,rgba(99,102,241,0.22) 70%,transparent 80%);pointer-events:none"></div>
+        <!-- Cyan beam bottom-right -->
+        <div style="position:absolute;bottom:-60px;right:-60px;width:300px;height:300px;background:conic-gradient(from 20deg at 70% 80%,transparent 55%,rgba(34,211,238,0.15) 65%,transparent 75%);pointer-events:none"></div>
+
+        <!-- Big bold headline -->
+        <div style="position:absolute;top:40px;left:44px;right:44px">
+          <div style="font-size:13px;font-weight:700;color:#6366f1;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">Shipment Tracking</div>
+          <div style="font-size:36px;font-weight:900;color:#f8fafc;line-height:1.1;letter-spacing:-1.5px">
+            Track anything.<br>
+            <span style="background:linear-gradient(90deg,#6366f1,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">1,200+ carriers.</span>
+          </div>
+        </div>
+
+        <!-- Bottom row: logo + domain + free badge -->
+        <div style="position:absolute;bottom:28px;left:44px;right:44px;display:flex;align-items:center;justify-content:space-between">
+          <img src="trackora-logo.png" style="height:40px;width:auto" alt="Trackora"/>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;color:rgba(248,250,252,0.35)">track-ora.com</span>
+            <span style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.35);color:#a5b4fc;border-radius:100px;padding:4px 12px;font-size:11px;font-weight:700">Free Forever</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>F — Bold headline + logo anchor</h3>
+      <p>Large impact text takes centre stage, logo anchors the bottom-left. High contrast, reads instantly at any size.</p>
+    </div>
+  </div>
+
+</div>

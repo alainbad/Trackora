@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import { ChevronRight, Zap } from 'lucide-react'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 export default function CTASection() {
+  const isMobile = useIsMobile()
   return (
-    <section style={{ padding: '100px 24px' }}>
+    <section style={{ padding: isMobile ? '64px 20px' : '100px 24px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
         <div style={{
-          padding: '60px 48px', borderRadius: '32px',
+          padding: isMobile ? '36px 24px' : '60px 48px', borderRadius: '32px',
           background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(6,182,212,0.06))',
           border: '1px solid rgba(99,102,241,0.25)', position: 'relative', overflow: 'hidden',
           boxShadow: '0 0 80px rgba(99,102,241,0.15)',

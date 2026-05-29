@@ -41,6 +41,25 @@ export default function TrackingTimeline({ events, delayRisk, delayReason }: Pro
         </div>
       )}
 
+      {/* Empty state */}
+      {events.length === 0 && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: '12px', padding: '40px 20px', textAlign: 'center',
+          borderRadius: '16px',
+          background: 'rgba(99,102,241,0.05)',
+          border: '1px dashed rgba(99,102,241,0.2)',
+        }}>
+          <div style={{ fontSize: '32px' }}>📡</div>
+          <div style={{ fontSize: '14px', fontWeight: 600, color: 'rgba(248,250,252,0.7)' }}>
+            Awaiting tracking updates
+          </div>
+          <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.4)', maxWidth: '280px', lineHeight: 1.6 }}>
+            The carrier hasn't posted any scan events yet. Check back in a few hours — updates usually appear within 24 hours of pickup.
+          </div>
+        </div>
+      )}
+
       {/* Events */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
         {events.map((event, i) => {

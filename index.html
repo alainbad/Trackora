@@ -2,9 +2,202 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Ads -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5739293622071866" crossorigin="anonymous"></script>
+
+    <!-- Favicon & PWA -->
+    <link rel="icon" type="image/png" href="/trackora-icon.png" />
+    <link rel="apple-touch-icon" href="/trackora-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Viewport & theme -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trackora — Global Shipment Intelligence</title>
+    <meta name="theme-color" content="#6366f1" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Trackora" />
+    <meta name="application-name" content="Trackora" />
+
+    <!-- ── Primary SEO ─────────────────────────────────────────────────────── -->
+    <title>Trackora | Free Shipment Tracker — 1,200+ Carriers, Real-Time Results</title>
+    <meta name="description" content="Track any package, container, or air cargo shipment instantly. Enter any tracking number from FedEx, DHL, UPS, Maersk, MSC, Emirates SkyCargo and 1,200+ more carriers. Real-time results, free forever." />
+    <meta name="keywords" content="shipment tracker, package tracking, track shipment, cargo tracking, container tracking, freight tracking, track package online, parcel tracker, AWB tracking, air waybill tracker, MAWB tracking, DHL tracking, FedEx tracking, UPS tracking, Maersk tracking, MSC tracking, sea freight tracking, air freight tracking, land freight tracking, express courier tracking, multi-carrier tracking, real-time shipment tracking, shipping tracker, logistics tracker, free package tracker, BOL tracking, bill of lading tracker, ocean freight tracking, courier tracking" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="author" content="Trackora" />
+    <meta name="copyright" content="Trackora" />
+    <meta name="language" content="English" />
+    <meta name="revisit-after" content="7 days" />
+    <meta name="rating" content="general" />
+    <link rel="canonical" href="https://www.track-ora.com/" />
+
+    <!-- ── Open Graph (Facebook / LinkedIn) ───────────────────────────────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.track-ora.com/" />
+    <meta property="og:title" content="Trackora | Track Any Shipment Instantly — 1,200+ Carriers" />
+    <meta property="og:description" content="Track any package, container, or air cargo in real time. Supports FedEx, DHL, UPS, Maersk, MSC and 1,200+ more carriers. Free forever — no sign-up required." />
+    <meta property="og:image" content="https://www.track-ora.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Trackora — Track any shipment across 1,200+ carriers" />
+    <meta property="og:site_name" content="Trackora" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ── Twitter Card ────────────────────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.track-ora.com/" />
+    <meta name="twitter:title" content="Trackora | Track Any Shipment — 1,200+ Carriers" />
+    <meta name="twitter:description" content="Real-time shipment tracking across 1,200+ carriers. Free forever." />
+    <meta name="twitter:image" content="https://www.track-ora.com/og-image.png" />
+
+    <!-- ── Preconnect for performance ─────────────────────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://assets.aftership.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+
+    <!-- ── Structured Data (JSON-LD) ──────────────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.track-ora.com/#organization",
+          "name": "Trackora",
+          "url": "https://www.track-ora.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.track-ora.com/trackora-logo.png",
+            "width": 512,
+            "height": 512
+          },
+          "description": "Global shipment intelligence platform supporting real-time tracking across 1,200+ carriers worldwide.",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Business Bay",
+            "addressLocality": "Dubai",
+            "addressCountry": "AE"
+          },
+          "email": "support@track-ora.com",
+          "foundingDate": "2024",
+          "knowsAbout": ["Shipment Tracking", "Cargo Logistics", "Supply Chain", "Freight Forwarding", "Container Tracking"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.track-ora.com/#website",
+          "url": "https://www.track-ora.com",
+          "name": "Trackora",
+          "description": "Track any shipment in real time across 1,200+ carriers worldwide.",
+          "publisher": { "@id": "https://www.track-ora.com/#organization" },
+          "inLanguage": "en-US",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://www.track-ora.com/track/{tracking_number}"
+            },
+            "query-input": "required name=tracking_number"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://www.track-ora.com/#app",
+          "name": "Trackora",
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "Logistics & Shipping",
+          "operatingSystem": "Web, iOS, Android",
+          "url": "https://www.track-ora.com",
+          "description": "Real-time shipment tracking across 1,200+ carriers. Track packages, ocean containers, air cargo, and express parcels with any tracking number.",
+          "featureList": [
+            "Real-time shipment tracking",
+            "1,200+ carrier support",
+            "Container and AWB tracking",
+            "Live route map",
+            "Shipment dashboard",
+            "Browser status alerts",
+            "PDF label scanner"
+          ],
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free forever — no credit card required"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "2847",
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How do I track a shipment on Trackora?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Enter your tracking number in the search box at track-ora.com/track. Trackora automatically detects the carrier and returns real-time status, a live event timeline, and a route map within seconds — no sign-up required."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which carriers does Trackora support?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Trackora supports 1,200+ carriers worldwide including FedEx, DHL, UPS, USPS, Aramex, Maersk, MSC, CMA CGM, Emirates SkyCargo, Lufthansa Cargo, Qatar Airways Cargo, and hundreds more across sea, air, land, and express freight."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Trackora free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Trackora's core tracking features are completely free with no credit card required. You can track any shipment, view the full event timeline, and save shipments to a personal dashboard at no cost."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I track ocean container shipments?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Trackora supports ISO container number tracking (SCAC codes), ocean bill of lading numbers, and integrates with major ocean carriers including Maersk, MSC, CMA CGM, Evergreen, and COSCO for real-time container status."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I track air cargo and air waybills (AWB)?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Trackora supports master air waybill (MAWB) and house air waybill tracking across major airlines and cargo carriers including Emirates SkyCargo, Lufthansa Cargo, Qatar Airways Cargo, and more."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I track multiple shipments at once?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Trackora supports multi-tracking — you can enter up to 40 tracking numbers at once. Tracked shipments are saved automatically to your dashboard when you're signed in."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8LTNXFGFWR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-8LTNXFGFWR', { page_path: window.location.pathname });
+    </script>
   </head>
   <body>
     <div id="root"></div>

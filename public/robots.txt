@@ -1,0 +1,11 @@
+# Trackora — Robots.txt
+# https://www.track-ora.com
+
+User-agent: *
+Allow: /
+
+# Block user-specific / auth pages from indexing
+Disallow: /dashboard
+
+# Sitemap location
+Sitemap: https://www.track-ora.com/sitemap.xml

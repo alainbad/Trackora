@@ -1,23 +1,48 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Track from './pages/Track'
 import Dashboard from './pages/Dashboard'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
+import { AuthProvider } from './contexts/AuthContext'
+import { ProfileProvider } from './contexts/ProfileContext'
+
+// Scrolls to #features / #pricing anchors (React Router doesn't do this on its own),
+// and scrolls to top on normal route changes.
+function ScrollManager() {
+  const { pathname, hash } = useLocation()
+  useEffect(() => {
+    if (hash) {
+      const el = document.getElementById(hash.slice(1))
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' })
+        return
+      }
+    }
+    window.scrollTo(0, 0)
+  }, [pathname, hash])
+  return null
+}
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <div className="min-h-screen" style={{ background: '#0a0f1e', color: '#f8fafc' }}>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/track" element={<Track />} />
-          <Route path="/track/:trackingId" element={<Track />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-        <Footer />
-      </div>
-    </BrowserRouter>
+    <AuthProvider>
+      <ProfileProvider>
+      <BrowserRouter>
+        <div className="min-h-screen" style={{ background: '#0a0f1e', color: '#f8fafc', width: '100%', overflowX: 'hidden' }}>
+          <ScrollManager />
+          <Navbar />
+          <Routes>
+            <Route path="/"                   element={<Home />} />
+            <Route path="/track"              element={<Track />} />
+            <Route path="/track/:trackingId"  element={<Track />} />
+            <Route path="/dashboard"          element={<Dashboard />} />
+          </Routes>
+          <Footer />
+        </div>
+      </BrowserRouter>
+      </ProfileProvider>
+    </AuthProvider>
   )
 }
