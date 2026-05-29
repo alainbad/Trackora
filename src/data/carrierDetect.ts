@@ -153,10 +153,17 @@ export function detectCarrier(raw: string): { carrier: DetectedCarrier; filledUr
     }
   }
 
-  // ── 5. FedEx: 12 / 15 / 20 digits ────────────────────────────────────────
-  if (/^(\d{12}|\d{15}|\d{20})$/.test(tn)) {
+  // ── 5. FedEx: 15 / 20 digits (high confidence)
+  //        12 digits = medium — Evergreen B/L, Hapag-Lloyd bookings also use this length
+  if (/^(\d{15}|\d{20})$/.test(tn)) {
     return {
       carrier: { name: 'FedEx', slug: 'fedex', category: 'express', accentColor: '#FF6200', logoUrl: '/logos/fedex.svg', confidence: 'high' },
+      filledUrl: `https://www.fedex.com/fedextrack/?trknbr=${encodeURIComponent(tn)}`,
+    }
+  }
+  if (/^\d{12}$/.test(tn)) {
+    return {
+      carrier: { name: 'FedEx', slug: 'fedex', category: 'express', accentColor: '#FF6200', logoUrl: '/logos/fedex.svg', confidence: 'medium' },
       filledUrl: `https://www.fedex.com/fedextrack/?trknbr=${encodeURIComponent(tn)}`,
     }
   }

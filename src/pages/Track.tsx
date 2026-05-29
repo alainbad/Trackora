@@ -219,8 +219,8 @@ export default function Track() {
           icon: '/favicon.ico',
         })
       }
-      // If inline data has real timeline events, clear the redirect card — full view wins
-      if (result.timeline.length > 0) setDetectedRedirect(null)
+      // Keep detectedRedirect visible even with inline data — users should always
+      // be able to open the official carrier page
       setShipment(result)
       setNotFound(false)
     } else {
@@ -767,14 +767,48 @@ export default function Track() {
           </div>
         )}
 
-        {/* Detection-first carrier redirect — shown while API loads or when API returns no data */}
-        {!animating && detectedRedirect && !shipment?.timeline.length && (
-          <CarrierRedirectCard
-            carrier={detectedRedirect.carrier}
-            trackingNumber={detectedRedirect.tn}
-            filledUrl={detectedRedirect.filledUrl}
-            loading={false}
-          />
+        {/* Detection-first carrier redirect */}
+        {!animating && detectedRedirect && (
+          shipment
+            ? /* Compact banner when inline data also loaded */
+              <a
+                href={detectedRedirect.filledUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: '12px', padding: '12px 18px', borderRadius: '12px',
+                  marginBottom: '20px', textDecoration: 'none',
+                  background: `${detectedRedirect.carrier.accentColor}18`,
+                  border: `1px solid ${detectedRedirect.carrier.accentColor}40`,
+                  transition: 'background 0.2s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = `${detectedRedirect.carrier.accentColor}28`)}
+                onMouseLeave={e => (e.currentTarget.style.background = `${detectedRedirect.carrier.accentColor}18`)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {detectedRedirect.carrier.logoUrl
+                    ? <img src={detectedRedirect.carrier.logoUrl} alt="" style={{ height: '22px', width: 'auto', maxWidth: '60px', objectFit: 'contain', background: '#fff', borderRadius: '4px', padding: '2px 4px' }} />
+                    : <span style={{ fontSize: '16px' }}>🔗</span>
+                  }
+                  <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(248,250,252,0.8)' }}>
+                    Also view on <strong style={{ color: detectedRedirect.carrier.accentColor }}>{detectedRedirect.carrier.name}</strong>'s official site
+                  </span>
+                  {detectedRedirect.carrier.confidence === 'medium' && (
+                    <span style={{ fontSize: '11px', color: 'rgba(248,250,252,0.35)', fontStyle: 'italic' }}>· wrong carrier?</span>
+                  )}
+                </div>
+                <span style={{ fontSize: '13px', fontWeight: 700, color: detectedRedirect.carrier.accentColor, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  Open →
+                </span>
+              </a>
+            : /* Full card when no inline data */
+              <CarrierRedirectCard
+                carrier={detectedRedirect.carrier}
+                trackingNumber={detectedRedirect.tn}
+                filledUrl={detectedRedirect.filledUrl}
+                loading={false}
+              />
         )}
 
         {/* Airline redirect card */}
