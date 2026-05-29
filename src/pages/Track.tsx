@@ -767,8 +767,9 @@ export default function Track() {
           </div>
         )}
 
-        {/* Detection-first carrier redirect */}
-        {!animating && detectedRedirect && (
+        {/* Detection-first carrier redirect — suppressed when the specialist airline/container
+            redirect card is already shown (those are more detailed for MAWB/container numbers) */}
+        {!animating && detectedRedirect && !airlineRedirect && !containerRedirect && (
           shipment
             ? /* Compact banner when inline data also loaded */
               <a
