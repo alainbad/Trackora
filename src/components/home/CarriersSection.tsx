@@ -11,24 +11,25 @@ interface Carrier {
   category: Exclude<Category, 'all'>
   track: string        // official tracking page — opened when the chip is clicked
   featured?: boolean   // shown in the default "All Carriers" view on the home page
+  logoUrl?: string     // direct high-quality logo image URL (bypasses favicon chain)
 }
 
 const CARRIERS: Carrier[] = [
   // Express
   { name: 'UPS',            domain: 'ups.com',               accentColor: '#8B5E3C', category: 'express', featured: true,  track: 'https://www.ups.com/track' },
-  { name: 'FedEx',          domain: 'fedex.com',             accentColor: '#FF6200', category: 'express', featured: true,  track: 'https://www.fedex.com/fedextrack/' },
+  { name: 'FedEx',          domain: 'fedex.com',             accentColor: '#FF6200', category: 'express', featured: true,  track: 'https://www.fedex.com/fedextrack/',                         logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/FedEx_Corporation_-_2016_Logo.svg/1200px-FedEx_Corporation_-_2016_Logo.svg.png' },
   { name: 'DHL',            domain: 'dhl.com',               accentColor: '#FFCC00', category: 'express', featured: true,  track: 'https://www.dhl.com/en/express/tracking.html' },
-  { name: 'TNT',            domain: 'tnt.com',               accentColor: '#FF6600', category: 'express',                  track: 'https://www.tnt.com/express/en_us/site/tracking.html' },
-  { name: 'DPD',            domain: 'dpd.com',               accentColor: '#dc0032', category: 'express',                  track: 'https://www.dpd.com/tracking' },
-  { name: 'GLS',            domain: 'gls-group.com',         accentColor: '#f5a623', category: 'express',                  track: 'https://gls-group.com/track' },
-  { name: 'Hermes',         domain: 'hermesworld.com',       accentColor: '#009FE3', category: 'express',                  track: 'https://www.evri.com/track-a-parcel' },
+  { name: 'TNT',            domain: 'tnt.com',               accentColor: '#FF6600', category: 'express',                  track: 'https://www.tnt.com/express/en_us/site/tracking.html',     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/TNT_Express_Logo.svg/1200px-TNT_Express_Logo.svg.png' },
+  { name: 'DPD',            domain: 'dpd.com',               accentColor: '#dc0032', category: 'express',                  track: 'https://www.dpd.com/tracking',                             logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/DPD_logo_%282015%29.svg' },
+  { name: 'GLS',            domain: 'gls-group.com',         accentColor: '#f5a623', category: 'express',                  track: 'https://gls-group.com/track',                              logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/GLS_logo_2021.svg/1200px-GLS_logo_2021.svg.png' },
+  { name: 'Hermes',         domain: 'hermesworld.com',       accentColor: '#009FE3', category: 'express',                  track: 'https://www.evri.com/track-a-parcel',                      logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Hermes_logo_2017.svg/1200px-Hermes_logo_2017.svg.png' },
   { name: 'Amazon',         domain: 'amazon.com',            accentColor: '#FF9900', category: 'express',                  track: 'https://www.amazon.com/progress-tracker/package' },
   { name: 'SF Express',     domain: 'sf-express.com',        accentColor: '#E3000F', category: 'express',                  track: 'https://www.sf-express.com/' },
-  { name: 'Aramex',         domain: 'aramex.com',            accentColor: '#E31937', category: 'express', featured: true,  track: 'https://www.aramex.com/track/shipments' },
+  { name: 'Aramex',         domain: 'aramex.com',            accentColor: '#E31937', category: 'express', featured: true,  track: 'https://www.aramex.com/track/shipments',                   logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ee/Aramex_logo.svg' },
   // Sea
   { name: 'Maersk',         domain: 'maersk.com',            accentColor: '#42ADEF', category: 'sea',    featured: true,  track: 'https://www.maersk.com/tracking' },
-  { name: 'MSC',            domain: 'msc.com',               accentColor: '#003087', category: 'sea',                     track: 'https://www.msc.com/en/track-a-shipment' },
-  { name: 'CMA CGM',        domain: 'cma-cgm.com',           accentColor: '#C41230', category: 'sea',    featured: true,  track: 'https://www.cma-cgm.com/ebusiness/tracking' },
+  { name: 'MSC',            domain: 'msc.com',               accentColor: '#003087', category: 'sea',                     track: 'https://www.msc.com/en/track-a-shipment',                  logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Mediterranean_Shipping_Company_logo.svg' },
+  { name: 'CMA CGM',        domain: 'cma-cgm.com',           accentColor: '#C41230', category: 'sea',    featured: true,  track: 'https://www.cma-cgm.com/ebusiness/tracking',               logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/b/ba/CMA_CGM_Company_Logo_July_2017.png' },
   { name: 'COSCO',          domain: 'cosco.com',             accentColor: '#C8102E', category: 'sea',                     track: 'https://elines.coscoshipping.com/ebusiness/cargoTracking' },
   { name: 'Hapag-Lloyd',    domain: 'hapag-lloyd.com',       accentColor: '#f59e0b', category: 'sea',                     track: 'https://www.hapag-lloyd.com/en/online-business/track/track-by-container-solution.html' },
   { name: 'Evergreen',      domain: 'evergreen-marine.com',  accentColor: '#00693E', category: 'sea',                     track: 'https://www.evergreen-line.com/' },
@@ -39,8 +40,8 @@ const CARRIERS: Carrier[] = [
   { name: 'Emirates',       domain: 'skycargo.com',          accentColor: '#C41230', category: 'air',                     track: 'https://www.skycargo.com/track-shipment/' },
   { name: 'Singapore Air',  domain: 'singaporeair.com',      accentColor: '#FFD700', category: 'air',                     track: 'https://www.siacargo.com/' },
   { name: 'Qatar Cargo',    domain: 'qatarairways.com',      accentColor: '#5C0632', category: 'air',                     track: 'https://www.qrcargo.com/s/track-shipment' },
-  { name: 'Cathay Cargo',   domain: 'cathaypacific.com',     accentColor: '#006564', category: 'air',                     track: 'https://www.cathaycargo.com/track-your-shipment/' },
-  { name: 'Air France KLM', domain: 'airfrancecargo.com',    accentColor: '#0032A0', category: 'air',                     track: 'https://www.afklcargo.com/mycargo/shipment/detail' },
+  { name: 'Cathay Cargo',   domain: 'cathaypacific.com',     accentColor: '#006564', category: 'air',                     track: 'https://www.cathaycargo.com/track-your-shipment/',         logoUrl: 'https://vectorise.net/logo/wp-content/uploads/2015/12/Logo-Cathay-Pacific-Cargo2.png' },
+  { name: 'Air France KLM', domain: 'airfrancecargo.com',    accentColor: '#0032A0', category: 'air',                     track: 'https://www.afklcargo.com/mycargo/shipment/detail',        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Air_France_KLM_logo_2004.gif' },
   { name: 'Turkish Cargo',  domain: 'turkishcargo.com',      accentColor: '#E30A17', category: 'air',                     track: 'https://www.turkishcargo.com/en/online-services/track-trace' },
   { name: 'IAG Cargo',      domain: 'iagcargo.com',          accentColor: '#5321A8', category: 'air',                     track: 'https://www.iagcargo.com/en/track-and-trace' },
   // Land
@@ -49,12 +50,12 @@ const CARRIERS: Carrier[] = [
   { name: 'Kuehne+Nagel',   domain: 'kuehne-nagel.com',      accentColor: '#003087', category: 'land',   featured: true,  track: 'https://onlineservices.kuehne-nagel.com/public-tracking/shipments' },
   { name: 'XPO',            domain: 'xpo.com',               accentColor: '#E31937', category: 'land',                    track: 'https://www.xpo.com/track/' },
   { name: 'Geodis',         domain: 'geodis.com',            accentColor: '#00A3E0', category: 'land',                    track: 'https://www.geodis.com/tracktrace' },
-  { name: 'Ceva Logistics', domain: 'cevalogistics.com',     accentColor: '#E4002B', category: 'land',                    track: 'https://www.cevalogistics.com/en/ceva-trackit' },
+  { name: 'Ceva Logistics', domain: 'cevalogistics.com',     accentColor: '#E4002B', category: 'land',                    track: 'https://www.cevalogistics.com/en/ceva-trackit',            logoUrl: 'https://seekvectorlogo.com/wp-content/uploads/2022/01/ceva-logistics-vector-logo-2022.png' },
   // Rail
-  { name: 'DB Cargo',       domain: 'dbcargo.com',           accentColor: '#E10019', category: 'rail',                    track: 'https://www.dbcargo.com/rail-deutschland-en' },
-  { name: 'Rail Cargo',     domain: 'railcargo.com',         accentColor: '#E30613', category: 'rail',                    track: 'https://www.railcargo.com/en' },
+  { name: 'DB Cargo',       domain: 'dbcargo.com',           accentColor: '#E10019', category: 'rail',                    track: 'https://www.dbcargo.com/rail-deutschland-en',              logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/DB-Logo-data.svg/1200px-DB-Logo-data.svg.png' },
+  { name: 'Rail Cargo',     domain: 'railcargo.com',         accentColor: '#E30613', category: 'rail',                    track: 'https://www.railcargo.com/en',                             logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ae/Logo_Rail_Cargo_Group_%282015%29.svg' },
   { name: 'SNCF Fret',      domain: 'sncf.com',              accentColor: '#A0006E', category: 'rail',                    track: 'https://www.sncf.com/en' },
-  { name: 'PKP Cargo',      domain: 'pkpcargo.com',          accentColor: '#003087', category: 'rail',                    track: 'https://www.pkpcargo.com/en/' },
+  { name: 'PKP Cargo',      domain: 'pkpcargo.com',          accentColor: '#003087', category: 'rail',                    track: 'https://www.pkpcargo.com/en/',                             logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/PKP_Cargo_logo.svg' },
   { name: 'BNSF Railway',   domain: 'bnsf.com',              accentColor: '#FF6600', category: 'rail',                    track: 'https://www.bnsf.com/' },
   { name: 'Union Pacific',  domain: 'unionpacific.com',      accentColor: '#FFD700', category: 'rail',                    track: 'https://www.up.com/customers/track-record/' },
   { name: 'Trenitalia',     domain: 'trenitalia.com',        accentColor: '#C8102E', category: 'rail',                    track: 'https://www.trenitalia.com/' },
@@ -103,28 +104,27 @@ function CarrierTextLogo({ carrier }: { carrier: Carrier }) {
 // the brand name, so for these we render the clean branded text logo directly.
 const NO_LOGO = new Set([
   'sf-express.com', 'cosco.com', 'hapag-lloyd.com',
-  'evergreen-marine.com', 'yangming.com', 'iagcargo.com', 'airfrancecargo.com',
+  'evergreen-marine.com', 'yangming.com', 'iagcargo.com',
   'china-railway.com.cn', 'japanpost.jp', 'chinapost.com.cn',
 ])
 
 // Carriers Google has no favicon for, but favicone.com serves their real brand icon — try it first.
-const FAVICONE_FIRST = new Set([
-  'gls-group.com',
-])
+const FAVICONE_FIRST = new Set<string>([])
 
 function CarrierChip({ carrier }: { carrier: Carrier }) {
   const [hovered, setHovered] = useState(false)
   const navigate = useNavigate()
   // Real-logo source chain — tried in order; falls back to branded text only if all fail.
-  // (Clearbit's Logo API was shut down, so we use favicon providers that return the actual brand mark.)
+  // If a direct logoUrl is provided it goes first; then favicon providers as fallback.
   const google = `https://www.google.com/s2/favicons?domain=${carrier.domain}&sz=128`
   const favicone = `https://favicone.com/${carrier.domain}?s=128`
   const ddg = `https://icons.duckduckgo.com/ip3/${carrier.domain}.ico`
-  const sources = FAVICONE_FIRST.has(carrier.domain)
+  const faviconChain = FAVICONE_FIRST.has(carrier.domain)
     ? [favicone, google, ddg]
     : [google, ddg, favicone]
+  const sources = carrier.logoUrl ? [carrier.logoUrl, ...faviconChain] : faviconChain
   const [srcIndex, setSrcIndex] = useState(0)
-  const [imgFailed, setImgFailed] = useState(NO_LOGO.has(carrier.domain))
+  const [imgFailed, setImgFailed] = useState(NO_LOGO.has(carrier.domain) && !carrier.logoUrl)
   const imgSrc = sources[srcIndex]
 
   const handleError = () => {
@@ -196,8 +196,12 @@ function CarrierChip({ carrier }: { carrier: Carrier }) {
             onError={handleError}
             onLoad={handleLoad}
             style={{
-              width: '44px',
-              height: '44px',
+              maxWidth: '80%',
+              maxHeight: '54px',
+              minWidth: '32px',
+              minHeight: '32px',
+              width: 'auto',
+              height: 'auto',
               objectFit: 'contain',
             }}
           />
