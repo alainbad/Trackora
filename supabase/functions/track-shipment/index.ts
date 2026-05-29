@@ -1027,6 +1027,13 @@ async function fetch17track(trackingNumber: string): Promise<Record<string, unkn
 
 function normaliseAfterShip(t: Record<string, unknown>) {
   const slug        = (t.slug as string) || ''
+  const carrierTitle = (t.title as string) || ''
+
+  // Quality gate: AfterShip returns "Unrecognized" when it finds the number
+  // format but can't identify the carrier — this is a false positive. Treat it
+  // as not found so the frontend shows the redirect card or "not found" state.
+  if (!slug || carrierTitle.toLowerCase() === 'unrecognized') return null
+
   const originISO   = toISO2((t.origin_country_region      as string) || '')
   const destISO     = toISO2((t.destination_country_region as string) || '')
   const originCoord = coord(originISO)
@@ -1057,8 +1064,8 @@ function normaliseAfterShip(t: Record<string, unknown>) {
   const rawWeight = t.shipment_weight
   const weightKg  = typeof rawWeight === 'number' ? rawWeight
                   : rawWeight && typeof rawWeight === 'object'
-                    ? ((rawWeight as Record<string, unknown>).value as number) || 10
-                    : 10
+                    ? ((rawWeight as Record<string, unknown>).value as number) || 0
+                    : 0
 
   let ft = freightTypeBySlug(slug)
   // MAWB format (NNN-NNNNNNNN) → air cargo unless the slug or carrier title
@@ -1077,8 +1084,8 @@ function normaliseAfterShip(t: Record<string, unknown>) {
   return {
     id:             (t.id as string) || (t.tracking_number as string),
     trackingNumber: t.tracking_number as string,
-    carrier:        ((t.title as string) && (t.title as string) !== (t.tracking_number as string))
-                      ? (t.title as string)
+    carrier:        (carrierTitle && carrierTitle !== (t.tracking_number as string))
+                      ? carrierTitle
                       : slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ') : 'Unknown',
     freightType:    ft,
     status:         AFTERSHIP_TAG_MAP[t.tag as string] || 'in_transit',

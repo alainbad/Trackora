@@ -72,6 +72,12 @@ const CARRIER_NAME_MAP: Record<string, string> = {
   'ups reference':        'UPS',
   'ups-reference':        'UPS',
   'ups mail innovations': 'UPS Mail Innovations',
+  // Carriers that AfterShip sometimes mismatches to — normalise their display names
+  'rl carriers':          'RL Carriers',
+  'rl-carriers':          'RL Carriers',
+  'starken':              'Starken',
+  'ninjavan':             'Ninjavan',
+  'ninjavan-id':          'Ninjavan',
   // FedEx
   'fedex':               'FedEx',
   'fedex uk':            'FedEx UK',
