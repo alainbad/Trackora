@@ -16,7 +16,9 @@ import TrackingAnimation from '../components/tracking/TrackingAnimation'
 import AirlineRedirectCard from '../components/tracking/AirlineRedirectCard'
 import ContainerRedirectCard from '../components/tracking/ContainerRedirectCard'
 import BookingRedirectCard from '../components/tracking/BookingRedirectCard'
+import CarrierRedirectCard from '../components/tracking/CarrierRedirectCard'
 import { BOOKING_CARRIERS, type BookingCarrier } from '../data/bookingRedirects'
+import { detectCarrier as detectCarrierFromNumber, type DetectedCarrier } from '../data/carrierDetect'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -70,6 +72,8 @@ export default function Track() {
   const [mode, setMode] = useState<'single' | 'multi' | 'booking'>('single')
   const [bookingCarrier, setBookingCarrier] = useState<BookingCarrier | null>(null)
   const [bookingRedirect, setBookingRedirect] = useState<{ carrier: BookingCarrier; ref: string } | null>(null)
+  // Detection-first redirect: shown immediately on submit while API loads in background
+  const [detectedRedirect, setDetectedRedirect] = useState<{ carrier: DetectedCarrier; filledUrl: string; tn: string } | null>(null)
   const [apiReady, setApiReady] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [showAlerts, setShowAlerts] = useState(false)
@@ -101,6 +105,22 @@ export default function Track() {
 
   function triggerSearch(id: string, carrierSlug?: string, isBooking?: boolean) {
     if (!id.trim()) return
+    const tn = id.trim()
+
+    // Detection-first: identify carrier client-side immediately, show redirect card
+    // right away. The API call runs in parallel — if it succeeds with real timeline
+    // data, the full inline view replaces the redirect card.
+    if (!isBooking) {
+      const detected = detectCarrierFromNumber(tn)
+      if (detected) {
+        setDetectedRedirect({ ...detected, tn })
+      } else {
+        setDetectedRedirect(null)
+      }
+    } else {
+      setDetectedRedirect(null)
+    }
+
     setAnimating(true)
     setShipment(null)
     setNotFound(false)
@@ -110,9 +130,7 @@ export default function Track() {
     setApiReady(false)
     apiResultRef.current = null
 
-    // Fire the API call immediately — runs in parallel with the animation.
-    // When resolved, flip apiReady so the animation can advance past its hold step.
-    pendingRef.current = fetchShipment(id.trim(), carrierSlug, isBooking).then(result => {
+    pendingRef.current = fetchShipment(tn, carrierSlug, isBooking).then(result => {
       apiResultRef.current = result
       setApiReady(true)
       return result
@@ -201,6 +219,8 @@ export default function Track() {
           icon: '/favicon.ico',
         })
       }
+      // If inline data has real timeline events, clear the redirect card — full view wins
+      if (result.timeline.length > 0) setDetectedRedirect(null)
       setShipment(result)
       setNotFound(false)
     } else {
@@ -334,7 +354,7 @@ export default function Track() {
     setActiveLineIdx(i)
   }
 
-  const hasResults = shipment || notFound || !!airlineRedirect || !!containerRedirect || !!bookingRedirect
+  const hasResults = shipment || notFound || !!airlineRedirect || !!containerRedirect || !!bookingRedirect || !!detectedRedirect
 
   // Tracking-number format guidance + live validation for the selected carrier
   const fmt = carrierContext ? getCarrierFormat(carrierContext) : null
@@ -745,6 +765,16 @@ export default function Track() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Detection-first carrier redirect — shown while API loads or when API returns no data */}
+        {!animating && detectedRedirect && !shipment?.timeline.length && (
+          <CarrierRedirectCard
+            carrier={detectedRedirect.carrier}
+            trackingNumber={detectedRedirect.tn}
+            filledUrl={detectedRedirect.filledUrl}
+            loading={false}
+          />
         )}
 
         {/* Airline redirect card */}
