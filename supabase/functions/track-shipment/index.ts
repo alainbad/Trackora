@@ -1552,6 +1552,26 @@ serve(async (req) => {
 
       const runParallel = format === 'express' && !usedDirect && !!TRACK17_KEY && !skipAfterShip
 
+      // Carriers AfterShip reliably identifies — we trust a zero-event result from
+      // these (shipment booked / just picked up). For any other slug, a zero-event
+      // result means AfterShip guessed the format but doesn't really know the carrier,
+      // so we drop it and show "not found" rather than misleading the user.
+      const TRUSTED_AS_SLUGS = new Set([
+        'fedex','ups','ups-mi','dhl','dhl-express','dhl-ecommerce','dhl-paket',
+        'usps','aramex','tnt','dpd','dpd-uk','dpd-de','dpd-fr','dpd-nl',
+        'gls','gls-de','gls-nl','hermes','hermes-uk','evri','postnl','bpost',
+        'royal-mail','la-poste','correos','colissimo','chronopost','parcelforce',
+        'brt','brt-it','sf-express','cainiao','yanwen','yun-express','4px',
+        // Air cargo (MAWB numbers are unambiguous by prefix)
+        'lufthansa-cargo','emirates-skycargo','singapore-airlines-cargo',
+        'qatar-cargo','turkish-cargo','cathay-pacific-cargo','air-france-cargo',
+        'etihad-cargo','cargolux','swiss-worldcargo','korean-air-cargo',
+        'japan-airlines-cargo','british-airways-world-cargo','klm-cargo',
+        // Sea (only when called with explicit carrier hint)
+        'maersk','msc','cma-cgm','cosco','hapag-lloyd','evergreen-line',
+        'yang-ming','one','zim',
+      ])
+
       if (runParallel) {
         // Fire AfterShip and 17track simultaneously
         const [asRaw, t17Raw] = await Promise.all([
@@ -1559,6 +1579,7 @@ serve(async (req) => {
           fetch17track(tn).catch(() => null),
         ])
         const asShipment  = asRaw  ? normaliseAfterShip(asRaw  as Record<string, unknown>) : null
+        const asSlug      = asRaw  ? ((asRaw as Record<string, unknown>).slug as string || '') : ''
         const t17Shipment = t17Raw ? normalise17track(t17Raw, tn) : null
         const asLen       = (asShipment?.timeline  as unknown[])?.length ?? 0
         const t17Len      = (t17Shipment?.timeline as unknown[])?.length ?? 0
@@ -1566,19 +1587,31 @@ serve(async (req) => {
         if (asLen > 0) {
           shipment = asShipment
         } else if (t17Len > 0) {
-          // Carry over carrier name if AfterShip identified it
-          if (asShipment?.carrier) (t17Shipment as Record<string, unknown>).carrier = asShipment.carrier as string
+          // Carry over carrier name if AfterShip identified it with a trusted slug
+          if (asShipment?.carrier && TRUSTED_AS_SLUGS.has(asSlug)) {
+            ;(t17Shipment as Record<string, unknown>).carrier = asShipment.carrier as string
+          }
           shipment = t17Shipment
-        } else if (asShipment) {
+        } else if (asShipment && TRUSTED_AS_SLUGS.has(asSlug)) {
+          // Only show zero-event AfterShip result for reliable carriers
           shipment = asShipment
         } else if (t17Shipment) {
           shipment = t17Shipment
         }
+        // else: both returned zero events for an untrusted carrier → null → "not found"
       } else {
         // Original sequential path (MAWB / direct-carrier fallback)
         if (!skipAfterShip) {
           const raw = await fetchAfterShip(tn, hint)
-          if (raw) shipment = normaliseAfterShip(raw as Record<string, unknown>)
+          if (raw) {
+            const norm = normaliseAfterShip(raw as Record<string, unknown>)
+            const rawSlug = (raw as Record<string, unknown>).slug as string || ''
+            const normLen = (norm?.timeline as unknown[])?.length ?? 0
+            // Only use zero-event result for trusted slugs
+            if (norm && (normLen > 0 || TRUSTED_AS_SLUGS.has(rawSlug))) {
+              shipment = norm
+            }
+          }
         }
 
         // Route 4 sequential fallback: express + direct-carrier ran but gave 0 events
