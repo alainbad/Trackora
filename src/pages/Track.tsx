@@ -8,7 +8,7 @@ import { fetchShipment, getCarrierTrackUrl } from '../lib/trackingApi'
 import { getCarrierFormat } from '../data/carrierFormats'
 import { extractFromPdf, type Candidate } from '../lib/extractTracking'
 import { getAirlineRedirect, type AirlineRedirect } from '../data/airlineRedirects'
-import { getContainerRedirect, getContainerRedirectByCarrier, type ContainerRedirect } from '../data/containerRedirects'
+import { getContainerRedirect, getContainerRedirectByCarrier, getSeaReferenceRedirect, type ContainerRedirect } from '../data/containerRedirects'
 import TrackingTimeline from '../components/tracking/TrackingTimeline'
 import ShipmentDetails, { DGBadge } from '../components/tracking/ShipmentDetails'
 import WorldMap from '../components/tracking/WorldMap'
@@ -22,13 +22,21 @@ import { useAuth } from '../contexts/AuthContext'
 
 // Carrier auto-detection patterns shown live as user types
 const CARRIER_HINTS = [
-  { pattern: /^1Z/i, name: 'UPS', color: '#f5a623', bg: '#3d1f00' },
-  { pattern: /^(JD|VD|UD)/i, name: 'JD Logistics', color: '#c0392b', bg: '#1a0000' },
-  { pattern: /^MAD/i, name: 'Maersk', color: '#42ADEF', bg: '#003F6C' },
-  { pattern: /^MAWB/i, name: 'Air Cargo / MAWB', color: '#FFAD00', bg: '#05164D' },
+  { pattern: /^1Z/i,            name: 'UPS',              color: '#f5a623', bg: '#3d1f00' },
+  { pattern: /^(JD|VD|UD)/i,   name: 'JD Logistics',     color: '#c0392b', bg: '#1a0000' },
+  { pattern: /^MAD/i,           name: 'Maersk',           color: '#42ADEF', bg: '#003F6C' },
+  { pattern: /^MAEU/i,          name: 'Maersk B/L',       color: '#42ADEF', bg: '#003F6C' },
+  { pattern: /^MSCU/i,          name: 'MSC B/L',          color: '#003087', bg: '#00153b' },
+  { pattern: /^HLCU/i,          name: 'Hapag-Lloyd B/L',  color: '#f59e0b', bg: '#2d1f00' },
+  { pattern: /^COSU|^CBHU/i,   name: 'COSCO B/L',        color: '#C8102E', bg: '#1a0000' },
+  { pattern: /^CMAU|^APHU/i,   name: 'CMA CGM B/L',      color: '#C41230', bg: '#1a0006' },
+  { pattern: /^ONEY|^ONEU/i,   name: 'ONE Line B/L',     color: '#E4003B', bg: '#1a0010' },
+  { pattern: /^YMLU/i,          name: 'Yang Ming B/L',    color: '#003DA5', bg: '#001030' },
+  { pattern: /^ZIMU/i,          name: 'ZIM B/L',          color: '#005BAC', bg: '#001a30' },
+  { pattern: /^MAWB/i,          name: 'Air Cargo / MAWB', color: '#FFAD00', bg: '#05164D' },
   { pattern: /^CNTR|^[A-Z]{4}\d{7}/i, name: 'Container (ISO)', color: '#10b981', bg: '#052e16' },
-  { pattern: /^(\d{12}|\d{15}|\d{20})/i, name: 'FedEx', color: '#FF6200', bg: '#1a0d2e' },
-  { pattern: /^\d{10}$/, name: 'DHL / Deutsche Post', color: '#FFCC00', bg: '#c8102e' },
+  { pattern: /^(\d{12}|\d{15}|\d{20})/i, name: 'FedEx',  color: '#FF6200', bg: '#1a0d2e' },
+  { pattern: /^\d{10}$/,        name: 'DHL / Deutsche Post', color: '#FFCC00', bg: '#c8102e' },
 ]
 
 const DEMO_IDS = ['1Z999AA10123456784', 'MAD3456789', 'MAWB001-12345678', 'CNTR8872341', '020-32974620']
@@ -168,9 +176,9 @@ export default function Track() {
           setLastUpdated(new Date())
           return
         }
-        // Owner-code lookup first; if that misses (leasing-company prefix like TII/Triton,
-        // CAI, TGHU…) fall back to the carrier name the API already identified.
+        // Owner-code lookup first; try sea B/L reference; then carrier-name fallback.
         const ctnRedir = getContainerRedirect(currentId)
+          ?? getSeaReferenceRedirect(currentId)
           ?? (result.carrier ? getContainerRedirectByCarrier(currentId, result.carrier) : null)
         if (ctnRedir) {
           setContainerRedirect(ctnRedir)
@@ -207,7 +215,7 @@ export default function Track() {
           setAirlineRedirect(airRedir)
           setNotFound(false)
         } else {
-          const ctnRedir = getContainerRedirect(currentId)
+          const ctnRedir = getContainerRedirect(currentId) ?? getSeaReferenceRedirect(currentId)
           if (ctnRedir) {
             setContainerRedirect(ctnRedir)
             setNotFound(false)

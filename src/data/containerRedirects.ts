@@ -182,6 +182,70 @@ const OWNER_MAP: Record<string, ShippingLineInfo> = {
     supportsDeepLink: false },
 }
 
+// ── 4-char SCAC owner codes used in B/L and booking references ─────────────────
+// Maersk, MSC, Hapag-Lloyd, COSCO etc. prefix their B/L numbers with their
+// 4-letter equipment owner code. These are NOT standard ISO containers (which are
+// always 11 chars) but should be redirected to the same carrier portal.
+const SCAC4_MAP: Record<string, ShippingLineInfo> = {
+  // Maersk family
+  'MAEU': { name: 'Maersk',      logoSlug: 'maersk',    trackUrl: 'https://www.maersk.com/tracking/{container}',                                                               supportsDeepLink: true  },
+  'MSKI': { name: 'Maersk',      logoSlug: 'maersk',    trackUrl: 'https://www.maersk.com/tracking/{container}',                                                               supportsDeepLink: true  },
+  'SEAU': { name: 'Maersk',      logoSlug: 'maersk',    trackUrl: 'https://www.maersk.com/tracking/{container}',                                                               supportsDeepLink: true  },
+  // MSC
+  'MSCU': { name: 'MSC',         logoSlug: 'msc',       trackUrl: 'https://www.msc.com/en/track-a-shipment',                                                                   supportsDeepLink: false },
+  'MSCD': { name: 'MSC',         logoSlug: 'msc',       trackUrl: 'https://www.msc.com/en/track-a-shipment',                                                                   supportsDeepLink: false },
+  // Hapag-Lloyd
+  'HLCU': { name: 'Hapag-Lloyd', logoSlug: 'hapag-lloyd', trackUrl: 'https://www.hapag-lloyd.com/en/online-business/track/track-by-booking-number.html?booking={container}',  supportsDeepLink: true  },
+  'HLXU': { name: 'Hapag-Lloyd', logoSlug: 'hapag-lloyd', trackUrl: 'https://www.hapag-lloyd.com/en/online-business/track/track-by-booking-number.html?booking={container}',  supportsDeepLink: true  },
+  // COSCO
+  'COSU': { name: 'COSCO',       logoSlug: 'cosco',     trackUrl: 'https://elines.coscoshipping.com/ebusiness/cargoTracking?trackingType=BOOKINGNO&number={container}',         supportsDeepLink: true  },
+  'CBHU': { name: 'COSCO',       logoSlug: 'cosco',     trackUrl: 'https://elines.coscoshipping.com/ebusiness/cargoTracking?trackingType=BOOKINGNO&number={container}',         supportsDeepLink: true  },
+  // CMA CGM
+  'CMAU': { name: 'CMA CGM',     logoSlug: 'cma-cgm',   trackUrl: 'https://www.cma-cgm.com/ebusiness/tracking/search?SearchBy=BookingNumber&Reference={container}',            supportsDeepLink: true  },
+  'APHU': { name: 'CMA CGM',     logoSlug: 'cma-cgm',   trackUrl: 'https://www.cma-cgm.com/ebusiness/tracking/search?SearchBy=BookingNumber&Reference={container}',            supportsDeepLink: true  },
+  // Evergreen
+  'EITU': { name: 'Evergreen',   logoSlug: 'evergreen', trackUrl: 'https://www.evergreen-line.com/service/cargo_tracking_detail.aspx?cn={container}',                          supportsDeepLink: true  },
+  'EGHU': { name: 'Evergreen',   logoSlug: 'evergreen', trackUrl: 'https://www.evergreen-line.com/service/cargo_tracking_detail.aspx?cn={container}',                          supportsDeepLink: true  },
+  // ONE
+  'ONEY': { name: 'ONE',         logoSlug: 'one',       trackUrl: 'https://ecomm.one-line.com/ecom/CUP_HOM_3301.do?f_cmd=_QRY_BL_&search_type=BL&blNo={container}',           supportsDeepLink: true  },
+  'ONEU': { name: 'ONE',         logoSlug: 'one',       trackUrl: 'https://ecomm.one-line.com/ecom/CUP_HOM_3301.do?f_cmd=_QRY_BL_&search_type=BL&blNo={container}',           supportsDeepLink: true  },
+  // Yang Ming
+  'YMLU': { name: 'Yang Ming',   logoSlug: 'yang-ming', trackUrl: 'https://www.yangming.com/e-service/Track_Trace/track_trace_cargo_tracking.aspx?cntrno={container}',         supportsDeepLink: true  },
+  'YMJU': { name: 'Yang Ming',   logoSlug: 'yang-ming', trackUrl: 'https://www.yangming.com/e-service/Track_Trace/track_trace_cargo_tracking.aspx?cntrno={container}',         supportsDeepLink: true  },
+  // ZIM
+  'ZIMU': { name: 'ZIM',         logoSlug: 'zim',       trackUrl: 'https://www.zim.com/tools/track-a-shipment?resultFor={container}',                                          supportsDeepLink: true  },
+}
+
+/** All 4-char sea SCAC prefixes — used by edge function to block AfterShip mismatches */
+export const SEA_SCAC4 = new Set(Object.keys(SCAC4_MAP))
+
+/**
+ * Detect B/L numbers and booking references that start with a known 4-char
+ * shipping-line owner code but don't match the strict ISO 6346 container format
+ * (e.g. MAEU265525152 = Maersk B/L, HLCU1234567890 = Hapag-Lloyd booking).
+ */
+export function getSeaReferenceRedirect(trackingNumber: string): ContainerRedirect | null {
+  const clean = trackingNumber.replace(/\s/g, '').toUpperCase()
+  // Must start with 4 uppercase letters and be at least 9 chars total
+  if (!/^[A-Z]{4}/.test(clean) || clean.length < 9) return null
+  // Skip if it already qualifies as a standard ISO container (handled separately)
+  if (/^[A-Z]{3}[UJZ]\d{7}$/.test(clean)) return null
+
+  const prefix4 = clean.slice(0, 4)
+  const info    = SCAC4_MAP[prefix4]
+  if (!info) return null
+
+  const trackUrl = info.trackUrl.replace('{container}', encodeURIComponent(clean))
+  return {
+    containerNumber: clean,
+    ownerCode:       prefix4,
+    shippingLine:    info.name,
+    logoSlug:        info.logoSlug,
+    trackUrl,
+    supportsDeepLink: info.supportsDeepLink,
+  }
+}
+
 export function getContainerRedirect(trackingNumber: string): ContainerRedirect | null {
   const clean = trackingNumber.replace(/\s/g, '').toUpperCase()
   // ISO 6346: 3-letter owner + equipment category (U/J/Z) + 7 digits

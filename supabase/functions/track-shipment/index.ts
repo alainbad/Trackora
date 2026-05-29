@@ -1431,6 +1431,56 @@ serve(async (req) => {
 
     const format = detectFormat(tn)
 
+    // ── Sea B/L / booking reference gate ─────────────────────────────────────
+    // Numbers like MAEU265525152 start with a 4-char shipping-line owner code but
+    // are NOT standard ISO containers (11 chars). AfterShip misidentifies them as
+    // unrelated express carriers (e.g. "Ninjavan"). Block them early and return 404
+    // so the frontend ContainerRedirectCard / BookingRedirectCard can take over.
+    const SEA_SCAC4 = new Set([
+      'MAEU','MSKI','SEAU',              // Maersk
+      'MSCU','MSCD',                     // MSC
+      'HLCU','HLXU',                     // Hapag-Lloyd
+      'COSU','CBHU',                     // COSCO
+      'CMAU','APHU',                     // CMA CGM
+      'EITU','EGHU',                     // Evergreen
+      'ONEY','ONEU',                     // ONE
+      'YMLU','YMJU',                     // Yang Ming
+      'ZIMU',                            // ZIM
+    ])
+    const upperTn = tn.toUpperCase()
+    const prefix4 = upperTn.slice(0, 4)
+    const isSeaRef = /^[A-Z]{4}/.test(upperTn) &&
+                     upperTn.length >= 9 &&
+                     !/^[A-Z]{3}[UJZ]\d{7}$/.test(upperTn) &&  // not a standard ISO container
+                     SEA_SCAC4.has(prefix4)
+
+    if (isSeaRef) {
+      // Try Shipsgo B/L lookup before giving up
+      let shipment: Record<string, unknown> | null = null
+      if (SHIPSGO_KEY) {
+        try {
+          const r = await fetch(`${BASE_SG}/ocean/shipments?bl_number=${encodeURIComponent(tn)}`, {
+            headers: SG_HEADERS(),
+          })
+          const j = await r.json()
+          const list = (j.shipments as Record<string, unknown>[]) || []
+          if (list.length > 0) {
+            const id = list[0].id as number
+            const sg = await shipsgoGet(id)
+            if (sg) shipment = normaliseShipsgo(sg, tn)
+          }
+        } catch { /* fall through */ }
+      }
+      if (shipment) {
+        return new Response(JSON.stringify({ data: shipment }), {
+          headers: { ...CORS, 'Content-Type': 'application/json' },
+        })
+      }
+      return new Response(JSON.stringify({ error: 'Sea reference — use carrier portal' }), {
+        status: 404, headers: { ...CORS, 'Content-Type': 'application/json' },
+      })
+    }
+
     let shipment: Record<string, unknown> | null = null
 
     // ── Route 0: Direct carrier APIs — FedEx · DHL · UPS · USPS · Aramex ──────
