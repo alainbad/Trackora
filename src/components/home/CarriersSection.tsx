@@ -12,12 +12,13 @@ interface Carrier {
   track: string        // official tracking page — opened when the chip is clicked
   featured?: boolean   // shown in the default "All Carriers" view on the home page
   logoUrl?: string     // direct high-quality logo image URL (bypasses favicon chain)
+  logoScale?: number   // size multiplier for the logo (1 = default); use for short/wide marks
 }
 
 const CARRIERS: Carrier[] = [
   // Express
   { name: 'UPS',            domain: 'ups.com',               accentColor: '#8B5E3C', category: 'express', featured: true,  track: 'https://www.ups.com/track' },
-  { name: 'FedEx',          domain: 'fedex.com',             accentColor: '#FF6200', category: 'express', featured: true,  track: 'https://www.fedex.com/fedextrack/',                         logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/FedEx_Corporation_-_2016_Logo.svg/1200px-FedEx_Corporation_-_2016_Logo.svg.png' },
+  { name: 'FedEx',          domain: 'fedex.com',             accentColor: '#FF6200', category: 'express', featured: true,  track: 'https://www.fedex.com/fedextrack/',                         logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/FedEx_Corporation_-_2016_Logo.svg/1200px-FedEx_Corporation_-_2016_Logo.svg.png', logoScale: 1.35 },
   { name: 'DHL',            domain: 'dhl.com',               accentColor: '#FFCC00', category: 'express', featured: true,  track: 'https://www.dhl.com/en/express/tracking.html',             logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/DHL_Logo.svg' },
   { name: 'TNT',            domain: 'tnt.com',               accentColor: '#FF6600', category: 'express',                  track: 'https://www.tnt.com/express/en_us/site/tracking.html',     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/TNT_Express_Logo.svg' },
   { name: 'DPD',            domain: 'dpd.com',               accentColor: '#dc0032', category: 'express',                  track: 'https://www.dpd.com/tracking',                             logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/DPD_logo_%282015%29.svg' },
@@ -39,7 +40,7 @@ const CARRIERS: Carrier[] = [
   { name: 'Lufthansa Cargo',domain: 'lufthansa-cargo.com',   accentColor: '#FFAD00', category: 'air',                     track: 'https://lufthansa-cargo.com/eservices/tools/tracking' },
   { name: 'Emirates',       domain: 'skycargo.com',          accentColor: '#C41230', category: 'air',                     track: 'https://www.skycargo.com/track-shipment/' },
   { name: 'Singapore Air',  domain: 'singaporeair.com',      accentColor: '#FFD700', category: 'air',                     track: 'https://www.siacargo.com/' },
-  { name: 'Qatar Cargo',    domain: 'qatarairways.com',      accentColor: '#5C0632', category: 'air',                     track: 'https://www.qrcargo.com/s/track-shipment' },
+  { name: 'Qatar Cargo',    domain: 'qatarairways.com',      accentColor: '#5C0632', category: 'air',                     track: 'https://www.qrcargo.com/s/track-shipment',                 logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/75/Qatar_Airways_logo.svg' },
   { name: 'Cathay Cargo',   domain: 'cathaypacific.com',     accentColor: '#006564', category: 'air',                     track: 'https://www.cathaycargo.com/track-your-shipment/',         logoUrl: 'https://vectorise.net/logo/wp-content/uploads/2015/12/Logo-Cathay-Pacific-Cargo2.png' },
   { name: 'Air France KLM', domain: 'airfrancecargo.com',    accentColor: '#0032A0', category: 'air',                     track: 'https://www.afklcargo.com/mycargo/shipment/detail',        logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Air_France-KLM.svg' },
   { name: 'Turkish Cargo',  domain: 'turkishcargo.com',      accentColor: '#E30A17', category: 'air',                     track: 'https://www.turkishcargo.com/en/online-services/track-trace' },
@@ -196,8 +197,8 @@ function CarrierChip({ carrier }: { carrier: Carrier }) {
             onError={handleError}
             onLoad={handleLoad}
             style={{
-              maxWidth: '80%',
-              maxHeight: '54px',
+              maxWidth: `${80 * (carrier.logoScale ?? 1)}%`,
+              maxHeight: `${54 * (carrier.logoScale ?? 1)}px`,
               minWidth: '32px',
               minHeight: '32px',
               width: 'auto',
