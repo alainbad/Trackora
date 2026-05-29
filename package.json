@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && npx wrangler pages deploy dist --project-name=trackora --branch=main"
+    "deploy": "npm run build && npx wrangler pages deploy dist --project-name=trackora --branch=master"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
