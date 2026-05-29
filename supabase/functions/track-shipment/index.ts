@@ -1183,7 +1183,7 @@ function normalise17track(item: Record<string, unknown>, trackingNumber: string)
     delayRisk:   status === 'delayed' ? 'high' : status === 'customs' ? 'medium' : 'low',
     delayReason: status === 'delayed' ? 'Carrier reported exception' : '',
     timeline, carbonKg: freightType === 'sea' ? 120 : freightType === 'air' ? 980 : 45,
-    weightKg: 10, dangerousGoods: DG_RE.test(evText),
+    weightKg: 0, dangerousGoods: DG_RE.test(evText),
   }
 }
 
@@ -1438,7 +1438,7 @@ serve(async (req) => {
     // so the frontend ContainerRedirectCard / BookingRedirectCard can take over.
     const SEA_SCAC4 = new Set([
       'MAEU','MSKI','SEAU',              // Maersk
-      'MSCU','MSCD',                     // MSC
+      'MSCU','MSCD','MEDU','GESU',       // MSC
       'HLCU','HLXU',                     // Hapag-Lloyd
       'COSU','CBHU',                     // COSCO
       'CMAU','APHU',                     // CMA CGM

@@ -68,8 +68,10 @@ const CARRIER_NAME_MAP: Record<string, string> = {
   'dhl paket':           'DHL Paket',
   'dhl de':              'DHL',
   // UPS
-  'ups':                 'UPS',
-  'ups mail innovations':'UPS Mail Innovations',
+  'ups':                  'UPS',
+  'ups reference':        'UPS',
+  'ups-reference':        'UPS',
+  'ups mail innovations': 'UPS Mail Innovations',
   // FedEx
   'fedex':               'FedEx',
   'fedex uk':            'FedEx UK',
@@ -244,7 +246,7 @@ function adaptApiShipment(d: Record<string, unknown>): Shipment {
     estimatedDelivery: (d.estimatedDelivery as string) ?? 'TBD',
     aiEta:             (d.estimatedDelivery as string) ?? 'TBD',
     etaConfidence:     (d.etaConfidence    as number)  ?? 75,
-    weight:            `${(d.weightKg      as number)  ?? '—'} kg`,
+    weight:            (d.weightKg as number) > 0 ? `${d.weightKg} kg` : '—',
     dimensions:        '—',
     pieces:            1,
     service:           normaliseCarrierName(d.carrier as string),

@@ -194,6 +194,8 @@ const SCAC4_MAP: Record<string, ShippingLineInfo> = {
   // MSC
   'MSCU': { name: 'MSC',         logoSlug: 'msc',       trackUrl: 'https://www.msc.com/en/track-a-shipment',                                                                   supportsDeepLink: false },
   'MSCD': { name: 'MSC',         logoSlug: 'msc',       trackUrl: 'https://www.msc.com/en/track-a-shipment',                                                                   supportsDeepLink: false },
+  'MEDU': { name: 'MSC',         logoSlug: 'msc',       trackUrl: 'https://www.msc.com/en/track-a-shipment',                                                                   supportsDeepLink: false },
+  'GESU': { name: 'MSC',         logoSlug: 'msc',       trackUrl: 'https://www.msc.com/en/track-a-shipment',                                                                   supportsDeepLink: false },
   // Hapag-Lloyd
   'HLCU': { name: 'Hapag-Lloyd', logoSlug: 'hapag-lloyd', trackUrl: 'https://www.hapag-lloyd.com/en/online-business/track/track-by-booking-number.html?booking={container}',  supportsDeepLink: true  },
   'HLXU': { name: 'Hapag-Lloyd', logoSlug: 'hapag-lloyd', trackUrl: 'https://www.hapag-lloyd.com/en/online-business/track/track-by-booking-number.html?booking={container}',  supportsDeepLink: true  },
