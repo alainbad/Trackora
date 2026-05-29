@@ -15,6 +15,8 @@ import WorldMap from '../components/tracking/WorldMap'
 import TrackingAnimation from '../components/tracking/TrackingAnimation'
 import AirlineRedirectCard from '../components/tracking/AirlineRedirectCard'
 import ContainerRedirectCard from '../components/tracking/ContainerRedirectCard'
+import BookingRedirectCard from '../components/tracking/BookingRedirectCard'
+import { BOOKING_CARRIERS, type BookingCarrier } from '../data/bookingRedirects'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -57,7 +59,9 @@ export default function Track() {
   const [notFound, setNotFound] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [currentId, setCurrentId] = useState(trackingId || '')
-  const [mode, setMode] = useState<'single' | 'multi'>('single')
+  const [mode, setMode] = useState<'single' | 'multi' | 'booking'>('single')
+  const [bookingCarrier, setBookingCarrier] = useState<BookingCarrier | null>(null)
+  const [bookingRedirect, setBookingRedirect] = useState<{ carrier: BookingCarrier; ref: string } | null>(null)
   const [apiReady, setApiReady] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [showAlerts, setShowAlerts] = useState(false)
@@ -87,19 +91,20 @@ export default function Track() {
     }
   }, [trackingId])
 
-  function triggerSearch(id: string, carrierSlug?: string) {
+  function triggerSearch(id: string, carrierSlug?: string, isBooking?: boolean) {
     if (!id.trim()) return
     setAnimating(true)
     setShipment(null)
     setNotFound(false)
     setAirlineRedirect(null)
     setContainerRedirect(null)
+    setBookingRedirect(null)
     setApiReady(false)
     apiResultRef.current = null
 
     // Fire the API call immediately — runs in parallel with the animation.
     // When resolved, flip apiReady so the animation can advance past its hold step.
-    pendingRef.current = fetchShipment(id.trim(), carrierSlug).then(result => {
+    pendingRef.current = fetchShipment(id.trim(), carrierSlug, isBooking).then(result => {
       apiResultRef.current = result
       setApiReady(true)
       return result
@@ -191,18 +196,24 @@ export default function Track() {
       setShipment(result)
       setNotFound(false)
     } else {
-      // Check for airline or container redirect before showing generic "not found"
-      const airRedir = getAirlineRedirect(currentId)
-      if (airRedir) {
-        setAirlineRedirect(airRedir)
+      // Booking mode fallback → show redirect card
+      if (mode === 'booking' && bookingCarrier) {
+        setBookingRedirect({ carrier: bookingCarrier, ref: currentId })
         setNotFound(false)
       } else {
-        const ctnRedir = getContainerRedirect(currentId)
-        if (ctnRedir) {
-          setContainerRedirect(ctnRedir)
+        // Check for airline or container redirect before showing generic "not found"
+        const airRedir = getAirlineRedirect(currentId)
+        if (airRedir) {
+          setAirlineRedirect(airRedir)
           setNotFound(false)
         } else {
-          setNotFound(true)
+          const ctnRedir = getContainerRedirect(currentId)
+          if (ctnRedir) {
+            setContainerRedirect(ctnRedir)
+            setNotFound(false)
+          } else {
+            setNotFound(true)
+          }
         }
       }
     }
@@ -210,6 +221,15 @@ export default function Track() {
   }
 
   function handleTrack() {
+    if (mode === 'booking') {
+      const id = (lines[0] || '').trim()
+      if (!id || !bookingCarrier) return
+      setCurrentId(id)
+      setBookingRedirect(null)
+      navigate(`/track/${encodeURIComponent(id)}`, { replace: true })
+      triggerSearch(id, bookingCarrier.slug, true)
+      return
+    }
     const id = lines.filter(l => l.trim())[0] || ''
     if (!id) return
     setCurrentId(id)
@@ -306,7 +326,7 @@ export default function Track() {
     setActiveLineIdx(i)
   }
 
-  const hasResults = shipment || notFound || !!airlineRedirect || !!containerRedirect
+  const hasResults = shipment || notFound || !!airlineRedirect || !!containerRedirect || !!bookingRedirect
 
   // Tracking-number format guidance + live validation for the selected carrier
   const fmt = carrierContext ? getCarrierFormat(carrierContext) : null
@@ -410,18 +430,59 @@ export default function Track() {
 
           {/* Mode toggle */}
           {!hasResults && !animating && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px' }}>
-              {(['single', 'multi'] as const).map(m => (
-                <button key={m} onClick={() => setMode(m)} style={{
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              {([
+                { id: 'single',  label: '🔍 Single Track' },
+                { id: 'multi',   label: '📋 Multi-Track (up to 40)' },
+                { id: 'booking', label: '📦 Booking / B/L' },
+              ] as const).map(m => (
+                <button key={m.id} onClick={() => { setMode(m.id); setBookingCarrier(null) }} style={{
                   padding: '6px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 600,
                   cursor: 'pointer', transition: 'all 0.2s',
-                  background: mode === m ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${mode === m ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                  color: mode === m ? '#818cf8' : 'rgba(248,250,252,0.6)',
+                  background: mode === m.id ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${mode === m.id ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                  color: mode === m.id ? '#818cf8' : 'rgba(248,250,252,0.6)',
                 }}>
-                  {m === 'single' ? '🔍 Single Track' : '📋 Multi-Track (up to 40)'}
+                  {m.label}
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Booking mode: carrier selector */}
+          {!hasResults && !animating && mode === 'booking' && (
+            <div style={{ marginBottom: '16px' }}>
+              <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(248,250,252,0.45)', marginBottom: '12px' }}>
+                Select your carrier — booking numbers are carrier-specific:
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                {['sea', 'air'].map(cat => (
+                  <div key={cat} style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+                    <span style={{ width: '100%', textAlign: 'center', fontSize: '10px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'rgba(248,250,252,0.25)', marginBottom: '2px' }}>
+                      {cat === 'sea' ? '🚢 Sea Freight' : '✈️ Air Freight'}
+                    </span>
+                    {BOOKING_CARRIERS.filter(c => c.category === cat).map(c => {
+                      const sel = bookingCarrier?.slug === c.slug
+                      return (
+                        <button
+                          key={c.slug}
+                          onClick={() => setBookingCarrier(sel ? null : c)}
+                          style={{
+                            padding: '6px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                            cursor: 'pointer', transition: 'all 0.18s',
+                            background: sel ? `${c.accentColor}25` : 'rgba(255,255,255,0.04)',
+                            border: `1px solid ${sel ? c.accentColor + '70' : 'rgba(255,255,255,0.08)'}`,
+                            color: sel ? c.accentColor : 'rgba(248,250,252,0.65)',
+                            boxShadow: sel ? `0 0 12px ${c.accentColor}20` : 'none',
+                          }}
+                        >
+                          {c.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -459,9 +520,13 @@ export default function Track() {
                           else handleTrack()
                         }
                       }}
-                      placeholder={i === 0
-                        ? 'Enter tracking number, AWB, BOL, Container ID…'
-                        : 'Add another tracking number…'}
+                      placeholder={
+                        mode === 'booking'
+                          ? (bookingCarrier ? `Enter ${bookingCarrier.hint}…` : 'Select a carrier above, then enter booking reference…')
+                          : i === 0
+                            ? 'Enter tracking number, AWB, BOL, Container ID…'
+                            : 'Add another tracking number…'
+                      }
                       style={{
                         flex: 1, background: 'none', border: 'none', outline: 'none',
                         color: '#f8fafc', fontSize: '15px',
@@ -615,17 +680,27 @@ export default function Track() {
                     </span>
                   </div>
                 )}
-                <button onClick={handleTrack} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  padding: isMobile ? '13px' : '11px 28px', borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                  border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
-                  cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.45)',
-                }}>
+                <button
+                  onClick={handleTrack}
+                  disabled={mode === 'booking' && !bookingCarrier}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    padding: isMobile ? '13px' : '11px 28px', borderRadius: '12px',
+                    background: mode === 'booking' && !bookingCarrier
+                      ? 'rgba(99,102,241,0.25)'
+                      : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                    border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
+                    cursor: mode === 'booking' && !bookingCarrier ? 'not-allowed' : 'pointer',
+                    boxShadow: mode === 'booking' && !bookingCarrier ? 'none' : '0 4px 20px rgba(99,102,241,0.45)',
+                    opacity: mode === 'booking' && !bookingCarrier ? 0.6 : 1,
+                  }}
+                >
                   <ScanLine size={16} />
-                  Track {mode === 'multi' && lines.filter(l => l.trim()).length > 1
-                    ? `${lines.filter(l => l.trim()).length} shipments`
-                    : 'Now'}
+                  {mode === 'booking'
+                    ? (bookingCarrier ? `Track ${bookingCarrier.name} Booking` : 'Select a carrier first')
+                    : mode === 'multi' && lines.filter(l => l.trim()).length > 1
+                      ? `Track ${lines.filter(l => l.trim()).length} shipments`
+                      : 'Track Now'}
                 </button>
               </div>
             </div>
@@ -672,6 +747,11 @@ export default function Track() {
         {/* Container redirect card */}
         {!animating && containerRedirect && (
           <ContainerRedirectCard redirect={containerRedirect} />
+        )}
+
+        {/* Booking redirect card */}
+        {!animating && bookingRedirect && (
+          <BookingRedirectCard carrier={bookingRedirect.carrier} bookingRef={bookingRedirect.ref} />
         )}
 
         {/* Results */}

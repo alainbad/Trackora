@@ -268,7 +268,7 @@ function adaptApiShipment(d: Record<string, unknown>): Shipment {
  * - All other numbers are sent to the AfterShip proxy Edge Function.
  * - Returns null if not found or if the Edge Function is not yet deployed.
  */
-export async function fetchShipment(trackingNumber: string, carrierSlug?: string): Promise<Shipment | null> {
+export async function fetchShipment(trackingNumber: string, carrierSlug?: string, isBookingNumber?: boolean): Promise<Shipment | null> {
   // 1. Demo IDs always work instantly
   const demo = getShipment(trackingNumber)
   if (demo) return demo
@@ -295,7 +295,11 @@ export async function fetchShipment(trackingNumber: string, carrierSlug?: string
     const res = await fetch(EDGE_FN, {
       method:  'POST',
       headers,
-      body:    JSON.stringify(carrierSlug ? { trackingNumber, carrierSlug } : { trackingNumber }),
+      body:    JSON.stringify({
+        trackingNumber,
+        ...(carrierSlug      && { carrierSlug }),
+        ...(isBookingNumber  && { isBookingNumber: true }),
+      }),
     })
 
     if (!res.ok) {

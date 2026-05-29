@@ -1368,7 +1368,11 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
   try {
-    const { trackingNumber, carrierSlug } = await req.json() as { trackingNumber: string; carrierSlug?: string }
+    const { trackingNumber, carrierSlug, isBookingNumber } = await req.json() as {
+      trackingNumber:  string
+      carrierSlug?:    string
+      isBookingNumber?: boolean
+    }
 
     if (!trackingNumber?.trim()) {
       return new Response(JSON.stringify({ error: 'trackingNumber is required' }), {
@@ -1376,7 +1380,55 @@ serve(async (req) => {
       })
     }
 
-    const tn     = trackingNumber.trim()
+    const tn = trackingNumber.trim()
+
+    // ── Booking-number path ───────────────────────────────────────────────────
+    // When isBookingNumber=true, a carrier slug is required. We try Shipsgo
+    // (sea) or AfterShip (air) with the carrier forced. If nothing resolves we
+    // return 404 so the frontend shows the BookingRedirectCard.
+    if (isBookingNumber && carrierSlug) {
+      let shipment: Record<string, unknown> | null = null
+
+      const SEA_BOOKING_SLUGS = new Set([
+        'maersk','msc','cma-cgm','cosco','hapag-lloyd','evergreen-line',
+        'yang-ming','one','zim','pil','wan-hai',
+      ])
+
+      if (SEA_BOOKING_SLUGS.has(carrierSlug) && SHIPSGO_KEY) {
+        // Try Shipsgo: search by booking/BL reference
+        try {
+          const r = await fetch(`${BASE_SG}/ocean/shipments?bl_number=${encodeURIComponent(tn)}`, {
+            headers: SG_HEADERS(),
+          })
+          const j = await r.json()
+          const list = (j.shipments as Record<string, unknown>[]) || []
+          if (list.length > 0) {
+            const id = list[0].id as number
+            const sg = await shipsgoGet(id)
+            if (sg) shipment = normaliseShipsgo(sg, tn)
+          }
+        } catch { /* fall through */ }
+      }
+
+      if (!shipment) {
+        // Try AfterShip with carrier forced (works for air + some sea)
+        try {
+          const raw = await fetchAfterShip(tn, carrierSlug)
+          if (raw) shipment = normaliseAfterShip(raw as Record<string, unknown>)
+        } catch { /* fall through */ }
+      }
+
+      if (shipment) {
+        return new Response(JSON.stringify({ data: shipment }), {
+          headers: { ...CORS, 'Content-Type': 'application/json' },
+        })
+      }
+      // Nothing found — return 404 so frontend shows BookingRedirectCard
+      return new Response(JSON.stringify({ error: 'Booking reference not found in tracking APIs' }), {
+        status: 404, headers: { ...CORS, 'Content-Type': 'application/json' },
+      })
+    }
+
     const format = detectFormat(tn)
 
     let shipment: Record<string, unknown> | null = null
