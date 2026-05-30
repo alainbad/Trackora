@@ -3,6 +3,7 @@ name: Deploy to Cloudflare Pages
 # Runs on every push to main, and can be triggered manually from the
 # Actions tab ("Run workflow"). Builds on a clean runner using the latest
 # main, then deploys the production build to Cloudflare Pages.
+
 on:
   push:
     branches: [main]
@@ -10,16 +11,19 @@ on:
 
 jobs:
   deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci

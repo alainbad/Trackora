@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0f1e"/>
+      <stop offset="100%" style="stop-color:#0f1733"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:0.1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid lines -->
+  <line x1="0" y1="210" x2="1200" y2="210" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="630" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="630" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+  <!-- Glowing orb left -->
+  <circle cx="150" cy="315" r="280" fill="url(#glow)" opacity="0.6"/>
+  <!-- Glowing orb right -->
+  <circle cx="1050" cy="315" r="200" fill="url(#glow)" opacity="0.4"/>
+
+  <!-- Logo icon area -->
+  <rect x="80" y="85" width="80" height="80" rx="20" fill="rgba(99,102,241,0.2)" stroke="rgba(99,102,241,0.4)" stroke-width="2"/>
+  <text x="120" y="140" text-anchor="middle" font-size="40" fill="url(#accent)">🌍</text>
+
+  <!-- Brand name -->
+  <text x="180" y="115" font-family="Arial, sans-serif" font-size="52" font-weight="900" fill="white" letter-spacing="-1">Track</text>
+  <text x="348" y="115" font-family="Arial, sans-serif" font-size="52" font-weight="900" fill="url(#accent)" letter-spacing="-1">ora</text>
+
+  <!-- Tagline -->
+  <text x="180" y="148" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.5)" letter-spacing="2">GLOBAL SHIPMENT INTELLIGENCE</text>
+
+  <!-- Separator line -->
+  <rect x="80" y="175" width="500" height="2" rx="1" fill="url(#accent)" opacity="0.6"/>
+
+  <!-- Main headline -->
+  <text x="80" y="255" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="white" letter-spacing="-2">Track Any Shipment</text>
+  <text x="80" y="325" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="url(#accent)" letter-spacing="-2">Instantly.</text>
+
+  <!-- Description -->
+  <text x="80" y="385" font-family="Arial, sans-serif" font-size="24" fill="rgba(255,255,255,0.6)">FedEx · DHL · UPS · Maersk · MSC · CMA CGM · 1,200+ Carriers</text>
+
+  <!-- Feature pills -->
+  <rect x="80" y="430" width="170" height="44" rx="22" fill="rgba(99,102,241,0.2)" stroke="rgba(99,102,241,0.5)" stroke-width="1.5"/>
+  <text x="165" y="457" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#a5b4fc">⚡ Express</text>
+
+  <rect x="268" y="430" width="150" height="44" rx="22" fill="rgba(66,173,239,0.2)" stroke="rgba(66,173,239,0.5)" stroke-width="1.5"/>
+  <text x="343" y="457" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#7dd3fc">🚢 Sea</text>
+
+  <rect x="436" y="430" width="150" height="44" rx="22" fill="rgba(34,211,153,0.15)" stroke="rgba(34,211,153,0.4)" stroke-width="1.5"/>
+  <text x="511" y="457" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#6ee7b7">✈️ Air</text>
+
+  <rect x="604" y="430" width="170" height="44" rx="22" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.4)" stroke-width="1.5"/>
+  <text x="689" y="457" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#fcd34d">🚛 Land</text>
+
+  <!-- Free badge -->
+  <rect x="80" y="510" width="130" height="40" rx="8" fill="rgba(16,185,129,0.2)" stroke="rgba(16,185,129,0.4)" stroke-width="1.5"/>
+  <text x="145" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#34d399">FREE FOREVER</text>
+
+  <!-- URL -->
+  <text x="80" y="590" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.3)">www.track-ora.com</text>
+
+  <!-- Right side: tracking UI mock -->
+  <rect x="760" y="80" width="380" height="470" rx="20" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+
+  <!-- Mock search bar -->
+  <rect x="785" y="110" width="330" height="50" rx="12" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="810" y="142" font-family="monospace" font-size="15" fill="rgba(255,255,255,0.5)">1Z999AA10123456784</text>
+
+  <!-- Mock status cards -->
+  <rect x="785" y="180" width="150" height="36" rx="10" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.4)" stroke-width="1"/>
+  <text x="860" y="203" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#fbbf24">⚡ Express</text>
+
+  <rect x="948" y="180" width="150" height="36" rx="10" fill="rgba(52,211,153,0.2)" stroke="rgba(52,211,153,0.4)" stroke-width="1"/>
+  <text x="1023" y="203" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#34d399">● In Transit</text>
+
+  <!-- Route bar -->
+  <text x="800" y="255" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.4)">SHANGHAI, CN</text>
+  <rect x="800" y="265" width="330" height="6" rx="3" fill="rgba(255,255,255,0.1)"/>
+  <rect x="800" y="265" width="180" height="6" rx="3" fill="url(#accent)"/>
+  <circle cx="980" cy="268" r="8" fill="#6366f1" stroke="white" stroke-width="2"/>
+  <text x="1110" y="255" text-anchor="end" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.4)">NEW YORK, US</text>
+
+  <!-- Timeline entries -->
+  <circle cx="808" cy="310" r="5" fill="#34d399"/>
+  <line x1="808" y1="318" x2="808" y2="340" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  <text x="824" y="316" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="rgba(255,255,255,0.85)">Departed Origin</text>
+  <text x="824" y="330" font-family="Arial, sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">Shanghai, China · May 28 · 14:30</text>
+
+  <circle cx="808" cy="355" r="5" fill="#34d399"/>
+  <line x1="808" y1="363" x2="808" y2="385" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+  <text x="824" y="361" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="rgba(255,255,255,0.85)">Customs Cleared</text>
+  <text x="824" y="375" font-family="Arial, sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">Hong Kong · May 29 · 09:15</text>
+
+  <circle cx="808" cy="400" r="5" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+  <line x1="808" y1="408" x2="808" y2="430" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="3"/>
+  <text x="824" y="406" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#818cf8">In Transit — Pacific Ocean</text>
+  <text x="824" y="420" font-family="Arial, sans-serif" font-size="11" fill="rgba(255,255,255,0.4)">May 30 · 22:00 · Current</text>
+
+  <circle cx="808" cy="445" r="5" fill="rgba(255,255,255,0.15)"/>
+  <text x="824" y="451" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.35)">Expected Delivery</text>
+  <text x="824" y="465" font-family="Arial, sans-serif" font-size="11" fill="rgba(255,255,255,0.25)">New York · Jun 7, 2026</text>
+
+  <!-- Stats at bottom of mock -->
+  <rect x="785" y="500" width="330" height="35" rx="8" fill="rgba(255,255,255,0.03)"/>
+  <text x="860" y="522" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.3)">Estimated Delivery</text>
+  <text x="1023" y="522" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.3)">Jun 7, 2026</text>
+</svg>
