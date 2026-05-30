@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Plane, ExternalLink, Copy, Check, ArrowLeft } from 'lucide-react'
+import { Plane, ExternalLink, Copy, Check, ArrowLeft, ClipboardCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import type { AirlineRedirect } from '../../data/airlineRedirects'
 
 export default function AirlineRedirectCard({ redirect }: { redirect: AirlineRedirect }) {
   const navigate  = useNavigate()
   const [copied,  setCopied]  = useState(false)
+  const [autoCopied, setAutoCopied] = useState(false)
   const [logoOk,  setLogoOk]  = useState(true)
 
   const logoUrl = `https://assets.aftership.com/couriers/svg/${redirect.logoSlug}.svg`
@@ -15,6 +16,14 @@ export default function AirlineRedirectCard({ redirect }: { redirect: AirlineRed
     navigator.clipboard.writeText(redirect.trackingNumber)
     setCopied(true)
     setTimeout(() => setCopied(false), 2200)
+  }
+
+  function handleOpenPortal() {
+    if (!redirect.supportsDeepLink) {
+      navigator.clipboard.writeText(redirect.trackingNumber).catch(() => {})
+      setAutoCopied(true)
+      setTimeout(() => setAutoCopied(false), 3000)
+    }
   }
 
   // First word of the airline name for the button label
@@ -183,13 +192,14 @@ export default function AirlineRedirectCard({ redirect }: { redirect: AirlineRed
             tracking directly on their own portal.{' '}
             {redirect.supportsDeepLink
               ? 'Your AWB number is already pre-filled in the link below — click to see live status instantly.'
-              : `Click below to open their tracking portal, then enter AWB `}
-            {!redirect.supportsDeepLink && (
-              <span style={{ fontFamily: 'monospace', color: '#22d3ee', fontWeight: 700 }}>
-                {redirect.trackingNumber}
-              </span>
-            )}
-            {!redirect.supportsDeepLink && '.'}
+              : <>
+                  When you click the button below, your AWB{' '}
+                  <span style={{ fontFamily: 'monospace', color: '#22d3ee', fontWeight: 700 }}>
+                    {redirect.trackingNumber}
+                  </span>
+                  {' '}is <strong style={{ color: '#34d399' }}>automatically copied to your clipboard</strong> — just paste it into their tracking field.
+                </>
+            }
           </p>
         </div>
 
@@ -199,11 +209,25 @@ export default function AirlineRedirectCard({ redirect }: { redirect: AirlineRed
           background: 'rgba(5,8,20,0.4)',
           display: 'flex', flexDirection: 'column', gap: '12px',
         }}>
+          {/* Auto-copied toast */}
+          {autoCopied && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '10px 14px', borderRadius: '10px',
+              background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
+              fontSize: '13px', color: '#34d399', fontWeight: 600,
+            }}>
+              <ClipboardCheck size={15} />
+              AWB copied! Just paste it into the tracking field on their site.
+            </div>
+          )}
+
           {/* Primary CTA */}
           <a
             href={redirect.trackUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleOpenPortal}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px',
               padding: '14px 24px', borderRadius: '14px', textDecoration: 'none',
@@ -216,7 +240,7 @@ export default function AirlineRedirectCard({ redirect }: { redirect: AirlineRed
             onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
           >
             <ExternalLink size={16} />
-            Track on {shortName} Portal
+            {redirect.supportsDeepLink ? `Track on ${shortName} Portal` : `Open Portal · AWB auto-copied`}
             {redirect.supportsDeepLink && (
               <span style={{
                 fontSize: '10px', fontWeight: 700, padding: '2px 7px',
@@ -224,6 +248,15 @@ export default function AirlineRedirectCard({ redirect }: { redirect: AirlineRed
                 letterSpacing: '0.3px', marginLeft: '2px',
               }}>
                 PRE-FILLED
+              </span>
+            )}
+            {!redirect.supportsDeepLink && (
+              <span style={{
+                fontSize: '10px', fontWeight: 700, padding: '2px 7px',
+                borderRadius: '6px', background: 'rgba(255,255,255,0.2)',
+                letterSpacing: '0.3px', marginLeft: '2px',
+              }}>
+                COPIED ✓
               </span>
             )}
           </a>

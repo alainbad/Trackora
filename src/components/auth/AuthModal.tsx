@@ -5,9 +5,10 @@ import { useAuth } from '../../contexts/AuthContext'
 interface AuthModalProps {
   initialMode?: 'signin' | 'signup'
   onClose: () => void
+  guestLimitMessage?: string
 }
 
-export default function AuthModal({ initialMode = 'signin', onClose }: AuthModalProps) {
+export default function AuthModal({ initialMode = 'signin', onClose, guestLimitMessage }: AuthModalProps) {
   const [mode,         setMode]         = useState<'signin' | 'signup'>(initialMode)
   const [email,        setEmail]        = useState('')
   const [password,     setPassword]     = useState('')
@@ -145,6 +146,17 @@ export default function AuthModal({ initialMode = 'signin', onClose }: AuthModal
             </button>
           ))}
         </div>
+
+        {/* Guest limit banner */}
+        {guestLimitMessage && (
+          <div style={{
+            padding: '12px 14px', borderRadius: '10px', marginBottom: '20px',
+            background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)',
+            fontSize: '13px', color: '#a5b4fc', lineHeight: 1.6,
+          }}>
+            {guestLimitMessage}
+          </div>
+        )}
 
         {/* Heading */}
         <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#f8fafc', marginBottom: '6px' }}>

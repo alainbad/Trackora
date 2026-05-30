@@ -1,23 +1,80 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Plane, Ship, Truck, Package, ChevronRight, Sparkles } from 'lucide-react'
-import WorldMap from '../tracking/WorldMap'
+import { Search, ChevronRight, Upload } from 'lucide-react'
 import { useIsMobile } from '../../hooks/useIsMobile'
-
-const FREIGHT_TYPES = [
-  { icon: Plane,   label: 'Air Freight', color: '#22d3ee' },
-  { icon: Ship,    label: 'Sea Freight', color: '#6366f1' },
-  { icon: Truck,   label: 'Land Freight', color: '#10b981' },
-  { icon: Package, label: 'Express',      color: '#f59e0b' },
-]
+import { WORLD_DOTS } from '../../data/worldDots'
 
 const SAMPLE_IDS = ['1Z999AA10123456784', 'MAD3456789', 'MAWB001-12345678', 'CNTR8872341']
+const CARRIERS = ['Maersk', 'DHL', 'UPS', 'Emirates SkyCargo', 'MSC', 'FedEx']
+
+const AMBER = '#f0a868'
+const TEAL  = '#5ec8c8'
+
+// ── Globe: stippled world map clipped to a sphere, with warm rim-light and
+//    two animated trade-lane arcs lifting off the surface. Pure SVG. ──────────
+function GlobeHero() {
+  return (
+    <svg viewBox="0 0 1000 1000" style={{ width: '100%', height: '100%' }} aria-hidden="true">
+      <defs>
+        <radialGradient id="globeBody" cx="42%" cy="35%" r="65%">
+          <stop offset="0%"   stopColor="#1a2440" />
+          <stop offset="78%"  stopColor="#111a30" />
+          <stop offset="100%" stopColor="#0b1124" />
+        </radialGradient>
+        <radialGradient id="globeRim" cx="50%" cy="50%" r="50%">
+          <stop offset="92%"  stopColor="rgba(240,168,104,0)" />
+          <stop offset="100%" stopColor="rgba(240,168,104,0.5)" />
+        </radialGradient>
+        <clipPath id="globeClip"><circle cx="500" cy="500" r="440" /></clipPath>
+      </defs>
+
+      {/* Sphere body */}
+      <circle cx="500" cy="500" r="440" fill="url(#globeBody)" />
+
+      {/* Land dots, clipped to the sphere */}
+      <g clipPath="url(#globeClip)" opacity="0.55">
+        <g transform="translate(120,150) scale(0.78)">
+          {WORLD_DOTS.map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r="1.9" fill="#5a6a88" opacity="0.9" />
+          ))}
+        </g>
+      </g>
+
+      {/* Rim light + edge */}
+      <circle cx="500" cy="500" r="440" fill="url(#globeRim)" />
+      <circle cx="500" cy="500" r="440" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+
+      {/* Trade lane 1 — amber (air) */}
+      <path d="M 360 250 Q 560 60 760 240" fill="none" stroke={AMBER} strokeWidth="2.4"
+        strokeDasharray="2 7" strokeLinecap="round">
+        <animate attributeName="stroke-dashoffset" values="0;-90" dur="6s" repeatCount="indefinite" />
+      </path>
+      <circle cx="360" cy="250" r="6" fill={AMBER} />
+      <circle cx="760" cy="240" r="6" fill={AMBER} />
+      <circle cx="760" cy="240" r="6" fill="none" stroke={AMBER} strokeWidth="1.4">
+        <animate attributeName="r" values="6;18;6" dur="2.6s" repeatCount="indefinite" />
+        <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="2.6s" repeatCount="indefinite" />
+      </circle>
+
+      {/* Trade lane 2 — teal (sea) */}
+      <path d="M 250 470 Q 470 330 690 430" fill="none" stroke={TEAL} strokeWidth="2.4"
+        strokeDasharray="2 7" strokeLinecap="round">
+        <animate attributeName="stroke-dashoffset" values="0;-90" dur="7.5s" repeatCount="indefinite" />
+      </path>
+      <circle cx="250" cy="470" r="6" fill={TEAL} />
+      <circle cx="690" cy="430" r="6" fill={TEAL} />
+      <circle cx="690" cy="430" r="6" fill="none" stroke={TEAL} strokeWidth="1.4">
+        <animate attributeName="r" values="6;18;6" dur="3s" repeatCount="indefinite" />
+        <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite" />
+      </circle>
+    </svg>
+  )
+}
 
 export default function HeroSection() {
-  const [query,      setQuery]      = useState('')
-  const [activeType, setActiveType] = useState(0)
-  const navigate   = useNavigate()
-  const isMobile   = useIsMobile()
+  const [query, setQuery] = useState('')
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,153 +82,141 @@ export default function HeroSection() {
   }
 
   return (
-    <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: '#0a0f1e' }} />
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(at 20% 40%, rgba(99,102,241,0.2) 0px, transparent 55%), radial-gradient(at 80% 20%, rgba(6,182,212,0.15) 0px, transparent 55%), radial-gradient(at 55% 80%, rgba(139,92,246,0.12) 0px, transparent 55%)' }} />
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(99,102,241,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.05) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
-      {!isMobile && <div style={{ position: 'absolute', inset: 0, opacity: 0.3 }}><WorldMap animated /></div>}
+    <section style={{
+      position: 'relative',
+      minHeight: isMobile ? 'auto' : '100vh',
+      display: 'flex', alignItems: 'center',
+      overflow: 'hidden',
+      background: '#0a0f1e',
+    }}>
+      {/* Subtle warm wash, top-right */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 90% at 78% 8%, rgba(240,168,104,0.08), transparent 55%)' }} />
 
+      {/* ── Globe (desktop only) ── */}
+      {!isMobile && (
+        <>
+          <div style={{
+            position: 'absolute', right: '-220px', bottom: '-360px',
+            width: '1100px', height: '1100px', zIndex: 1,
+          }}>
+            <GlobeHero />
+          </div>
+
+          {/* Floating live shipment-event chip */}
+          <div style={{
+            position: 'absolute', top: '150px', right: '300px', zIndex: 3,
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '10px 14px', borderRadius: '13px',
+            background: 'rgba(16,22,40,0.82)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.45)',
+          }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: AMBER, boxShadow: `0 0 8px ${AMBER}`, flexShrink: 0 }} />
+            <div>
+              <div style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, letterSpacing: '0.5px' }}>176-22536813</div>
+              <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', marginTop: '2px' }}>Departed Dubai · 18m ago</div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Left editorial column ── */}
       <div style={{
-        position: 'relative', zIndex: 10, width: '100%', maxWidth: '900px',
-        margin: '0 auto',
-        padding: isMobile ? '100px 20px 60px' : '120px 24px 80px',
-        textAlign: 'center',
+        position: 'relative', zIndex: 5,
+        width: '100%', maxWidth: isMobile ? '100%' : '680px',
+        padding: isMobile ? '110px 20px 64px' : '0 0 0 96px',
+        textAlign: isMobile ? 'center' : 'left',
       }}>
-        {/* Badge */}
+        {/* Live counter */}
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '8px',
-          padding: '6px 16px', borderRadius: '100px',
-          background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)',
-          marginBottom: '24px', fontSize: isMobile ? '12px' : '13px', color: '#818cf8', fontWeight: 500,
+          display: 'inline-flex', alignItems: 'center', gap: '9px',
+          padding: '7px 15px', borderRadius: '100px',
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+          fontSize: '13px', color: 'rgba(248,250,252,0.7)', fontWeight: 500, marginBottom: '26px',
         }}>
-          <Sparkles size={13} />
-          AI-Powered Global Shipment Intelligence
+          <span style={{ position: 'relative', width: '8px', height: '8px', display: 'inline-block' }}>
+            <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#34d399' }} />
+            <span style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', border: '1px solid #34d399', opacity: 0.5 }} />
+          </span>
+          <b style={{ fontWeight: 700, color: '#34d399' }}>2,418</b>
+          <span style={{ opacity: 0.85 }}>shipments moving right now</span>
         </div>
 
-        {/* Heading */}
+        {/* Headline */}
         <h1 style={{
-          fontSize: isMobile ? '38px' : 'clamp(40px, 7vw, 80px)',
-          fontWeight: 800, lineHeight: 1.1, letterSpacing: isMobile ? '-1px' : '-2px',
-          marginBottom: '20px', color: '#f8fafc',
+          fontSize: isMobile ? '44px' : 'clamp(52px, 6vw, 76px)',
+          fontWeight: 800, lineHeight: 1.03,
+          letterSpacing: isMobile ? '-1.5px' : '-2.5px',
+          color: '#f8fafc', margin: '0 0 22px',
         }}>
-          Track Every{' '}
-          <span style={{ background: 'linear-gradient(135deg, #a5b4fc, #6366f1, #22d3ee)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            Shipment
+          Track every<br />shipment.<br />
+          <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>
+            In real time.
+            <span style={{
+              position: 'absolute', left: 0, bottom: '5px', width: '100%', height: '11px',
+              background: 'rgba(240,168,104,0.32)', borderRadius: '3px', zIndex: -1,
+            }} />
           </span>
-          <br />Across the Globe
         </h1>
 
         <p style={{
-          fontSize: isMobile ? '15px' : 'clamp(16px, 2vw, 20px)',
-          color: 'rgba(248,250,252,0.6)',
-          maxWidth: '600px', margin: '0 auto 32px', lineHeight: 1.6,
+          fontSize: isMobile ? '16px' : '19px',
+          color: 'rgba(248,250,252,0.6)', lineHeight: 1.6,
+          maxWidth: '520px', margin: isMobile ? '0 auto 32px' : '0 0 34px',
         }}>
-          One platform for air, sea, land freight &amp; express couriers. Real-time tracking, AI predictions, and carrier-level insights — all in one place.
+          One place for air, sea, land freight &amp; express couriers. Paste any tracking
+          number, AWB, B/L or container ID — we find it in seconds.
         </p>
 
-        {/* Freight type filter pills */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '28px', flexWrap: 'wrap' }}>
-          {FREIGHT_TYPES.map((type, i) => {
-            const Icon = type.icon
-            return (
-              <button key={i} onClick={() => setActiveType(i)} style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                padding: isMobile ? '7px 12px' : '8px 16px',
-                borderRadius: '100px',
-                border: `1px solid ${activeType === i ? type.color : 'rgba(255,255,255,0.1)'}`,
-                background: activeType === i ? `${type.color}18` : 'rgba(255,255,255,0.04)',
-                color: activeType === i ? type.color : 'rgba(248,250,252,0.6)',
-                fontSize: isMobile ? '12px' : '13px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
-              }}>
-                <Icon size={13} />{type.label}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Search form */}
-        <form onSubmit={handleTrack} style={{ maxWidth: '680px', margin: '0 auto 24px' }}>
+        {/* Search */}
+        <form onSubmit={handleTrack} style={{ maxWidth: '600px', margin: isMobile ? '0 auto' : '0' }}>
           {isMobile ? (
-            /* Mobile: stacked layout */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: '14px', padding: '6px 16px',
-                backdropFilter: 'blur(20px)',
-              }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.13)', borderRadius: '14px', padding: '6px 16px' }}>
                 <Search size={18} color="rgba(248,250,252,0.4)" style={{ flexShrink: 0 }} />
-                <input
-                  type="text" value={query} onChange={e => setQuery(e.target.value)}
+                <input type="text" value={query} onChange={e => setQuery(e.target.value)}
                   placeholder="Enter tracking number…"
-                  style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '15px', padding: '8px 0' }}
-                />
+                  style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '15px', padding: '8px 0' }} />
               </div>
-              <button type="submit" style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                padding: '14px', borderRadius: '14px',
-                background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', color: 'white',
-                fontSize: '15px', fontWeight: 700, cursor: 'pointer',
-                boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-              }}>
+              <button type="submit" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: '14px', background: AMBER, border: 'none', color: '#1a1206', fontSize: '15px', fontWeight: 700, cursor: 'pointer' }}>
                 Track Now <ChevronRight size={16} />
               </button>
             </div>
           ) : (
-            /* Desktop: single row */
-            <div style={{
-              display: 'flex', gap: '0',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '16px', padding: '6px 6px 6px 20px',
-              boxShadow: '0 0 60px rgba(99,102,241,0.2)', backdropFilter: 'blur(20px)', alignItems: 'center',
-            }}>
-              <Search size={20} color="rgba(248,250,252,0.4)" style={{ flexShrink: 0 }} />
-              <input
-                type="text" value={query} onChange={e => setQuery(e.target.value)}
-                placeholder="Enter tracking number, AWB, BOL, or container ID…"
-                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '16px', padding: '10px 16px' }}
-              />
-              <button type="submit" style={{
-                display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '10px',
-                background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', color: 'white',
-                fontSize: '15px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)', flexShrink: 0,
-              }}>
-                Track Now <ChevronRight size={16} />
+            <div style={{ display: 'flex', gap: 0, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.13)', borderRadius: '16px', padding: '7px 7px 7px 22px', alignItems: 'center', boxShadow: '0 18px 50px rgba(0,0,0,0.35)' }}>
+              <Search size={20} color="rgba(248,250,252,0.35)" style={{ flexShrink: 0 }} />
+              <input type="text" value={query} onChange={e => setQuery(e.target.value)}
+                placeholder="Enter tracking number, AWB, B/L or container ID…"
+                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '17px', padding: '13px 16px' }} />
+              <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '14px 28px', borderRadius: '11px', background: AMBER, border: 'none', color: '#1a1206', fontSize: '16px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                Track <ChevronRight size={16} />
               </button>
             </div>
           )}
         </form>
 
-        {/* Demo IDs */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', color: 'rgba(248,250,252,0.4)' }}>Try demo:</span>
-          {(isMobile ? SAMPLE_IDS.slice(0, 2) : SAMPLE_IDS).map(id => (
-            <button key={id} onClick={() => { setQuery(id); navigate(`/track/${encodeURIComponent(id)}`) }} style={{
-              padding: '4px 10px', borderRadius: '6px',
-              background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
-              color: '#818cf8', fontSize: '11px', fontFamily: 'monospace', cursor: 'pointer',
-            }}>{id}</button>
-          ))}
+        {/* Upload + demo row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'center' : 'flex-start', gap: '16px', margin: '14px 0 30px', flexWrap: 'wrap', paddingLeft: isMobile ? 0 : '4px' }}>
+          <button onClick={() => navigate('/track')} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: 'none', border: 'none', color: 'rgba(248,250,252,0.55)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+            <Upload size={14} /> Upload AWB / B/L PDF
+          </button>
+          <span style={{ color: 'rgba(248,250,252,0.2)' }}>|</span>
+          <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}>
+            Try:{' '}
+            <button onClick={() => navigate(`/track/${encodeURIComponent(SAMPLE_IDS[1])}`)}
+              style={{ fontFamily: 'monospace', color: AMBER, background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', padding: 0 }}>
+              {SAMPLE_IDS[1]}
+            </button>
+          </span>
         </div>
 
-        {/* Stats grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
-          gap: '1px', marginTop: isMobile ? '48px' : '64px',
-          background: 'rgba(255,255,255,0.06)', borderRadius: '16px', overflow: 'hidden',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}>
-          {[
-            { value: '500M+', label: 'Shipments Tracked' },
-            { value: '1,200+', label: 'Carriers Supported' },
-            { value: '195', label: 'Countries Covered' },
-            { value: '99.9%', label: 'Uptime SLA' },
-          ].map((stat, i) => (
-            <div key={i} style={{ padding: isMobile ? '16px 12px' : '20px', background: 'rgba(10,15,30,0.6)', textAlign: 'center' }}>
-              <div style={{ fontSize: isMobile ? '22px' : '26px', fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.5px' }}>{stat.value}</div>
-              <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', marginTop: '4px' }}>{stat.label}</div>
-            </div>
+        {/* Carrier trust strip */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'center' : 'flex-start', gap: '11px', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '12px', color: 'rgba(248,250,252,0.35)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px' }}>Works with</span>
+          {CARRIERS.map((c, i) => (
+            <span key={c} style={{ display: 'inline-flex', alignItems: 'center', gap: '11px' }}>
+              <span style={{ fontSize: '15px', fontWeight: 700, color: 'rgba(248,250,252,0.42)' }}>{c}</span>
+              {i < CARRIERS.length - 1 && <span style={{ color: 'rgba(248,250,252,0.18)' }}>·</span>}
+            </span>
           ))}
         </div>
       </div>
