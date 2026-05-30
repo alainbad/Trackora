@@ -86,7 +86,85 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
   },
   {
-    slug: 'how-to-track-sea-freight',
+    slug: 'how-to-track-dhl-shipment',
+    title: 'How to Track a DHL Shipment: Complete Guide (2026)',
+    date: '2026-05-30',
+    readTime: '5 min read',
+    excerpt: 'Everything you need to know about DHL tracking numbers — DHL Express, DHL Parcel, and DHL eCommerce. Find your waybill number and get live status in seconds.',
+    seo: {
+      title: 'How to Track a DHL Shipment — DHL Tracking Guide 2026 | Trackora',
+      description: 'Step-by-step guide to tracking DHL Express, DHL Parcel, and DHL eCommerce shipments. Find your DHL waybill number and check live delivery status on Trackora.',
+    },
+    sections: [
+      {
+        body: 'DHL is the world\'s most international courier company, delivering to 220+ countries and territories. Whether you shipped with DHL Express, DHL Parcel, or DHL eCommerce, tracking your shipment is straightforward once you know where to find your tracking number and what format to expect.',
+      },
+      {
+        heading: 'DHL Express vs DHL Parcel vs DHL eCommerce — What\'s the Difference?',
+        body: 'DHL operates several distinct services that each have their own tracking systems. DHL Express is the premium international and domestic express courier — fast, fully tracked, and used by businesses. DHL Parcel is the domestic parcel service in Germany and several European countries. DHL eCommerce (formerly DHL Packet) is a lower-cost international service used by online retailers shipping from Asia and Europe. Each uses different tracking number formats.',
+      },
+      {
+        heading: 'DHL Express Tracking Number Format',
+        body: 'DHL Express tracking numbers are 10 digits long (e.g. 1234567890). Some DHL Express shipments use a JD-prefix format (JD014600012345678900) — these are 20 characters and typically used for high-volume e-commerce integrations. Both formats are fully supported on Trackora.',
+      },
+      {
+        heading: 'DHL Parcel and eCommerce Tracking Formats',
+        body: 'DHL Parcel Germany uses reference numbers starting with 00340 followed by additional digits, totalling up to 20 digits. DHL eCommerce international shipments often use GM, LX, or RX prefixes followed by 8 digits and a 2-letter country code (e.g. GM123456789DE). Enter any of these formats into Trackora and it will auto-detect the DHL service type.',
+      },
+      {
+        heading: 'Where to Find Your DHL Tracking Number',
+        body: 'Your DHL tracking number appears in: (1) the shipment confirmation email from the sender, (2) on the DHL shipping label as a barcode with digits below it, (3) in your DHL account under "My Shipments", or (4) on your online order\'s tracking page if the retailer has integrated DHL tracking. If you ordered from an online shop, look for an email with subject lines like "Your order has shipped" or "Dispatch notification".',
+      },
+      {
+        heading: 'How to Track DHL on Trackora',
+        body: 'Paste your DHL tracking number into the Trackora search box. Trackora automatically identifies it as a DHL shipment and retrieves the full event timeline — from pickup and departure scans through customs clearance and out-for-delivery status. No carrier selection required. You can also enable browser notifications to get an alert the moment your DHL delivery status changes.',
+      },
+      {
+        heading: 'Common DHL Status Messages Explained',
+        body: '"Shipment picked up" — DHL collected the parcel from the sender. "In transit" — your package is moving through the DHL network. "Customs status updated" — the shipment has been presented to customs at the destination country. "Out for delivery" — a DHL courier is delivering your parcel today. "Delivered" — the parcel was handed to the recipient or left in a safe place. "Delivery attempted" — nobody was home; DHL will retry or leave a collection card.',
+      },
+    ],
+  },
+  {
+    slug: 'how-to-track-fedex-shipment',
+    title: 'How to Track a FedEx Shipment: Complete Guide (2026)',
+    date: '2026-05-30',
+    readTime: '5 min read',
+    excerpt: 'Learn how to track any FedEx package — FedEx Express, FedEx Ground, and FedEx International. Find your tracking number, understand status updates, and get live delivery estimates.',
+    seo: {
+      title: 'How to Track a FedEx Shipment — FedEx Tracking Guide 2026 | Trackora',
+      description: 'Step-by-step guide to tracking FedEx Express, FedEx Ground, and FedEx International shipments. Find your FedEx tracking number and check live status on Trackora.',
+    },
+    sections: [
+      {
+        body: 'FedEx delivers over 16 million packages per day to 220+ countries. With multiple service types — FedEx Express, FedEx Ground, FedEx Home Delivery, FedEx International Priority — knowing which service you used and where to find your tracking number makes all the difference when following your shipment.',
+      },
+      {
+        heading: 'FedEx Tracking Number Formats',
+        body: 'FedEx uses several tracking number formats depending on the service. FedEx Express and FedEx Ground use 12-digit numbers (e.g. 123456789012). FedEx Ground also uses 15-digit numbers for some shipments. FedEx International uses 20-digit numbers starting with 96 (e.g. 96123456789012345678). Some FedEx shipments use a "door tag" number starting with DT, printed on the notice left when delivery was attempted.',
+      },
+      {
+        heading: 'FedEx Express vs FedEx Ground — Key Differences',
+        body: 'FedEx Express uses aircraft for fast delivery — typically 1–3 business days within the US and 1–5 days internationally. FedEx Ground uses trucks for cost-effective domestic delivery — typically 1–7 business days. FedEx Home Delivery is the residential version of Ground, delivering 7 days a week including Sundays in most US areas. International Priority (IP) and International Economy (IE) are the main cross-border FedEx services.',
+      },
+      {
+        heading: 'Where to Find Your FedEx Tracking Number',
+        body: 'Your FedEx tracking number is on: (1) the shipping confirmation email from the sender — usually a 12 or 20-digit number labelled "tracking number" or "reference number", (2) the FedEx shipping label as a barcode, (3) your FedEx account under "Shipment History", or (4) the retailer\'s order page under "Track your order". For TNT shipments (owned by FedEx), the consignment number also works on Trackora.',
+      },
+      {
+        heading: 'How to Track FedEx on Trackora',
+        body: 'Enter your FedEx tracking number in the Trackora search box. Trackora detects the 12, 15, or 20-digit FedEx format automatically and retrieves your full delivery timeline — pickup scans, departure from origin facility, arrival at destination facility, out for delivery, and proof of delivery. If your FedEx package is being delivered by TNT (common in Europe), enter the TNT consignment number the same way.',
+      },
+      {
+        heading: 'FedEx Delivery Status Messages Explained',
+        body: '"Picked up" — FedEx collected the package from the shipper. "At FedEx facility" — your package is at a sorting hub being processed. "In transit" — the package is moving between facilities. "On FedEx vehicle for delivery" — a FedEx driver has your package and is on their route. "Delivered" — package was left at the door, with a neighbour, or signed for. "Delivery exception" — an unexpected event (customs hold, address issue, weather) is causing a delay. "Attempted delivery" — FedEx tried to deliver but couldn\'t; a door tag was left.',
+      },
+      {
+        heading: 'What to Do If Your FedEx Package Is Delayed',
+        body: 'If your package shows "In transit" for more than 3 days without an update, first check for a "Delivery exception" status. International shipments can be held by customs — the "Customs status updated" event means your package is being processed. If tracking shows no movement for 5+ business days, contact FedEx directly with your tracking number. Trackora\'s notification feature will alert you the moment the status changes so you don\'t need to keep checking manually.',
+      },
+    ],
+  },
     title: 'How to Track a Sea Freight Shipment Step by Step (2026)',
     date: '2026-05-30',
     readTime: '6 min read',

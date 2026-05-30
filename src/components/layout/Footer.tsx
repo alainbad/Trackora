@@ -137,7 +137,8 @@ export default function Footer() {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {[
                 { label: 'Blog',                href: '/blog' },
-                { label: 'How It Works',        href: '/how-it-works' },
+                { label: 'Track DHL',           href: '/blog/how-to-track-dhl-shipment' },
+                { label: 'Track FedEx',         href: '/blog/how-to-track-fedex-shipment' },
                 { label: 'Container Numbers',   href: '/blog/what-is-a-container-number' },
                 { label: 'MAWB vs HAWB',        href: '/blog/mawb-vs-hawb' },
                 { label: 'Sea Freight Guide',   href: '/blog/how-to-track-sea-freight' },
