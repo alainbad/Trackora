@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { X, Camera, User, Phone, Calendar, Check, Loader } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useProfile } from '../../contexts/ProfileContext'
+import ScrollDatePicker from '../ui/ScrollDatePicker'
 
 interface ProfileModalProps {
   onClose: () => void
@@ -150,16 +151,12 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
             />
           </div>
 
-          {/* Date of birth */}
-          <div style={{ position: 'relative' }}>
-            <Calendar size={14} color="rgba(248,250,252,0.3)" style={{ position: 'absolute', left: '13px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-            <input
-              type="date" value={dob} onChange={e => setDob(e.target.value)}
-              placeholder="Date of birth"
-              style={{ ...inputStyle, colorScheme: 'dark' }}
-              onFocus={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)')}
-              onBlur={e  => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
-            />
+          {/* Date of birth — scroll picker */}
+          <div>
+            <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'rgba(248,250,252,0.35)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Calendar size={12} color="rgba(248,250,252,0.35)" /> Date of Birth
+            </p>
+            <ScrollDatePicker value={dob} onChange={setDob} />
           </div>
         </div>
 
