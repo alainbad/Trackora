@@ -12,9 +12,30 @@ const TEAL  = '#5ec8c8'
 
 // ── Globe: stippled world map clipped to a sphere, with warm rim-light and
 //    two animated trade-lane arcs lifting off the surface. Pure SVG. ──────────
+// Each arc carries a live-event chip anchored above its apex (foreignObject),
+// so the chip scales and stays locked to the route as the globe resizes.
+function LaneChip({ x, y, color, id, status }: { x: number; y: number; color: string; id: string; status: string }) {
+  return (
+    <foreignObject x={x} y={y} width={300} height={70} style={{ overflow: 'visible' }}>
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: '10px',
+        padding: '10px 14px', borderRadius: '13px',
+        background: 'rgba(16,22,40,0.85)',
+        border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.45)',
+      }}>
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}`, flexShrink: 0 }} />
+        <div>
+          <div style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, letterSpacing: '0.5px', color: '#f8fafc' }}>{id}</div>
+          <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', marginTop: '2px' }}>{status}</div>
+        </div>
+      </div>
+    </foreignObject>
+  )
+}
+
 function GlobeHero() {
   return (
-    <svg viewBox="0 0 1000 1000" style={{ width: '100%', height: '100%' }} aria-hidden="true">
+    <svg viewBox="0 0 1000 1000" style={{ width: '100%', height: '100%', overflow: 'visible' }} aria-hidden="true">
       <defs>
         <radialGradient id="globeBody" cx="42%" cy="35%" r="65%">
           <stop offset="0%"   stopColor="#1a2440" />
@@ -67,6 +88,10 @@ function GlobeHero() {
         <animate attributeName="r" values="6;18;6" dur="3s" repeatCount="indefinite" />
         <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite" />
       </circle>
+
+      {/* Live-event chips, one per lane, anchored above each arc's apex */}
+      <LaneChip x={415} y={70}  color={AMBER} id="176-22536813" status="Departed Dubai · 18m ago" />
+      <LaneChip x={330} y={300} color={TEAL}  id="MSKU7620114"  status="Loaded Shanghai · 2h ago" />
     </svg>
   )
 }
@@ -94,29 +119,12 @@ export default function HeroSection() {
 
       {/* ── Globe (desktop only) ── */}
       {!isMobile && (
-        <>
-          <div style={{
-            position: 'absolute', right: '-220px', bottom: '-360px',
-            width: '1100px', height: '1100px', zIndex: 1,
-          }}>
-            <GlobeHero />
-          </div>
-
-          {/* Floating live shipment-event chip */}
-          <div style={{
-            position: 'absolute', top: '150px', right: '300px', zIndex: 3,
-            display: 'flex', alignItems: 'center', gap: '10px',
-            padding: '10px 14px', borderRadius: '13px',
-            background: 'rgba(16,22,40,0.82)', backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 40px rgba(0,0,0,0.45)',
-          }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: AMBER, boxShadow: `0 0 8px ${AMBER}`, flexShrink: 0 }} />
-            <div>
-              <div style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, letterSpacing: '0.5px' }}>176-22536813</div>
-              <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', marginTop: '2px' }}>Departed Dubai · 18m ago</div>
-            </div>
-          </div>
-        </>
+        <div style={{
+          position: 'absolute', right: '-140px', bottom: '-260px',
+          width: '1180px', height: '1180px', zIndex: 1,
+        }}>
+          <GlobeHero />
+        </div>
       )}
 
       {/* ── Left editorial column ── */}
