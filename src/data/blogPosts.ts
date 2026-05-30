@@ -165,6 +165,8 @@ export const BLOG_POSTS: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: 'how-to-track-sea-freight',
     title: 'How to Track a Sea Freight Shipment Step by Step (2026)',
     date: '2026-05-30',
     readTime: '6 min read',
