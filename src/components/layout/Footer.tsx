@@ -139,9 +139,9 @@ export default function Footer() {
                 { label: 'Blog',                href: '/blog' },
                 { label: 'Track DHL',           href: '/blog/how-to-track-dhl-shipment' },
                 { label: 'Track FedEx',         href: '/blog/how-to-track-fedex-shipment' },
-                { label: 'Container Numbers',   href: '/blog/what-is-a-container-number' },
-                { label: 'MAWB vs HAWB',        href: '/blog/mawb-vs-hawb' },
-                { label: 'Sea Freight Guide',   href: '/blog/how-to-track-sea-freight' },
+                { label: 'Track UPS',           href: '/blog/how-to-track-ups-shipment' },
+                { label: 'Track Aramex',        href: '/blog/how-to-track-aramex-shipment' },
+                { label: 'What Is a B/L?',      href: '/blog/what-is-a-bill-of-lading' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
