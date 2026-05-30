@@ -92,7 +92,7 @@ function GlobeHero() {
 
       {/* Live-event chips, one per lane, anchored above each arc's apex */}
       <LaneChip x={415} y={70}  color={AMBER} id="176-22536813" status="Departed Dubai · 18m ago" />
-      <LaneChip x={360} y={200} color={TEAL}  id="MSKU7620114"  status="Loaded Shanghai · 2h ago" />
+      <LaneChip x={360} y={255} color={TEAL}  id="MSKU7620114"  status="Loaded Shanghai · 2h ago" />
     </svg>
   )
 }
