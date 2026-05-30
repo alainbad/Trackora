@@ -12,6 +12,8 @@ interface CarrierInfo {
   formatExample: string
   guide: string[]
   faqs: { q: string; a: string }[]
+  isMarketplace?: boolean   // e.g. Shopify — not a real carrier, needs carrier number
+  marketplaceNote?: string  // banner text explaining how to find the real tracking number
 }
 
 const CARRIERS: Record<string, CarrierInfo> = {
@@ -154,6 +156,47 @@ const CARRIERS: Record<string, CarrierInfo> = {
     faqs: [
       { q: 'What is an Amazon TBA tracking number?', a: 'TBA tracking numbers (e.g. TBA123456789000) are used by Amazon Logistics (AMZL), Amazon\'s own delivery service. They indicate the package is being delivered by Amazon\'s in-house drivers.' },
       { q: 'Why is my Amazon package showing "out for delivery" for hours?', a: 'AMZL drivers typically have 100-200 stops per route. Once "out for delivery" is shown, delivery is usually within the same day. The 4-hour delivery window in the Amazon app is based on the driver\'s current position.' },
+    ],
+  },
+  'shopify': {
+    name: 'Shopify', type: 'express', emoji: '🛍️', color: '#96BF48',
+    isMarketplace: true,
+    marketplaceNote: 'Shopify is an e-commerce platform, not a shipping carrier. Orders placed on Shopify stores are shipped by standard carriers like USPS, FedEx, DHL, or UPS. To track your order, find the carrier tracking number in your shipping confirmation email — then enter it below.',
+    description: 'Ordered from a Shopify store and want to track your package? Shopify uses standard shipping carriers (USPS, FedEx, DHL, UPS, and others) to deliver orders. Find the carrier tracking number in your confirmation email and track it instantly on Trackora.',
+    trackingFormat: 'Carrier tracking number (from your shipping confirmation email)',
+    formatExample: '9400100000000000000000',
+    guide: [
+      'Open the shipping confirmation email from the Shopify store.',
+      'Look for a "Track your shipment" button or a tracking number — it\'s usually from USPS, FedEx, DHL, or UPS.',
+      'Copy that tracking number (not the Shopify order number like #1234).',
+      'Paste it into the Trackora search box above — the carrier is detected automatically.',
+      'Can\'t find the email? Log in to the store\'s website and check "My Orders" → your order → "Track Shipment".',
+    ],
+    faqs: [
+      {
+        q: 'Why can\'t I track a Shopify order number directly?',
+        a: 'Shopify order numbers (like #1001) are internal references for the store — they\'re not shipping tracking numbers. The actual shipment is handled by a carrier like USPS, FedEx, or DHL, and each carrier assigns their own tracking number. That carrier tracking number is what you need to track the package\'s physical location.',
+      },
+      {
+        q: 'Where do I find my Shopify carrier tracking number?',
+        a: 'Check your shipping confirmation email — it usually has a "Track your shipment" button that links to the carrier\'s website, or shows the tracking number directly. You can also log into your account on the store\'s website, go to My Orders, and click on your order to see the shipment details.',
+      },
+      {
+        q: 'Which carriers do Shopify stores use?',
+        a: 'Most Shopify stores in the US use USPS, FedEx, or UPS. Stores in the UK often use Royal Mail or DPD. International stores may use DHL Express. All of these are fully supported on Trackora — just paste the tracking number and we auto-detect the carrier.',
+      },
+      {
+        q: 'My Shopify tracking number starts with 1Z — what carrier is it?',
+        a: 'A tracking number starting with "1Z" is a UPS tracking number. Enter it in Trackora and it will be detected as UPS automatically.',
+      },
+      {
+        q: 'What if my Shopify order shows "Fulfilled" but I have no tracking number?',
+        a: '"Fulfilled" means the store has processed and shipped your order. If no tracking number appears, the store may have shipped without a tracked service, or may not have added the tracking number yet. Contact the store directly if no tracking number appears within 24 hours of the fulfilled status.',
+      },
+      {
+        q: 'Can I track a Shopify order using the Shop app?',
+        a: 'Yes. Shopify\'s own Shop app (shop.app) can track orders from Shopify stores using your email address and order number. However, for real-time carrier tracking with timeline and map, Trackora uses the carrier tracking number directly for the most accurate results.',
+      },
     ],
   },
   'aramex': {
@@ -518,6 +561,23 @@ export default function CarrierPage() {
           </p>
         </div>
 
+        {/* Marketplace notice (Shopify etc.) */}
+        {carrier.isMarketplace && (
+          <div style={{
+            padding: isMobile ? '16px' : '20px 24px',
+            borderRadius: '14px',
+            background: `${typeColor}10`,
+            border: `1px solid ${typeColor}30`,
+            marginBottom: '32px',
+            display: 'flex', gap: '12px', alignItems: 'flex-start',
+          }}>
+            <span style={{ fontSize: '20px', flexShrink: 0 }}>💡</span>
+            <p style={{ margin: 0, fontSize: '14px', color: 'rgba(248,250,252,0.65)', lineHeight: 1.7 }}>
+              {carrier.marketplaceNote}
+            </p>
+          </div>
+        )}
+
         {/* CTA box */}
         <div style={{
           padding: isMobile ? '20px' : '28px',
@@ -527,14 +587,16 @@ export default function CarrierPage() {
           marginBottom: '56px',
         }}>
           <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc', marginBottom: '6px' }}>
-            Track a {carrier.name} shipment now
+            {carrier.isMarketplace ? 'Paste your carrier tracking number here' : `Track a ${carrier.name} shipment now`}
           </h2>
           <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: '16px' }}>
-            Format: <span style={{ fontFamily: 'monospace', color: '#a5b4fc' }}>{carrier.trackingFormat}</span>
-            {' · '}Example: <span style={{ fontFamily: 'monospace', color: '#a5b4fc' }}>{carrier.formatExample}</span>
+            {carrier.isMarketplace
+              ? <>From your shipping confirmation email · e.g. <span style={{ fontFamily: 'monospace', color: '#a5b4fc' }}>{carrier.formatExample}</span></>
+              : <>Format: <span style={{ fontFamily: 'monospace', color: '#a5b4fc' }}>{carrier.trackingFormat}</span>{' · '}Example: <span style={{ fontFamily: 'monospace', color: '#a5b4fc' }}>{carrier.formatExample}</span></>
+            }
           </p>
           <Link
-            to={`/track/${encodeURIComponent(carrier.formatExample)}`}
+            to={carrier.isMarketplace ? '/track' : `/track/${encodeURIComponent(carrier.formatExample)}`}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '8px',
               padding: '11px 22px', borderRadius: '12px', textDecoration: 'none',
@@ -543,7 +605,7 @@ export default function CarrierPage() {
               boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
             }}
           >
-            Track on Trackora →
+            {carrier.isMarketplace ? 'Track your shipment →' : 'Track on Trackora →'}
           </Link>
         </div>
 
