@@ -59,7 +59,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase
       .from('profiles')
       .upsert({ id: user.id, ...updates, updated_at: new Date().toISOString() })
-    if (!error) setProfile(prev => ({ id: user.id, full_name: null, mobile: null, dob: null, avatar_url: null, ...prev, ...updates }))
+    if (!error) setProfile(prev => ({ id: user.id, full_name: null, mobile: null, dob: null, avatar_url: null, plan_tier: null, ...prev, ...updates }))
     return { error: error?.message ?? null }
   }
 

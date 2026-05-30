@@ -18,8 +18,6 @@ export default function ContainerRedirectCard({ redirect }: { redirect: Containe
     setTimeout(() => setCopied(false), 2200)
   }
 
-  const shortName = redirect.shippingLine.split(' ')[0]
-
   return (
     <div style={{ maxWidth: '580px', margin: '0 auto' }}>
       {/* Back */}
