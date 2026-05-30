@@ -308,5 +308,4 @@ export const BLOG_POSTS: BlogPost[] = [
       { heading: 'Air Freight Transit Times to Expect', body: 'Air freight is typically 1–5 days door-to-door depending on the route, airline, and customs. Express services (e.g. Emirates SkyCargo Priority) deliver in 24–48 hours. Standard air freight is 3–5 days. Add 1–3 days for customs clearance at destination, especially for commercial shipments requiring import permits or inspections. Total door-to-door for most air freight lanes: 3–7 business days.' },
     ],
   },
-  },
 ]
