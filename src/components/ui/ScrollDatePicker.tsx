@@ -29,7 +29,7 @@ interface DrumProps {
   items:    (string | number)[]
   selected: number          // index
   onSelect: (i: number) => void
-  width:    number
+  width:    number | string   // px number or "100%" for flex column
 }
 
 function Drum({ items, selected, onSelect, width }: DrumProps) {
@@ -64,7 +64,7 @@ function Drum({ items, selected, onSelect, width }: DrumProps) {
   }, [snap])
 
   return (
-    <div style={{ position: 'relative', width, flexShrink: 0 }}>
+    <div style={{ position: 'relative', width, flexShrink: width === '100%' ? 1 : 0, minWidth: 0 }}>
       {/* Scrollable list */}
       <div
         ref={ref}
@@ -193,12 +193,9 @@ export default function ScrollDatePicker({ value, onChange }: Props) {
       </div>
 
       {/* Drums */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px 8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 4px 8px', width: '100%', boxSizing: 'border-box' }}>
         <Drum items={days}   selected={clampedDay} onSelect={setDay}   width={56} />
-        {/* Month takes all remaining space */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Drum items={MONTHS} selected={month} onSelect={setMonth} width={999} />
-        </div>
+        <Drum items={MONTHS} selected={month}      onSelect={setMonth} width="100%" />
         <Drum items={years}  selected={year}       onSelect={setYear}  width={70} />
       </div>
     </div>
