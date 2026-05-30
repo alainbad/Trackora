@@ -22,6 +22,12 @@ import { BOOKING_CARRIERS, type BookingCarrier } from '../data/bookingRedirects'
 import { detectCarrier as detectCarrierFromNumber, type DetectedCarrier } from '../data/carrierDetect'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useProfile } from '../contexts/ProfileContext'
+import UpgradeModal from '../components/ui/UpgradeModal'
+import AuthModal from '../components/auth/AuthModal'
+
+const GUEST_USES_KEY = 'trackora_guest_uses'
+const GUEST_LIMIT = 3
 
 // Carrier auto-detection patterns shown live as user types
 const CARRIER_HINTS = [
@@ -60,7 +66,12 @@ export default function Track() {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
   const { user } = useAuth()
+  const { planTier } = useProfile()
   const [searchParams] = useSearchParams()
+
+  // Guest limit & upgrade gating
+  const [showAuthWall, setShowAuthWall]   = useState(false)
+  const [upgradeFeature, setUpgradeFeature] = useState<'air' | 'sea' | 'analytics' | 'alerts' | 'saved' | null>(null)
   const carrierContext = searchParams.get('carrier')   // set when arriving from a carrier chip
 
   const [lines, setLines] = useState<string[]>(trackingId ? [trackingId] : [''])
@@ -220,6 +231,14 @@ export default function Track() {
           icon: '/favicon.ico',
         })
       }
+      // Gate sea freight API data for free users
+      if (user && planTier === 'free' && result.freightType === 'sea' && result.timeline.length > 0) {
+        setUpgradeFeature('sea')
+        setAnimating(false)
+        setLastUpdated(new Date())
+        return
+      }
+
       // Keep detectedRedirect visible even with inline data — users should always
       // be able to open the official carrier page
       setShipment(result)
@@ -253,6 +272,7 @@ export default function Track() {
     if (mode === 'booking') {
       const id = (lines[0] || '').trim()
       if (!id || !bookingCarrier) return
+      if (!checkGuestLimit()) return
       setCurrentId(id)
       setBookingRedirect(null)
       navigate(`/track/${encodeURIComponent(id)}`, { replace: true })
@@ -261,9 +281,33 @@ export default function Track() {
     }
     const id = lines.filter(l => l.trim())[0] || ''
     if (!id) return
+
+    // Guest limit: non-logged-in users get GUEST_LIMIT free tracks
+    if (!checkGuestLimit()) return
+
+    // Free plan gate: air freight (MAWB) requires Pro
+    if (user && planTier === 'free') {
+      const detected = detectCarrierFromNumber(id.trim())
+      if (detected?.carrier.category === 'air') {
+        setUpgradeFeature('air')
+        return
+      }
+    }
+
     setCurrentId(id)
     navigate(`/track/${encodeURIComponent(id.trim())}`, { replace: true })
     triggerSearch(id)
+  }
+
+  function checkGuestLimit(): boolean {
+    if (user) return true
+    const uses = parseInt(localStorage.getItem(GUEST_USES_KEY) || '0', 10)
+    if (uses >= GUEST_LIMIT) {
+      setShowAuthWall(true)
+      return false
+    }
+    localStorage.setItem(GUEST_USES_KEY, String(uses + 1))
+    return true
   }
 
   // Load persisted alert state whenever the tracked shipment changes
@@ -1198,6 +1242,23 @@ export default function Track() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin 0.8s linear infinite; }
       `}</style>
+
+      {/* Guest limit wall — requires sign-up after 3 free tracks */}
+      {showAuthWall && (
+        <AuthModal
+          initialMode="signup"
+          onClose={() => setShowAuthWall(false)}
+          guestLimitMessage={`You've used your ${GUEST_LIMIT} free tracking lookups. Create a free account to keep tracking — unlimited express & land freight, forever free.`}
+        />
+      )}
+
+      {/* Plan upgrade modal */}
+      {upgradeFeature && (
+        <UpgradeModal
+          feature={upgradeFeature}
+          onClose={() => setUpgradeFeature(null)}
+        />
+      )}
     </div>
   )
 }

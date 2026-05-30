@@ -3,6 +3,11 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import Track from './pages/Track'
 import Dashboard from './pages/Dashboard'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
+import About from './pages/About'
+import HowItWorks from './pages/HowItWorks'
+import CarrierPage from './pages/CarrierPage'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import { AuthProvider } from './contexts/AuthContext'
@@ -38,6 +43,11 @@ export default function App() {
             <Route path="/track"              element={<Track />} />
             <Route path="/track/:trackingId"  element={<Track />} />
             <Route path="/dashboard"          element={<Dashboard />} />
+            <Route path="/privacy"            element={<Privacy />} />
+            <Route path="/terms"              element={<Terms />} />
+            <Route path="/about"              element={<About />} />
+            <Route path="/how-it-works"       element={<HowItWorks />} />
+            <Route path="/carriers/:slug"     element={<CarrierPage />} />
           </Routes>
           <Footer />
         </div>

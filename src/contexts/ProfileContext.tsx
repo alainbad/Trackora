@@ -10,11 +10,13 @@ export interface Profile {
   mobile:     string | null
   dob:        string | null
   avatar_url: string | null
+  plan_tier:  'free' | 'pro' | 'business' | null
 }
 
 interface ProfileContextType {
   profile:       Profile | null
   loading:       boolean
+  planTier:      'free' | 'pro' | 'business'
   updateProfile: (updates: Partial<Omit<Profile, 'id'>>) => Promise<{ error: string | null }>
   uploadAvatar:  (file: File) => Promise<{ error: string | null; url: string | null }>
   refetch:       () => void
@@ -23,6 +25,7 @@ interface ProfileContextType {
 const ProfileContext = createContext<ProfileContextType>({
   profile:       null,
   loading:       false,
+  planTier:      'free',
   updateProfile: async () => ({ error: null }),
   uploadAvatar:  async () => ({ error: null, url: null }),
   refetch:       () => {},
@@ -72,8 +75,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     return { error: null, url }
   }
 
+  const planTier: 'free' | 'pro' | 'business' = profile?.plan_tier ?? 'free'
+
   return (
-    <ProfileContext.Provider value={{ profile, loading, updateProfile, uploadAvatar, refetch: fetchProfile }}>
+    <ProfileContext.Provider value={{ profile, loading, planTier, updateProfile, uploadAvatar, refetch: fetchProfile }}>
       {children}
     </ProfileContext.Provider>
   )

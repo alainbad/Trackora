@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Anchor, ExternalLink, Copy, Check, ArrowLeft } from 'lucide-react'
+import { Anchor, ExternalLink, Copy, Check, ArrowLeft, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import type { ContainerRedirect } from '../../data/containerRedirects'
 
@@ -7,6 +7,7 @@ export default function ContainerRedirectCard({ redirect }: { redirect: Containe
   const navigate = useNavigate()
   const [copied,  setCopied]  = useState(false)
   const [logoOk,  setLogoOk]  = useState(true)
+  const [whyOpen, setWhyOpen] = useState(false)
 
   const logoUrl = `https://assets.aftership.com/couriers/svg/${redirect.logoSlug}.svg`
   const domain  = redirect.trackUrl.replace(/^https?:\/\//, '').split('/')[0]
@@ -169,20 +170,33 @@ export default function ContainerRedirectCard({ redirect }: { redirect: Containe
           </div>
         </div>
 
+        {/* ── Official source badge ── */}
+        <div style={{
+          padding: '12px 24px',
+          background: 'rgba(16,185,129,0.06)',
+          borderBottom: '1px solid rgba(16,185,129,0.1)',
+          display: 'flex', alignItems: 'center', gap: '10px',
+        }}>
+          <ShieldCheck size={16} color="#10b981" style={{ flexShrink: 0 }} />
+          <span style={{ fontSize: '13px', color: '#34d399', fontWeight: 700 }}>
+            Official source — 100% accurate data
+          </span>
+        </div>
+
         {/* ── Info banner ── */}
         <div style={{
           padding: '16px 24px',
-          background: 'rgba(16,185,129,0.05)',
-          borderBottom: '1px solid rgba(16,185,129,0.1)',
+          background: 'rgba(16,185,129,0.04)',
+          borderBottom: '1px solid rgba(16,185,129,0.08)',
           display: 'flex', gap: '12px', alignItems: 'flex-start',
         }}>
           <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>ℹ️</span>
           <p style={{ margin: 0, fontSize: '13px', color: 'rgba(248,250,252,0.6)', lineHeight: 1.65 }}>
-            <strong style={{ color: 'rgba(248,250,252,0.85)' }}>{redirect.shippingLine}</strong> manages container
-            tracking directly on their own portal.{' '}
+            For guaranteed accuracy, we link you directly to{' '}
+            <strong style={{ color: 'rgba(248,250,252,0.85)' }}>{redirect.shippingLine}</strong>'s official tracking portal.{' '}
             {redirect.supportsDeepLink
-              ? 'Your container number is already pre-filled in the link below — click to see live vessel position and port events instantly.'
-              : `Click below to open their tracking portal, then enter container number `}
+              ? 'Your container number is pre-filled — click to see live vessel position and port events instantly.'
+              : `Click below to open their tracking portal, then paste container number `}
             {!redirect.supportsDeepLink && (
               <span style={{ fontFamily: 'monospace', color: '#10b981', fontWeight: 700 }}>
                 {redirect.containerNumber}
@@ -190,6 +204,30 @@ export default function ContainerRedirectCard({ redirect }: { redirect: Containe
             )}
             {!redirect.supportsDeepLink && '.'}
           </p>
+        </div>
+
+        {/* ── Why direct link ── */}
+        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <button
+            onClick={() => setWhyOpen(p => !p)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              width: '100%', padding: '12px 24px', background: 'none', border: 'none',
+              cursor: 'pointer', color: 'rgba(248,250,252,0.4)', fontSize: '12px', fontWeight: 600,
+              textAlign: 'left',
+            }}
+          >
+            {whyOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            Why are we redirecting you?
+          </button>
+          {whyOpen && (
+            <div style={{ padding: '0 24px 16px', fontSize: '13px', color: 'rgba(248,250,252,0.5)', lineHeight: 1.65 }}>
+              Sea freight container data can change multiple times per day as vessels move between ports.
+              Rather than risk showing you delayed or incomplete information, we redirect you to the
+              carrier's own system — the same data their teams use. This ensures you always see the
+              most current vessel position, ETA, and port events. Trackora never shows unverified data.
+            </div>
+          )}
         </div>
 
         {/* ── Actions ── */}
@@ -215,7 +253,7 @@ export default function ContainerRedirectCard({ redirect }: { redirect: Containe
             onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
           >
             <ExternalLink size={16} />
-            Track on {shortName} Portal
+            Open Pre-filled Tracking →
             {redirect.supportsDeepLink && (
               <span style={{
                 fontSize: '10px', fontWeight: 700, padding: '2px 7px',

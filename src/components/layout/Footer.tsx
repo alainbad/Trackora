@@ -61,10 +61,11 @@ export default function Footer() {
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {[
-                { label: 'Track Shipment', href: '/track' },
-                { label: 'Dashboard',      href: '/dashboard' },
-                { label: 'Features',       href: '/#features' },
-                { label: 'Plans',          href: '/#pricing' },
+                { label: 'Track Shipment',  href: '/track' },
+                { label: 'Dashboard',       href: '/dashboard' },
+                { label: 'How It Works',    href: '/how-it-works' },
+                { label: 'Features',        href: '/#features' },
+                { label: 'Pricing Plans',   href: '/#pricing' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
@@ -143,9 +144,9 @@ export default function Footer() {
             © 2026 Trackora. All rights reserved. · Business Bay, Dubai, UAE
           </p>
           <div style={{ display: 'flex', gap: isMobile ? '16px' : '24px', flexWrap: 'wrap' }}>
-            {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map(l => (
-              <a key={l} href="#" style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>{l}</a>
-            ))}
+            <Link to="/privacy" style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Privacy Policy</Link>
+            <Link to="/terms"   style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Terms of Service</Link>
+            <Link to="/about"   style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>About</Link>
           </div>
         </div>
       </div>

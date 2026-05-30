@@ -1,21 +1,23 @@
 import { useState } from 'react'
-import { Check, Zap, Building2, Globe2 } from 'lucide-react'
+import { Check, X, Zap, Building2, Globe2 } from 'lucide-react'
 import AuthModal from '../auth/AuthModal'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
 const PLANS = [
   {
-    icon: Globe2, name: 'Basic', price: '$0', period: 'free forever',
+    icon: Globe2, name: 'Free', price: '$0', period: 'free forever',
     color: '#6b7280', gradient: null, popular: false,
-    desc: 'For individuals tracking personal shipments.',
+    desc: 'For individuals tracking parcels and land freight.',
     features: [
-      'Real-time tracking — 1,200+ carriers',
-      'Sea, air, land & express support',
-      'Live event timeline & route map',
-      'PDF label scanner (AWB / BOL)',
-      'Browser status alerts',
-      'Personal shipment dashboard',
-      '256-bit encrypted data',
+      { text: 'Express courier tracking (UPS, FedEx, DHL…)', included: true },
+      { text: 'Land freight tracking', included: true },
+      { text: 'Live event timeline & route map', included: true },
+      { text: 'Sea freight carrier redirect (official portals)', included: true },
+      { text: 'PDF label scanner (AWB / BOL)', included: true },
+      { text: 'Up to 10 saved shipments', included: true },
+      { text: 'Air freight (MAWB) tracking', included: false },
+      { text: 'Sea freight full timeline & vessel data', included: false },
+      { text: 'Email status alerts', included: false },
     ],
     cta: 'Get Started Free', ctaStyle: 'outline' as const,
     gumroadUrl: null,
@@ -24,27 +26,30 @@ const PLANS = [
     icon: Zap, name: 'Pro', price: '$4.99', period: 'per month',
     offerPrice: '$2.49', offerNote: 'first month only',
     color: '#6366f1', gradient: 'linear-gradient(135deg, #6366f1, #4f46e5)', popular: true,
-    desc: 'For power users, SMBs, and growing teams.',
+    desc: 'For importers, exporters and growing businesses.',
     features: [
-      'Everything in Basic',
-      'Advanced analytics dashboard',
-      'AI-powered shipment insights',
-      'Unlimited saved shipments',
-      'Priority email support',
+      { text: 'Everything in Free', included: true },
+      { text: 'Air freight (MAWB) real-time tracking', included: true },
+      { text: 'Sea freight full timeline & vessel position', included: true },
+      { text: 'Unlimited saved shipments', included: true },
+      { text: 'Email status change alerts', included: true },
+      { text: 'Advanced analytics dashboard', included: true },
+      { text: 'AI-powered shipment insights', included: true },
+      { text: 'Priority email support', included: true },
     ],
     cta: 'Claim Offer', ctaStyle: 'filled' as const,
     gumroadUrl: 'https://badranalain.gumroad.com/l/impejho',
   },
   {
-    icon: Building2, name: 'Enterprise', price: '$9.99', period: 'per month',
+    icon: Building2, name: 'Business', price: '$9.99', period: 'per month',
     color: '#f59e0b', gradient: 'linear-gradient(135deg, #f59e0b, #d97706)', popular: false,
     desc: 'For logistics operations, 3PLs, and enterprises.',
     features: [
-      'Everything in Pro',
-      'Team & multi-user access',
-      'API & integrations access',
-      'Dedicated support line',
-      'Custom carrier onboarding',
+      { text: 'Everything in Pro', included: true },
+      { text: 'Team & multi-user access (5 seats)', included: true },
+      { text: 'API & webhook integrations', included: true },
+      { text: 'Dedicated support line', included: true },
+      { text: 'Custom carrier onboarding', included: true },
     ],
     cta: 'Get Started', ctaStyle: 'gold' as const,
     gumroadUrl: 'https://badranalain.gumroad.com/l/rconap',
@@ -194,11 +199,14 @@ export default function PricingSection() {
                   </button>
 
                   {/* Features */}
-                  <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {plan.features.map((f, j) => (
-                      <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '14px', color: 'rgba(248,250,252,0.75)' }}>
-                        <Check size={15} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
-                        {f}
+                      <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '14px', color: f.included ? 'rgba(248,250,252,0.75)' : 'rgba(248,250,252,0.3)' }}>
+                        {f.included
+                          ? <Check size={15} color="#10b981" style={{ flexShrink: 0, marginTop: '2px' }} />
+                          : <X size={15} color="rgba(248,250,252,0.2)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        }
+                        {f.text}
                       </li>
                     ))}
                   </ul>
