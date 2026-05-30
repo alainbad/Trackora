@@ -62,7 +62,7 @@ function autoDetect(val: string): { refType: SeaRefType; carrierSlug: string | n
 export default function SeaFreightTracker() {
   const isMobile = useIsMobile()
 
-  const [refType,   setRefType]   = useState<SeaRefType>('container')
+  const [refType,   setRefType]   = useState<SeaRefType>('bl')
   const [carrier,   setCarrier]   = useState<SeaCarrier | null>(null)
   const [number,    setNumber]    = useState('')
   const [autoHint,  setAutoHint]  = useState<string | null>(null)
@@ -277,9 +277,12 @@ export default function SeaFreightTracker() {
           <p style={{ margin: '0 0 6px', fontSize: '11px', fontWeight: 700, color: 'rgba(248,250,252,0.3)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Quick reference</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {[
-              { ex: 'MSCU1234567', label: 'Container — auto-detected' },
-              { ex: 'MAEU265525152', label: 'Maersk B/L — auto-detected' },
-              { ex: 'HLCU1234567890', label: 'Hapag-Lloyd B/L — auto-detected' },
+              { ex: 'MSCU1234567',   label: 'Container — auto-detected (MSC)' },
+              { ex: 'MAEU265525152', label: 'B/L — auto-detected (Maersk)' },
+              { ex: 'HLCU1234567890',label: 'B/L — auto-detected (Hapag-Lloyd)' },
+              { ex: '70528270',      label: 'B/L → select CMA CGM above' },
+              { ex: '550600041386',  label: 'B/L → select Evergreen above' },
+              { ex: '10250467',      label: 'B/L → select Turkon above' },
             ].map(({ ex, label }) => (
               <button
                 key={ex}

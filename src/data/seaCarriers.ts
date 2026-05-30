@@ -17,6 +17,14 @@ export interface SeaCarrier {
 
 export const SEA_CARRIERS: SeaCarrier[] = [
   {
+    name: 'Turkon', slug: 'turkon', accentColor: '#E30613',
+    urls: {
+      container: 'https://www.turkon.com/en/cargo-tracking/?no={n}',
+      bl:        'https://www.turkon.com/en/cargo-tracking/?no={n}',
+      booking:   'https://www.turkon.com/en/cargo-tracking/?no={n}',
+    },
+  },
+  {
     name: 'Maersk', slug: 'maersk', accentColor: '#42ADEF', logoUrl: '/logos/maersk.svg',
     urls: {
       container: 'https://www.maersk.com/tracking/{n}',
