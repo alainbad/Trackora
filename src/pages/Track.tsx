@@ -1001,8 +1001,26 @@ export default function Track() {
                     {alertsEnabled ? 'Alerts On' : 'Alerts'}
                   </button>
 
+                  {/* Mobile backdrop */}
+                  {showAlerts && isMobile && (
+                    <div
+                      onClick={() => setShowAlerts(false)}
+                      style={{ position: 'fixed', inset: 0, zIndex: 199, background: 'rgba(0,0,0,0.5)' }}
+                    />
+                  )}
+
                   {showAlerts && (
-                    <div style={{
+                    <div style={isMobile ? {
+                      // Mobile: full-width bottom sheet fixed to viewport
+                      position: 'fixed', bottom: 0, left: 0, right: 0,
+                      borderRadius: '20px 20px 0 0', zIndex: 200,
+                      background: 'rgba(15,20,40,0.99)', backdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderBottom: 'none',
+                      boxShadow: '0 -8px 40px rgba(0,0,0,0.6)',
+                      padding: '20px 20px 36px',
+                    } : {
+                      // Desktop: dropdown anchored right of button
                       position: 'absolute', top: 'calc(100% + 8px)', right: 0,
                       width: '300px', borderRadius: '16px', zIndex: 100,
                       background: 'rgba(15,20,40,0.97)', backdropFilter: 'blur(16px)',
@@ -1010,8 +1028,19 @@ export default function Track() {
                       boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
                       padding: '20px',
                     }}>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc', marginBottom: '6px' }}>
-                        Status Alerts
+                      {/* Mobile drag handle */}
+                      {isMobile && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                          <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.2)' }} />
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
+                          Status Alerts
+                        </div>
+                        {isMobile && (
+                          <button onClick={() => setShowAlerts(false)} style={{ background: 'none', border: 'none', color: 'rgba(248,250,252,0.4)', cursor: 'pointer', fontSize: '20px', lineHeight: 1, padding: '0 4px' }}>×</button>
+                        )}
                       </div>
                       <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.45)', marginBottom: '16px', lineHeight: 1.5 }}>
                         Get notified whenever this shipment's status changes.
