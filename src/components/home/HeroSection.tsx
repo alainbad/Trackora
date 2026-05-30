@@ -159,11 +159,10 @@ export default function HeroSection() {
         }}>
           Track every<br />shipment.<br />
           <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>
-            In real time.
             <span style={{
-              position: 'absolute', left: 0, bottom: '5px', width: '100%', height: '11px',
-              background: 'rgba(240,168,104,0.32)', borderRadius: '3px', zIndex: -1,
-            }} />
+              background: 'linear-gradient(135deg, #22d3ee, #6366f1)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+            }}>In real time.</span>
           </span>
         </h1>
 
