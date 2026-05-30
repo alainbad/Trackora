@@ -79,20 +79,20 @@ function GlobeHero() {
       </circle>
 
       {/* Trade lane 2 — teal (sea) */}
-      <path d="M 250 470 Q 470 330 690 430" fill="none" stroke={TEAL} strokeWidth="2.4"
+      <path d="M 360 380 Q 525 285 700 360" fill="none" stroke={TEAL} strokeWidth="2.4"
         strokeDasharray="2 7" strokeLinecap="round">
         <animate attributeName="stroke-dashoffset" values="0;-90" dur="7.5s" repeatCount="indefinite" />
       </path>
-      <circle cx="250" cy="470" r="6" fill={TEAL} />
-      <circle cx="690" cy="430" r="6" fill={TEAL} />
-      <circle cx="690" cy="430" r="6" fill="none" stroke={TEAL} strokeWidth="1.4">
+      <circle cx="360" cy="380" r="6" fill={TEAL} />
+      <circle cx="700" cy="360" r="6" fill={TEAL} />
+      <circle cx="700" cy="360" r="6" fill="none" stroke={TEAL} strokeWidth="1.4">
         <animate attributeName="r" values="6;18;6" dur="3s" repeatCount="indefinite" />
         <animate attributeName="stroke-opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite" />
       </circle>
 
       {/* Live-event chips, one per lane, anchored above each arc's apex */}
       <LaneChip x={415} y={70}  color={AMBER} id="176-22536813" status="Departed Dubai · 18m ago" />
-      <LaneChip x={330} y={300} color={TEAL}  id="MSKU7620114"  status="Loaded Shanghai · 2h ago" />
+      <LaneChip x={360} y={200} color={TEAL}  id="MSKU7620114"  status="Loaded Shanghai · 2h ago" />
     </svg>
   )
 }
@@ -121,7 +121,7 @@ export default function HeroSection() {
       {/* ── Globe (desktop only) ── */}
       {!isMobile && (
         <div style={{
-          position: 'absolute', right: '-140px', bottom: '-260px',
+          position: 'absolute', right: '120px', bottom: '-220px',
           width: '1180px', height: '1180px', zIndex: 1,
         }}>
           <GlobeHero />
