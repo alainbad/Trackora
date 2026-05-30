@@ -15,7 +15,7 @@ export default function Footer() {
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1.4fr',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr 1fr',
           gap: isMobile ? '32px' : '48px',
           marginBottom: isMobile ? '36px' : '48px',
         }}>
@@ -90,6 +90,57 @@ export default function Footer() {
                 { label: 'Sea Freight',      href: '/track' },
                 { label: 'Land Freight',     href: '/track' },
                 { label: 'Express Couriers', href: '/track' },
+              ].map(l => (
+                <li key={l.label}>
+                  <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Top Carriers ── */}
+          <div>
+            <h4 style={{
+              fontSize: '12px', fontWeight: 600, color: 'rgba(248,250,252,0.4)',
+              textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px',
+            }}>
+              Top Carriers
+            </h4>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { label: 'FedEx',          href: '/carriers/fedex' },
+                { label: 'DHL Express',    href: '/carriers/dhl' },
+                { label: 'UPS',            href: '/carriers/ups' },
+                { label: 'Maersk',         href: '/carriers/maersk' },
+                { label: 'Aramex',         href: '/carriers/aramex' },
+                { label: 'Emirates Cargo', href: '/carriers/lufthansa-cargo' },
+              ].map(l => (
+                <li key={l.label}>
+                  <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Resources ── */}
+          <div>
+            <h4 style={{
+              fontSize: '12px', fontWeight: 600, color: 'rgba(248,250,252,0.4)',
+              textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px',
+            }}>
+              Resources
+            </h4>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { label: 'Blog',                href: '/blog' },
+                { label: 'How It Works',        href: '/how-it-works' },
+                { label: 'Container Numbers',   href: '/blog/what-is-a-container-number' },
+                { label: 'MAWB vs HAWB',        href: '/blog/mawb-vs-hawb' },
+                { label: 'Sea Freight Guide',   href: '/blog/how-to-track-sea-freight' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>

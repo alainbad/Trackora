@@ -8,6 +8,8 @@ import Terms from './pages/Terms'
 import About from './pages/About'
 import HowItWorks from './pages/HowItWorks'
 import CarrierPage from './pages/CarrierPage'
+import Blog from './pages/Blog'
+import BlogPost from './pages/BlogPost'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import { AuthProvider } from './contexts/AuthContext'
@@ -48,6 +50,8 @@ export default function App() {
             <Route path="/about"              element={<About />} />
             <Route path="/how-it-works"       element={<HowItWorks />} />
             <Route path="/carriers/:slug"     element={<CarrierPage />} />
+            <Route path="/blog"               element={<Blog />} />
+            <Route path="/blog/:slug"         element={<BlogPost />} />
           </Routes>
           <Footer />
         </div>
