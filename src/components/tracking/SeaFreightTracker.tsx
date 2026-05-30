@@ -59,13 +59,23 @@ function autoDetect(val: string): { refType: SeaRefType; carrierSlug: string | n
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
-export default function SeaFreightTracker() {
+interface Props {
+  initialNumber?: string   // pre-fill number (e.g. from "not found" fallback)
+  compact?:       boolean  // hide header + tips, used inline in results area
+}
+
+export default function SeaFreightTracker({ initialNumber, compact }: Props) {
   const isMobile = useIsMobile()
 
   const [refType,   setRefType]   = useState<SeaRefType>('bl')
   const [carrier,   setCarrier]   = useState<SeaCarrier | null>(null)
-  const [number,    setNumber]    = useState('')
+  const [number,    setNumber]    = useState(initialNumber ?? '')
   const [autoHint,  setAutoHint]  = useState<string | null>(null)
+
+  // When parent passes a new initialNumber, sync it
+  useEffect(() => {
+    if (initialNumber) setNumber(initialNumber)
+  }, [initialNumber])
 
   // Auto-detect carrier + type from number
   useEffect(() => {
@@ -96,17 +106,19 @@ export default function SeaFreightTracker() {
       boxShadow: '0 0 60px rgba(66,173,239,0.08)',
     }}>
 
-      {/* Header */}
-      <div style={{
-        padding: isMobile ? '16px 18px' : '20px 24px',
-        background: 'linear-gradient(135deg, rgba(66,173,239,0.12), transparent)',
-        borderBottom: '1px solid rgba(66,173,239,0.15)',
-        display: 'flex', alignItems: 'center', gap: '10px',
-      }}>
-        <Anchor size={18} color="#42ADEF" />
-        <span style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>Sea Freight Tracker</span>
-        <span style={{ fontSize: '12px', color: 'rgba(248,250,252,0.4)' }}>· Container · B/L · Booking</span>
-      </div>
+      {/* Header — hidden in compact mode */}
+      {!compact && (
+        <div style={{
+          padding: isMobile ? '16px 18px' : '20px 24px',
+          background: 'linear-gradient(135deg, rgba(66,173,239,0.12), transparent)',
+          borderBottom: '1px solid rgba(66,173,239,0.15)',
+          display: 'flex', alignItems: 'center', gap: '10px',
+        }}>
+          <Anchor size={18} color="#42ADEF" />
+          <span style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>Sea Freight Tracker</span>
+          <span style={{ fontSize: '12px', color: 'rgba(248,250,252,0.4)' }}>· Container · B/L · Booking</span>
+        </div>
+      )}
 
       <div style={{ padding: isMobile ? '18px' : '24px' }}>
 
@@ -269,8 +281,8 @@ export default function SeaFreightTracker() {
           </div>
         )}
 
-        {/* Quick tips */}
-        <div style={{
+        {/* Quick tips — hidden in compact mode */}
+        {!compact && <div style={{
           marginTop: '16px', padding: '12px 16px', borderRadius: '10px',
           background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
         }}>
@@ -298,7 +310,7 @@ export default function SeaFreightTracker() {
               </button>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   )

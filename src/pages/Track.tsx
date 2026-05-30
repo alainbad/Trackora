@@ -758,20 +758,39 @@ export default function Track() {
 
         {/* Not found */}
         {!animating && notFound && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '300px', justifyContent: 'center', gap: '16px', textAlign: 'center' }}>
-            <div style={{ fontSize: '56px' }}>📭</div>
-            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#f8fafc' }}>Shipment not found</h2>
-            <p style={{ color: 'rgba(248,250,252,0.5)', maxWidth: '360px', lineHeight: 1.6 }}>
-              We queried 1,200+ carriers and couldn't find a match. Try one of the demo IDs.
-            </p>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-              {DEMO_IDS.map(id => (
-                <button key={id} onClick={() => { setLines([id]); setCurrentId(id); navigate(`/track/${id}`); triggerSearch(id) }} style={{
-                  padding: '6px 14px', borderRadius: '8px',
-                  background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
-                  color: '#818cf8', fontSize: '12px', fontFamily: 'monospace', cursor: 'pointer',
-                }}>{id}</button>
-              ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Sea freight fallback — shown for any "not found" result */}
+            <div style={{
+              padding: '20px 24px', borderRadius: '16px',
+              background: 'rgba(66,173,239,0.06)',
+              border: '1px solid rgba(66,173,239,0.2)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                <span style={{ fontSize: '20px' }}>🚢</span>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#42ADEF' }}>
+                  Is this a sea freight shipment?
+                </h3>
+              </div>
+              <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'rgba(248,250,252,0.5)', lineHeight: 1.6 }}>
+                Numbers like <code style={{ fontFamily: 'monospace', color: '#f8fafc' }}>{currentId}</code> from carriers like CMA CGM, Evergreen, Turkon, Maersk, MSC etc. cannot be auto-detected — select your carrier below to track instantly.
+              </p>
+              <SeaFreightTracker initialNumber={currentId} compact />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center', paddingBottom: '16px' }}>
+              <div style={{ fontSize: '40px' }}>📭</div>
+              <p style={{ color: 'rgba(248,250,252,0.35)', fontSize: '13px' }}>
+                Not sea freight? Try one of the demo IDs:
+              </p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {DEMO_IDS.map(id => (
+                  <button key={id} onClick={() => { setLines([id]); setCurrentId(id); navigate(`/track/${id}`); triggerSearch(id) }} style={{
+                    padding: '6px 14px', borderRadius: '8px',
+                    background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
+                    color: '#818cf8', fontSize: '12px', fontFamily: 'monospace', cursor: 'pointer',
+                  }}>{id}</button>
+                ))}
+              </div>
             </div>
           </div>
         )}
