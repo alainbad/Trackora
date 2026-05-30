@@ -9,6 +9,7 @@ const CARRIERS = ['Maersk', 'DHL', 'UPS', 'Emirates SkyCargo', 'MSC', 'FedEx']
 
 const AMBER = '#f0a868'
 const TEAL  = '#5ec8c8'
+const CYAN  = '#22d3ee'
 
 // ── Globe: stippled world map clipped to a sphere, with warm rim-light and
 //    two animated trade-lane arcs lifting off the surface. Pure SVG. ──────────
@@ -185,7 +186,7 @@ export default function HeroSection() {
                   placeholder="Enter tracking number…"
                   style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '15px', padding: '8px 0' }} />
               </div>
-              <button type="submit" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: '14px', background: AMBER, border: 'none', color: '#1a1206', fontSize: '15px', fontWeight: 700, cursor: 'pointer' }}>
+              <button type="submit" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', borderRadius: '14px', background: CYAN, border: 'none', color: '#06222a', fontSize: '15px', fontWeight: 700, cursor: 'pointer' }}>
                 Track Now <ChevronRight size={16} />
               </button>
             </div>
@@ -195,7 +196,7 @@ export default function HeroSection() {
               <input type="text" value={query} onChange={e => setQuery(e.target.value)}
                 placeholder="Enter tracking number, AWB, B/L or container ID…"
                 style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#f8fafc', fontSize: '17px', padding: '13px 16px' }} />
-              <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '14px 28px', borderRadius: '11px', background: AMBER, border: 'none', color: '#1a1206', fontSize: '16px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              <button type="submit" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '14px 28px', borderRadius: '11px', background: CYAN, border: 'none', color: '#06222a', fontSize: '16px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
                 Track <ChevronRight size={16} />
               </button>
             </div>
