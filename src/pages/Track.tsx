@@ -16,6 +16,7 @@ import TrackingAnimation from '../components/tracking/TrackingAnimation'
 import AirlineRedirectCard from '../components/tracking/AirlineRedirectCard'
 import ContainerRedirectCard from '../components/tracking/ContainerRedirectCard'
 import BookingRedirectCard from '../components/tracking/BookingRedirectCard'
+import SeaFreightTracker from '../components/tracking/SeaFreightTracker'
 import CarrierRedirectCard from '../components/tracking/CarrierRedirectCard'
 import { BOOKING_CARRIERS, type BookingCarrier } from '../data/bookingRedirects'
 import { detectCarrier as detectCarrierFromNumber, type DetectedCarrier } from '../data/carrierDetect'
@@ -69,7 +70,7 @@ export default function Track() {
   const [notFound, setNotFound] = useState(false)
   const [lastUpdated, setLastUpdated] = useState(new Date())
   const [currentId, setCurrentId] = useState(trackingId || '')
-  const [mode, setMode] = useState<'single' | 'multi' | 'booking'>('single')
+  const [mode, setMode] = useState<'single' | 'multi' | 'booking' | 'sea'>('single')
   const [bookingCarrier, setBookingCarrier] = useState<BookingCarrier | null>(null)
   const [bookingRedirect, setBookingRedirect] = useState<{ carrier: BookingCarrier; ref: string } | null>(null)
   // Detection-first redirect: shown immediately on submit while API loads in background
@@ -461,8 +462,9 @@ export default function Track() {
             <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
               {([
                 { id: 'single',  label: '🔍 Single Track' },
-                { id: 'multi',   label: '📋 Multi-Track (up to 40)' },
-                { id: 'booking', label: '📦 Booking / B/L' },
+                { id: 'multi',   label: '📋 Multi-Track' },
+                { id: 'sea',     label: '🚢 Sea Freight' },
+                { id: 'booking', label: '✈️ Air Cargo B/L' },
               ] as const).map(m => (
                 <button key={m.id} onClick={() => { setMode(m.id); setBookingCarrier(null) }} style={{
                   padding: '6px 18px', borderRadius: '100px', fontSize: '13px', fontWeight: 600,
@@ -477,17 +479,24 @@ export default function Track() {
             </div>
           )}
 
-          {/* Booking mode: carrier selector */}
+          {/* Sea freight mode — full dedicated tracker */}
+          {!animating && mode === 'sea' && (
+            <div style={{ marginBottom: '0' }}>
+              <SeaFreightTracker />
+            </div>
+          )}
+
+          {/* Booking mode: carrier selector (air only now) */}
           {!hasResults && !animating && mode === 'booking' && (
             <div style={{ marginBottom: '16px' }}>
               <p style={{ textAlign: 'center', fontSize: '13px', color: 'rgba(248,250,252,0.45)', marginBottom: '12px' }}>
-                Select your carrier — booking numbers are carrier-specific:
+                Select airline — AWB/booking numbers are carrier-specific:
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-                {['sea', 'air'].map(cat => (
+                {(['air'] as const).map(cat => (
                   <div key={cat} style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
                     <span style={{ width: '100%', textAlign: 'center', fontSize: '10px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'rgba(248,250,252,0.25)', marginBottom: '2px' }}>
-                      {cat === 'sea' ? '🚢 Sea Freight' : '✈️ Air Freight'}
+                      {'✈️ Air Freight'}
                     </span>
                     {BOOKING_CARRIERS.filter(c => c.category === cat).map(c => {
                       const sel = bookingCarrier?.slug === c.slug
@@ -514,8 +523,8 @@ export default function Track() {
             </div>
           )}
 
-          {/* Input area */}
-          {!animating && (
+          {/* Input area — hidden in sea mode (SeaFreightTracker replaces it) */}
+          {!animating && mode !== 'sea' && (
             <div style={{
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.10)',
