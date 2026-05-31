@@ -57,7 +57,6 @@ function buildSegments(data: { count: number; color: string }[], total: number, 
 
 interface ChartData { label: string; count: number; color: string; pct: string }
 
-// Convert an SVG element to a base64 PNG string via Canvas
 async function svgToBase64Png(svgEl: SVGSVGElement): Promise<string> {
   const svgStr = new XMLSerializer().serializeToString(svgEl)
   const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
@@ -65,7 +64,7 @@ async function svgToBase64Png(svgEl: SVGSVGElement): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
-      const scale = 2 // render at 2x for crisp images in Excel
+      const scale = 2
       const canvas = document.createElement('canvas')
       canvas.width  = svgEl.width.baseVal.value  * scale
       canvas.height = svgEl.height.baseVal.value * scale
@@ -73,7 +72,6 @@ async function svgToBase64Png(svgEl: SVGSVGElement): Promise<string> {
       ctx.scale(scale, scale)
       ctx.drawImage(img, 0, 0)
       URL.revokeObjectURL(url)
-      // strip "data:image/png;base64," prefix
       resolve(canvas.toDataURL('image/png').split(',')[1])
     }
     img.onerror = reject
@@ -149,21 +147,18 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
   const svgFreight = useRef<SVGSVGElement>(null)
   const svgCarrier = useRef<SVGSVGElement>(null)
 
-  // Status
   const statusData: ChartData[] = groupCount(shipments, s => s.status).map(g => ({
     label: STATUS_META[g.raw]?.label ?? g.raw,
     count: g.count, color: STATUS_META[g.raw]?.color ?? '#818cf8',
     pct: ((g.count / total) * 100).toFixed(1),
   }))
 
-  // Freight
   const freightData: ChartData[] = groupCount(shipments, s => s.freightType).map(g => ({
     label: FREIGHT_META[g.raw]?.label ?? g.raw,
     count: g.count, color: FREIGHT_META[g.raw]?.color ?? '#818cf8',
     pct: ((g.count / total) * 100).toFixed(1),
   }))
 
-  // Carriers (top 5 + Other)
   const carrierGroups = groupCount(shipments, s => s.carrier)
   const otherCount    = carrierGroups.slice(5).reduce((s, g) => s + g.count, 0)
   const carrierData: ChartData[] = [
@@ -188,8 +183,8 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
       wb.creator  = 'Trackora'
       wb.created  = new Date()
 
-      const CHART_W = 7   // columns wide
-      const CHART_H = 14  // rows tall
+      const CHART_W = 7
+      const CHART_H = 14
       const TABLE_START_ROW = CHART_H + 2
 
       const sheets: { name: string; data: ChartData[]; png: string }[] = [
@@ -201,9 +196,11 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
       for (const { name, data, png } of sheets) {
         const ws = wb.addWorksheet(name)
 
-        ws.getColumn(1).width = 28
-        ws.getColumn(2).width = 12
-        ws.getColumn(3).width = 14
+        // col1 = color swatch, col2 = category, col3 = count, col4 = percentage
+        ws.getColumn(1).width = 4
+        ws.getColumn(2).width = 26
+        ws.getColumn(3).width = 12
+        ws.getColumn(4).width = 14
 
         const imgId = wb.addImage({ base64: png, extension: 'png' })
         ws.addImage(imgId, {
@@ -213,37 +210,47 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
 
         const headerRow = ws.getRow(TABLE_START_ROW)
         headerRow.height = 20
-        const headers = ['Category', 'Count', 'Percentage']
+        const headers = ['', 'Category', 'Count', 'Percentage']
         headers.forEach((h, i) => {
           const cell = headerRow.getCell(i + 1)
           cell.value = h
           cell.font  = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 }
           cell.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF6366F1' } }
-          cell.alignment = { vertical: 'middle', horizontal: i === 0 ? 'left' : 'center' }
-          cell.border = {
-            bottom: { style: 'thin', color: { argb: 'FF4F46E5' } },
-          }
+          cell.alignment = { vertical: 'middle', horizontal: i <= 1 ? 'left' : 'center' }
+          cell.border = { bottom: { style: 'thin', color: { argb: 'FF4F46E5' } } }
         })
+
+        function toArgb(hex: string): string {
+          if (hex.startsWith('#')) {
+            const h = hex.slice(1)
+            return 'FF' + (h.length === 3 ? h.split('').map(c => c + c).join('') : h).toUpperCase()
+          }
+          return 'FF818CF8'
+        }
 
         data.forEach((row, idx) => {
           const r = ws.getRow(TABLE_START_ROW + 1 + idx)
           r.height = 18
           const isEven = idx % 2 === 0
           const bgColor = isEven ? 'FFF0F0FF' : 'FFFFFFFF'
+          const swatchArgb = toArgb(row.color)
 
-          const c1 = r.getCell(1)
+          const cs = r.getCell(1)
+          cs.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: swatchArgb } }
+
+          const c1 = r.getCell(2)
           c1.value = row.label
           c1.font  = { size: 10, color: { argb: 'FF1E1B4B' } }
           c1.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } }
           c1.alignment = { vertical: 'middle', horizontal: 'left' }
 
-          const c2 = r.getCell(2)
+          const c2 = r.getCell(3)
           c2.value = row.count
           c2.font  = { size: 10, bold: true, color: { argb: 'FF1E1B4B' } }
           c2.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } }
           c2.alignment = { vertical: 'middle', horizontal: 'center' }
 
-          const c3 = r.getCell(3)
+          const c3 = r.getCell(4)
           c3.value = `${row.pct}%`
           c3.font  = { size: 10, color: { argb: 'FF4F46E5' } }
           c3.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } }
@@ -252,19 +259,19 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
 
         const totalRow = ws.getRow(TABLE_START_ROW + 1 + data.length)
         totalRow.height = 20
-        const t1 = totalRow.getCell(1)
+        const t1 = totalRow.getCell(2)
         t1.value = 'Total'
         t1.font  = { bold: true, size: 10, color: { argb: 'FF1E1B4B' } }
         t1.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E7FF' } }
         t1.alignment = { vertical: 'middle', horizontal: 'left' }
 
-        const t2 = totalRow.getCell(2)
+        const t2 = totalRow.getCell(3)
         t2.value = total
         t2.font  = { bold: true, size: 10, color: { argb: 'FF4F46E5' } }
         t2.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E7FF' } }
         t2.alignment = { vertical: 'middle', horizontal: 'center' }
 
-        const t3 = totalRow.getCell(3)
+        const t3 = totalRow.getCell(4)
         t3.value = '100%'
         t3.font  = { bold: true, size: 10, color: { argb: 'FF4F46E5' } }
         t3.fill  = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E7FF' } }
@@ -305,7 +312,6 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
           boxShadow: '0 40px 120px rgba(0,0,0,0.7)',
         }}
       >
-        {/* Header */}
         <div style={{
           display: 'flex', alignItems: isMobile ? 'flex-start' : 'center',
           justifyContent: 'space-between',
@@ -353,7 +359,6 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
           </div>
         </div>
 
-        {/* Charts */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
