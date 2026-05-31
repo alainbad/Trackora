@@ -243,6 +243,23 @@ export default function Track() {
       // be able to open the official carrier page
       setShipment(result)
       setNotFound(false)
+
+      // Sync the latest status back to the DB if this shipment is saved
+      if (user && supabase) {
+        supabase
+          .from('shipments')
+          .update({
+            status:      result.status,
+            carrier_name: result.carrier,
+            est_delivery: result.estimatedDelivery ?? null,
+            origin_city:  result.origin?.city ?? null,
+            dest_city:    result.destination?.city ?? null,
+            updated_at:  new Date().toISOString(),
+          })
+          .eq('user_id', user.id)
+          .eq('tracking_number', result.trackingNumber)
+          .then(() => {})  // fire-and-forget
+      }
     } else {
       // Booking mode fallback → show redirect card
       if (mode === 'booking' && bookingCarrier) {

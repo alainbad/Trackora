@@ -1034,8 +1034,18 @@ function normaliseAfterShip(t: Record<string, unknown>) {
   // as not found so the frontend shows the redirect card or "not found" state.
   if (!slug || carrierTitle.toLowerCase() === 'unrecognized') return null
 
-  const originISO   = toISO2((t.origin_country_region      as string) || '')
-  const destISO     = toISO2((t.destination_country_region as string) || '')
+  // AfterShip uses origin_country_iso3 / destination_country_iso3 (ISO-3166-1 alpha-3).
+  // origin_country_region is not a real AfterShip field — keep as fallback for safety.
+  const originISO   = toISO2(
+    (t.origin_country_iso3      as string) ||
+    (t.origin_country_region    as string) ||
+    (t.origin_country           as string) || ''
+  )
+  const destISO     = toISO2(
+    (t.destination_country_iso3    as string) ||
+    (t.destination_country_region  as string) ||
+    (t.destination_country         as string) || ''
+  )
   const originCoord = coord(originISO)
   const destCoord   = coord(destISO)
   const checkpoints = (t.checkpoints as Record<string, unknown>[]) || []
@@ -1088,7 +1098,13 @@ function normaliseAfterShip(t: Record<string, unknown>) {
                       ? carrierTitle
                       : slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ') : 'Unknown',
     freightType:    ft,
-    status:         AFTERSHIP_TAG_MAP[t.tag as string] || 'in_transit',
+    // Prefer the most-recent checkpoint tag — AfterShip's top-level t.tag
+    // can lag behind the actual checkpoint data (e.g. stays "InTransit"
+    // even when the last checkpoint is "Delivered").
+    status: (() => {
+      const lastCpTag = (lastCp?.tag as string) || ''
+      return AFTERSHIP_TAG_MAP[lastCpTag] || AFTERSHIP_TAG_MAP[t.tag as string] || 'in_transit'
+    })(),
     origin: {
       city:    (t.origin_city as string) || COUNTRY_NAME[originISO] || originISO || '',
       country: originISO,
