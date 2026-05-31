@@ -65,7 +65,7 @@ async function svgToBase64Png(svgEl: SVGSVGElement): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => {
-      const scale = 3 // render at 3× for crisp images in Excel
+      const scale = 2 // render at 2x for crisp images in Excel
       const canvas = document.createElement('canvas')
       canvas.width  = svgEl.width.baseVal.value  * scale
       canvas.height = svgEl.height.baseVal.value * scale
@@ -149,21 +149,21 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
   const svgFreight = useRef<SVGSVGElement>(null)
   const svgCarrier = useRef<SVGSVGElement>(null)
 
-  // ── Status ────────────────────────────────────────────────────────────────
+  // Status
   const statusData: ChartData[] = groupCount(shipments, s => s.status).map(g => ({
     label: STATUS_META[g.raw]?.label ?? g.raw,
     count: g.count, color: STATUS_META[g.raw]?.color ?? '#818cf8',
     pct: ((g.count / total) * 100).toFixed(1),
   }))
 
-  // ── Freight ───────────────────────────────────────────────────────────────
+  // Freight
   const freightData: ChartData[] = groupCount(shipments, s => s.freightType).map(g => ({
     label: FREIGHT_META[g.raw]?.label ?? g.raw,
     count: g.count, color: FREIGHT_META[g.raw]?.color ?? '#818cf8',
     pct: ((g.count / total) * 100).toFixed(1),
   }))
 
-  // ── Carriers (top 5 + Other) ──────────────────────────────────────────────
+  // Carriers (top 5 + Other)
   const carrierGroups = groupCount(shipments, s => s.carrier)
   const otherCount    = carrierGroups.slice(5).reduce((s, g) => s + g.count, 0)
   const carrierData: ChartData[] = [
@@ -174,12 +174,10 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
     ...(otherCount > 0 ? [{ label: 'Other', count: otherCount, color: 'rgba(248,250,252,0.2)', pct: ((otherCount / total) * 100).toFixed(1) }] : []),
   ]
 
-  // ── Excel export (charts + tables) ────────────────────────────────────────
   async function handleExport() {
     if (!svgStatus.current || !svgFreight.current || !svgCarrier.current) return
     setExporting(true)
     try {
-      // Capture all 3 charts as PNG
       const [pngStatus, pngFreight, pngCarrier] = await Promise.all([
         svgToBase64Png(svgStatus.current),
         svgToBase64Png(svgFreight.current),
@@ -190,8 +188,8 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
       wb.creator  = 'Trackora'
       wb.created  = new Date()
 
-      const CHART_W = 18  // columns wide
-      const CHART_H = 22  // rows tall
+      const CHART_W = 7   // columns wide
+      const CHART_H = 14  // rows tall
       const TABLE_START_ROW = CHART_H + 2
 
       const sheets: { name: string; data: ChartData[]; png: string }[] = [
@@ -203,19 +201,16 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
       for (const { name, data, png } of sheets) {
         const ws = wb.addWorksheet(name)
 
-        // Column widths
         ws.getColumn(1).width = 28
         ws.getColumn(2).width = 12
         ws.getColumn(3).width = 14
 
-        // Embed pie chart image
         const imgId = wb.addImage({ base64: png, extension: 'png' })
         ws.addImage(imgId, {
           tl: { col: 0, row: 0 } as ExcelJS.Anchor,
           br: { col: CHART_W, row: CHART_H } as ExcelJS.Anchor,
         })
 
-        // Table header
         const headerRow = ws.getRow(TABLE_START_ROW)
         headerRow.height = 20
         const headers = ['Category', 'Count', 'Percentage']
@@ -230,7 +225,6 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
           }
         })
 
-        // Data rows
         data.forEach((row, idx) => {
           const r = ws.getRow(TABLE_START_ROW + 1 + idx)
           r.height = 18
@@ -256,7 +250,6 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
           c3.alignment = { vertical: 'middle', horizontal: 'center' }
         })
 
-        // Total row
         const totalRow = ws.getRow(TABLE_START_ROW + 1 + data.length)
         totalRow.height = 20
         const t1 = totalRow.getCell(1)
@@ -278,7 +271,6 @@ export default function ReportModal({ shipments, onClose }: ReportModalProps) {
         t3.alignment = { vertical: 'middle', horizontal: 'center' }
       }
 
-      // Trigger download
       const buf      = await wb.xlsx.writeBuffer()
       const blob     = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
       const url      = URL.createObjectURL(blob)
