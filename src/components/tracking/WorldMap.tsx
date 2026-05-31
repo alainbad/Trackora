@@ -180,6 +180,13 @@ export default function WorldMap({ animated = false, freightType = 'express', ro
         if (p.lat === 0 && p.lng === 0) return null
         const [x, y] = toSVG(p.lat, p.lng)
         const color  = p.type === 'origin' ? '#10b981' : p.type === 'destination' ? '#ef4444' : '#f59e0b'
+        // Place label above for destination, below for origin, above-right for waypoint
+        const labelOffsetY = p.type === 'origin' ? 22 : -16
+        const labelOffsetX = p.type === 'waypoint' ? 14 : 0
+        const labelAnchor  = p.type === 'waypoint' ? 'start' : 'middle'
+        const labelX = x + labelOffsetX
+        const labelY = y + labelOffsetY
+        const labelW = (p.label?.length ?? 0) * 6.5 + 12
         return (
           <g key={i}>
             <circle cx={x} cy={y} r="6" fill={color} opacity="0.9" filter="url(#strong-glow)" />
@@ -188,9 +195,33 @@ export default function WorldMap({ animated = false, freightType = 'express', ro
               <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite" />
             </circle>
             {p.label && (
-              <text x={x + 14} y={y + 4} fill="white" fontSize="11" fontFamily="Inter,system-ui,sans-serif" opacity="0.8">
-                {p.label}
-              </text>
+              <g>
+                {/* Dark pill background */}
+                <rect
+                  x={labelAnchor === 'middle' ? labelX - labelW / 2 : labelX - 4}
+                  y={labelY - 11}
+                  width={labelW}
+                  height={16}
+                  rx="4"
+                  fill="rgba(8,12,28,0.82)"
+                  stroke={color}
+                  strokeWidth="0.8"
+                  strokeOpacity="0.5"
+                />
+                <text
+                  x={labelX}
+                  y={labelY}
+                  fill="white"
+                  fontSize="10"
+                  fontFamily="Inter,system-ui,sans-serif"
+                  fontWeight="600"
+                  textAnchor={labelAnchor}
+                  opacity="0.95"
+                  letterSpacing="0.5"
+                >
+                  {p.label.toUpperCase()}
+                </text>
+              </g>
             )}
           </g>
         )
