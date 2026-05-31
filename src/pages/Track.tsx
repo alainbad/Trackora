@@ -379,14 +379,35 @@ export default function Track() {
   async function handleToggleEmailAlerts() {
     if (!shipment || !user || !supabase) return
     const next = !emailAlertsEnabled
-    setEmailAlertsEnabled(next)
+    setEmailAlertsEnabled(next)   // optimistic UI
     setEmailAlertsSaving(true)
     try {
-      await supabase
+      // UPSERT: create the row if it doesn't exist yet, update if it does.
+      // A plain UPDATE silently fails when the shipment hasn't been saved to DB.
+      const { error } = await supabase
         .from('shipments')
-        .update({ email_notify: next })
-        .eq('user_id', user.id)
-        .eq('tracking_number', shipment.trackingNumber)
+        .upsert({
+          user_id:         user.id,
+          tracking_number: shipment.trackingNumber,
+          carrier_name:    shipment.carrier ?? null,
+          status:          shipment.status  ?? null,
+          freight_type:    shipment.freightType ?? 'express',
+          origin_city:     shipment.origin?.city ?? null,
+          origin_country:  shipment.origin?.country ?? null,
+          dest_city:       shipment.destination?.city ?? null,
+          dest_country:    shipment.destination?.country ?? null,
+          est_delivery:    shipment.estimatedDelivery ?? null,
+          email_notify:    next,
+        }, { onConflict: 'user_id,tracking_number' })
+
+      if (error) {
+        // Revert optimistic UI on failure
+        setEmailAlertsEnabled(!next)
+        console.error('[Trackora] email alert toggle failed:', error.message)
+      }
+    } catch (e) {
+      setEmailAlertsEnabled(!next)
+      console.error('[Trackora] email alert toggle error:', e)
     } finally {
       setEmailAlertsSaving(false)
     }
