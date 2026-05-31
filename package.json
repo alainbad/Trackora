@@ -13,6 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
     "@tailwindcss/vite": "^4.3.0",
+    "exceljs": "^4.4.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
     "pdfjs-dist": "^4.10.38",
