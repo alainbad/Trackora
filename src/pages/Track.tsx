@@ -1195,10 +1195,9 @@ export default function Track() {
                 {/* Map */}
                 <div style={{
                   borderRadius: '16px', overflow: 'hidden',
-                  background: 'rgba(255,255,255,0.03)',
+                  background: 'rgba(10,15,30,0.9)',
                   border: '1px solid rgba(255,255,255,0.08)', height: '240px', position: 'relative',
                 }}>
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,15,30,0.8), rgba(15,22,41,0.6))' }} />
                   {(() => {
                     const hasCoords =
                       (shipment.origin.lat !== 0 || shipment.origin.lng !== 0) &&
@@ -1243,10 +1242,9 @@ export default function Track() {
                   {/* Map */}
                   <div style={{
                     borderRadius: '20px', overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.03)',
+                    background: 'rgba(10,15,30,0.9)',
                     border: '1px solid rgba(255,255,255,0.08)', height: '380px', position: 'relative',
                   }}>
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,15,30,0.8), rgba(15,22,41,0.6))' }} />
                     {(() => {
                       const hasCoords =
                         (shipment.origin.lat !== 0 || shipment.origin.lng !== 0) &&

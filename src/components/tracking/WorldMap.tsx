@@ -111,16 +111,16 @@ export default function WorldMap({ animated = false, freightType = 'express', ro
       {/* Grid lines */}
       {[30, 60, 120, 150, 210, 240, 300, 330].map(lng => {
         const [x] = toSVG(0, lng - 180)
-        return <line key={`v${lng}`} x1={x} y1={0} x2={x} y2={500} stroke="rgba(99,102,241,0.06)" strokeWidth="1" />
+        return <line key={`v${lng}`} x1={x} y1={0} x2={x} y2={500} stroke="rgba(99,102,241,0.14)" strokeWidth="1" />
       })}
       {[30, 60, 90, 120, 150].map(lat => {
         const [, y] = toSVG(lat - 90, 0)
-        return <line key={`h${lat}`} x1={0} y1={y} x2={1000} y2={y} stroke="rgba(99,102,241,0.06)" strokeWidth="1" />
+        return <line key={`h${lat}`} x1={0} y1={y} x2={1000} y2={y} stroke="rgba(99,102,241,0.14)" strokeWidth="1" />
       })}
 
       {/* Continents */}
       {LAND_PATHS.map((d, i) => (
-        <path key={i} d={d} fill="rgba(99,102,241,0.12)" stroke="rgba(99,102,241,0.25)" strokeWidth="1" />
+        <path key={i} d={d} fill="rgba(99,102,241,0.28)" stroke="rgba(139,141,255,0.6)" strokeWidth="1.5" />
       ))}
 
       {/* Routes */}
@@ -143,14 +143,14 @@ export default function WorldMap({ animated = false, freightType = 'express', ro
         return (
           <g key={i}>
             {/* Glow halo */}
-            <path d={arcPath} fill="none" stroke={color} strokeWidth={hasRealRoute ? 6 : 4} strokeOpacity="0.12" />
+            <path d={arcPath} fill="none" stroke={color} strokeWidth={hasRealRoute ? 8 : 6} strokeOpacity="0.25" />
             {/* Main arc */}
             <path
               d={arcPath}
               fill="none"
               stroke={color}
-              strokeWidth={hasRealRoute ? 2 : 1.5}
-              strokeOpacity={hasRealRoute ? 0.7 : 0.4}
+              strokeWidth={hasRealRoute ? 2.5 : 2}
+              strokeOpacity={hasRealRoute ? 0.9 : 0.65}
               strokeDasharray="10 6"
               style={{ animation: `dash ${hasRealRoute ? '3s' : '15s'} linear infinite` }}
             />
