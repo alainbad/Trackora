@@ -1204,6 +1204,7 @@ export default function Track() {
                       (shipment.destination.lat !== 0 || shipment.destination.lng !== 0)
                     return (
                       <WorldMap
+                        animated={!hasCoords}
                         freightType={shipment.freightType}
                         route={hasCoords
                           ? { from: [shipment.origin.lat, shipment.origin.lng], to: [shipment.destination.lat, shipment.destination.lng] }
@@ -1251,6 +1252,7 @@ export default function Track() {
                         (shipment.destination.lat !== 0 || shipment.destination.lng !== 0)
                       return (
                         <WorldMap
+                          animated={!hasCoords}
                           freightType={shipment.freightType}
                           route={hasCoords
                             ? { from: [shipment.origin.lat, shipment.origin.lng], to: [shipment.destination.lat, shipment.destination.lng] }
