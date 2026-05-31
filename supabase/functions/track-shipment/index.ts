@@ -422,12 +422,20 @@ async function getFedexToken(): Promise<string | null> {
 }
 
 const FEDEX_STATUS: Record<string, string> = {
-  PU: 'picked_up', OC: 'picked_up', IP: 'picked_up',
-  AR: 'in_transit', DP: 'in_transit', IT: 'in_transit', AF: 'in_transit', HP: 'in_transit',
-  OD: 'out_for_delivery', HL: 'out_for_delivery',
-  DL: 'delivered',
+  // Picked up / label created
+  PU: 'picked_up', OC: 'picked_up', IP: 'picked_up', SH: 'picked_up',
+  // In transit
+  AR: 'in_transit', DP: 'in_transit', IT: 'in_transit', AF: 'in_transit',
+  HP: 'in_transit', TR: 'in_transit', AO: 'in_transit', SF: 'in_transit',
+  // Out for delivery
+  OD: 'out_for_delivery', HL: 'out_for_delivery', OF: 'out_for_delivery',
+  // Delivered — all known FedEx delivered codes
+  DL: 'delivered', SW: 'delivered', FD: 'delivered', OA: 'delivered',
+  // Delayed / exception
   DE: 'delayed', DY: 'delayed', CA: 'delayed', SE: 'delayed', RS: 'delayed',
-  CH: 'customs', CC: 'customs',
+  TD: 'delayed', BA: 'delayed', OX: 'delayed',
+  // Customs
+  CH: 'customs', CC: 'customs', HD: 'customs',
 }
 
 async function fetchFedEx(tn: string): Promise<Record<string, unknown> | null> {
