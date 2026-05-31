@@ -4,10 +4,11 @@ import { useSEO } from '../hooks/useSEO'
 import {
   Plus, Search, Plane, Ship, Truck, Package, Brain,
   TrendingUp, AlertTriangle, CheckCircle2, Clock,
-  BarChart3, Zap, PackageSearch, Trash2, ChevronDown,
+  BarChart3, Zap, PackageSearch, Trash2, ChevronDown, FileBarChart2,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import ReportModal from '../components/dashboard/ReportModal'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -274,12 +275,13 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
 
-  const [shipments,  setShipments]  = useState<DashboardShipment[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [filter,     setFilter]     = useState('all')
-  const [search,     setSearch]     = useState('')
-  const [sort,       setSort]       = useState<SortKey>('newest')
-  const [sortOpen,   setSortOpen]   = useState(false)
+  const [shipments,   setShipments]  = useState<DashboardShipment[]>([])
+  const [loading,     setLoading]    = useState(true)
+  const [filter,      setFilter]     = useState('all')
+  const [search,      setSearch]     = useState('')
+  const [sort,        setSort]       = useState<SortKey>('newest')
+  const [sortOpen,    setSortOpen]   = useState(false)
+  const [showReport,  setShowReport] = useState(false)
   const sortRef = useRef<HTMLDivElement>(null)
 
   // ── Fetch from Supabase ───────────────────────────────────────────────────
@@ -607,6 +609,24 @@ export default function Dashboard() {
                 ))}
               </div>
 
+              {/* Generate Report button */}
+              {shipments.length > 0 && (
+                <button
+                  onClick={() => setShowReport(true)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 14px', borderRadius: '8px', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.2))',
+                    border: '1px solid rgba(99,102,241,0.4)',
+                    color: '#818cf8', fontSize: '12px', fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <FileBarChart2 size={14} />
+                  {!isMobile && 'Analysis Report'}
+                </button>
+              )}
+
               {/* Sort dropdown */}
               <div ref={sortRef} style={{ position: 'relative' }}>
                 <button
@@ -720,6 +740,11 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Analysis Report Modal */}
+      {showReport && (
+        <ReportModal shipments={shipments} onClose={() => setShowReport(false)} />
+      )}
     </div>
   )
 }
