@@ -132,6 +132,35 @@ function normaliseCarrierName(name: string): string {
   return CARRIER_NAME_MAP[name.toLowerCase()] ?? name
 }
 
+// Common carrier API city misspellings → correct name
+const CITY_NAME_MAP: Record<string, string> = {
+  'rivadh':       'Riyadh',
+  'riyad':        'Riyadh',
+  'jeddah':       'Jeddah',
+  'jedda':        'Jeddah',
+  'duba':         'Dubai',
+  'dubay':        'Dubai',
+  'abu dhab':     'Abu Dhabi',
+  'sharjah':      'Sharjah',
+  'sharjha':      'Sharjah',
+  'frankfurt':    'Frankfurt',
+  'frankfort':    'Frankfurt',
+  'hongkong':     'Hong Kong',
+  'hong-kong':    'Hong Kong',
+  'singapur':     'Singapore',
+  'moskow':       'Moscow',
+  'moskva':       'Moscow',
+  'peking':       'Beijing',
+  'calcutta':     'Kolkata',
+  'bombay':       'Mumbai',
+  'madras':       'Chennai',
+}
+
+function normaliseCityName(name: string): string {
+  if (!name) return name
+  return CITY_NAME_MAP[name.toLowerCase().trim()] ?? name
+}
+
 // ── Carrier → direct tracking URL (for "check on carrier site" links) ─────────
 const CARRIER_TRACK_URLS: Record<string, (tn: string) => string> = {
   // ── Ocean / sea carriers ──────────────────────────────────────────────────
@@ -246,9 +275,9 @@ function adaptApiShipment(d: Record<string, unknown>): Shipment {
     freightType,
     status:          status as Shipment['status'],
     statusLabel:     statusLabel(status),
-    origin:          { city: origin.city || '', country: origin.country || '', code: '', lat: origin.lat, lng: origin.lng },
-    destination:     { city: dest.city  || '', country: dest.country  || '', code: '', lat: dest.lat,  lng: dest.lng  },
-    currentLocation: { city: curCity, country: curCountry, lat: cur.lat, lng: cur.lng },
+    origin:          { city: normaliseCityName(origin.city || ''), country: origin.country || '', code: '', lat: origin.lat, lng: origin.lng },
+    destination:     { city: normaliseCityName(dest.city  || ''), country: dest.country  || '', code: '', lat: dest.lat,  lng: dest.lng  },
+    currentLocation: { city: normaliseCityName(curCity), country: curCountry, lat: cur.lat, lng: cur.lng },
     estimatedDelivery: (d.estimatedDelivery as string) ?? 'TBD',
     aiEta:             (d.estimatedDelivery as string) ?? 'TBD',
     etaConfidence:     (d.etaConfidence    as number)  ?? 75,
