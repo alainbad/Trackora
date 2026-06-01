@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
-import { X, Mail, Lock, Eye, EyeOff, CheckCircle, Zap } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { X, Mail, Lock, Eye, EyeOff, CheckCircle, Zap, RefreshCw } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { supabase } from '../../lib/supabase'
 
 interface AuthModalProps {
   initialMode?: 'signin' | 'signup'
@@ -16,8 +17,39 @@ export default function AuthModal({ initialMode = 'signin', onClose, guestLimitM
   const [loading,      setLoading]      = useState(false)
   const [error,        setError]        = useState<string | null>(null)
   const [done,         setDone]         = useState(false)   // email-confirm screen
+  const [resendCd,     setResendCd]     = useState(0)       // countdown seconds
+  const [resending,    setResending]    = useState(false)
+  const [resendOk,     setResendOk]     = useState(false)
+  const cdRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const { signIn, signUp } = useAuth()
+
+  function startCountdown() {
+    setResendCd(60)
+    setResendOk(false)
+    if (cdRef.current) clearInterval(cdRef.current)
+    cdRef.current = setInterval(() => {
+      setResendCd(n => {
+        if (n <= 1) { clearInterval(cdRef.current!); cdRef.current = null; return 0 }
+        return n - 1
+      })
+    }, 1000)
+  }
+
+  async function handleResend() {
+    if (resendCd > 0 || resending || !email || !supabase) return
+    setResending(true)
+    try {
+      await supabase.auth.resend({ type: 'signup', email })
+      setResendOk(true)
+      startCountdown()
+    } finally {
+      setResending(false)
+    }
+  }
+
+  // clean up interval on unmount
+  useEffect(() => () => { if (cdRef.current) clearInterval(cdRef.current) }, [])
 
   // Close on Escape
   useEffect(() => {
@@ -99,10 +131,30 @@ export default function AuthModal({ initialMode = 'signin', onClose, guestLimitM
           </p>
           <button
             onClick={onClose}
-            style={{ padding: '12px 32px', borderRadius: '10px', fontSize: '15px', fontWeight: 600, background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.35)' }}
+            style={{ padding: '12px 32px', borderRadius: '10px', fontSize: '15px', fontWeight: 600, background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.35)', marginBottom: '16px' }}
           >
             Got it
           </button>
+          <div style={{ marginTop: '4px' }}>
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendCd > 0 || resending}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px', margin: '0 auto',
+                padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                border: '1px solid rgba(99,102,241,0.4)',
+                background: resendCd > 0 ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.15)',
+                color: resendCd > 0 ? 'rgba(129,140,248,0.45)' : '#818cf8',
+                cursor: resendCd > 0 || resending ? 'not-allowed' : 'pointer',
+              }}
+            >
+              <RefreshCw size={13} style={resending ? { animation: 'spin 1s linear infinite' } : {}} />
+              {resending ? 'Sending…' : resendCd > 0 ? `Resend in ${resendCd}s` : 'Resend confirmation email'}
+            </button>
+            {resendOk && <p style={{ fontSize: '12px', color: '#10b981', marginTop: '8px' }}>✓ New email sent!</p>}
+          </div>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
     )
@@ -208,10 +260,35 @@ export default function AuthModal({ initialMode = 'signin', onClose, guestLimitM
 
           {/* Error */}
           {error && (
-            <div style={{ padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', fontSize: '13px', color: '#fca5a5', lineHeight: 1.5 }}>
-              {error}
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ padding: '10px 14px', borderRadius: '8px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', fontSize: '13px', color: '#fca5a5', lineHeight: 1.5 }}>
+                {error}
+              </div>
+              {error.toLowerCase().includes('confirm') && (
+                <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendCd > 0 || resending}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '8px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                      border: '1px solid rgba(99,102,241,0.4)',
+                      background: resendCd > 0 ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.15)',
+                      color: resendCd > 0 ? 'rgba(129,140,248,0.45)' : '#818cf8',
+                      cursor: resendCd > 0 || resending ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <RefreshCw size={13} style={resending ? { animation: 'spin 1s linear infinite' } : {}} />
+                    {resending ? 'Sending…' : resendCd > 0 ? `Resend in ${resendCd}s` : 'Resend confirmation email'}
+                  </button>
+                  {resendOk && <span style={{ fontSize: '12px', color: '#10b981' }}>✓ Email sent!</span>}
+                </div>
+              )}
             </div>
           )}
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
           {/* Submit */}
           <button
