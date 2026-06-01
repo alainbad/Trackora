@@ -53,7 +53,7 @@ export const BOOKING_CARRIERS: BookingCarrier[] = [
   {
     name: 'Evergreen',    slug: 'evergreen-line', category: 'sea',
     accentColor: '#00693E',
-    bookingUrl: 'https://ct.evergreen-line.com/toc_web/bl.aspx?bl_no={booking}',
+    bookingUrl: 'https://www.evergreen-line.com/eservice/Eservice.do?service=BLQuery&blno={booking}',
     supportsDeepLink: true,
     hint: 'Booking reference or B/L',
   },
