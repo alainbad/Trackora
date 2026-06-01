@@ -136,6 +136,13 @@ export const BOOKING_CARRIERS: BookingCarrier[] = [
     supportsDeepLink: false,
     hint: 'Booking reference',
   },
+  {
+    name: 'Oman Air Cargo',  slug: 'oman-air',                 category: 'air',
+    accentColor: '#B8232F',
+    bookingUrl: 'https://www.omanair.com/en/cargo/track-shipment?awb={booking}',
+    supportsDeepLink: true,
+    hint: 'AWB number (e.g. 910-18547012)',
+  },
 ]
 
 export function getBookingCarrier(slug: string): BookingCarrier | undefined {
