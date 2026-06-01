@@ -55,7 +55,7 @@ const AIRLINE_MAP: Record<string, AirlineInfo> = {
   '618': { name: 'Singapore Airlines Cargo',  logoSlug: 'singapore-airlines-cargo',  trackUrl: 'https://www.siacargo.com/e-services/quicksearch_public/',                                          supportsDeepLink: false },
   '724': { name: 'Swiss WorldCargo',          logoSlug: 'swiss-worldcargo',          trackUrl: 'https://www.swissworldcargo.com/en/track_n_trace',                                                 supportsDeepLink: false },
   '988': { name: 'Asiana Cargo',              logoSlug: 'asiana-cargo',              trackUrl: 'https://www.asianacargo.com/tracking/viewTraceAirWaybill.do?lang=en&awbNumber={nosep}',            supportsDeepLink: true  },
-  '910': { name: 'Oman Air Cargo',            logoSlug: 'oman-air',                  trackUrl: 'https://www.omanair.com/en/cargo/track-shipment',                                                      supportsDeepLink: false },
+  '910': { name: 'Oman Air Cargo',            logoSlug: 'oman-air',                  trackUrl: 'https://ebooking.champ.aero/webtracking/wy/tracking.asp',                                             supportsDeepLink: false },
 }
 
 // These prefixes are handled well by AfterShip already — no redirect needed
