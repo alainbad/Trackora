@@ -112,6 +112,15 @@ export function findCandidates(text: string): Candidate[] {
     add(`${m[1]}-${m[2]}`, 'mawb', 'Air Waybill (MAWB)')
   }
 
+  // 2b. DHL Express / generic 10-digit waybill appearing after AWB-style keyword.
+  //     DHL AWBs are always 10 digits; the existing patterns miss them because
+  //     mawbRe expects 11 digits and courier12Re expects 12 spaced digits.
+  //     Matching keyword-preceded forms avoids false positives from phone numbers.
+  const dhl10Re = /\b(?:air\s+waybill|airwaybill|waybill|AWB|MAWB|DHL)\s*(?:no\.?|number|#|:)?\s*:?\s*(\d{10})\b/gi
+  for (const m of T.matchAll(dhl10Re)) {
+    add(m[1], 'reference', 'Air Waybill (10-digit)')
+  }
+
   // 3. Express courier labels — tracking number printed as grouped digits near barcode.
   //    FedEx Express, DHL Express, TNT all use 4+4+4 = 12-digit format on shipping labels
   //    e.g. "8720 7000 1520" → "872070001520". The number often appears far from any
@@ -157,6 +166,16 @@ export function findCandidates(text: string): Candidate[] {
     if (isValidContainer(normalised)) { add(normalised, 'container', 'Container (ISO 6346)'); continue }
     if (/^\d{3}-\d{8}$/.test(normalised)) { add(normalised, 'mawb', 'Air Waybill (MAWB)'); continue }
     add(normalised, 'reference', 'Shipment reference')
+  }
+
+  // Remove consecutive-sequence 12-digit piece barcodes (DHL multi-piece shipments
+  // print one barcode per package; they appear as N, N+1, N+2… and are not the AWB).
+  const refs12 = [...found.values()].filter(c => c.type === 'reference' && /^\d{12}$/.test(c.value))
+  if (refs12.length >= 2) {
+    const nums = refs12.map(c => BigInt(c.value)).sort((a, b) => (a < b ? -1 : 1))
+    let seqCount = 1
+    for (let i = 1; i < nums.length; i++) if (nums[i] - nums[i - 1] === 1n) seqCount++
+    if (seqCount >= 2) refs12.forEach(c => found.delete(`reference:${c.value}`))
   }
 
   // Order: containers first, then MAWBs, then references
