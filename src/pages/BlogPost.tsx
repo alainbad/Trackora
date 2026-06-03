@@ -91,7 +91,7 @@ export default function BlogPost() {
         </div>
 
         {/* Ad — below article CTA */}
-        <AdUnit slot="2874691530" style={{ margin: '32px 0' }} />
+        <AdUnit slot="5988077434" style={{ margin: '32px 0' }} />
 
         {/* Other articles */}
         {otherPosts.length > 0 && (

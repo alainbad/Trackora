@@ -193,7 +193,7 @@ export default function FAQ() {
           ))}
         </div>
 
-        <AdUnit slot="2874691530" style={{ marginTop: '48px' }} />
+        <AdUnit slot="5988077434" style={{ marginTop: '48px' }} />
       </div>
     </div>
   )
