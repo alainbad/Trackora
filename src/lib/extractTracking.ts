@@ -122,6 +122,8 @@ export function findCandidates(text: string): Candidate[] {
   }
   // Fallback: standalone 10-digit numbers that appear ≥ 2 times in the document
   // (tracking numbers are always repeated on shipping labels; random refs are not).
+  // When multiple numbers qualify, keep only the most frequent one — the real AWB
+  // appears in the header, barcode, and each copy; phone numbers appear once or twice.
   // Only runs when no keyword-preceded AWB was already found.
   if (![...found.values()].some(c => c.label === 'Air Waybill (10-digit)')) {
     const standalone10Re = /\b(\d{10})\b/g
@@ -129,8 +131,12 @@ export function findCandidates(text: string): Candidate[] {
     for (const m of T.matchAll(standalone10Re)) {
       tally.set(m[1], (tally.get(m[1]) ?? 0) + 1)
     }
-    for (const [num, count] of tally) {
-      if (count >= 2) add(num, 'reference', 'Air Waybill (10-digit)')
+    const qualified = [...tally.entries()].filter(([, count]) => count >= 2)
+    if (qualified.length > 0) {
+      const maxCount = Math.max(...qualified.map(([, c]) => c))
+      const winners = qualified.filter(([, c]) => c === maxCount)
+      // Only add if there's a single clear winner to avoid ambiguity
+      if (winners.length === 1) add(winners[0][0], 'reference', 'Air Waybill (10-digit)')
     }
   }
 
