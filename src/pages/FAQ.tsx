@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
+import AdUnit from '../components/ui/AdUnit'
 
 const categories = [
   {
@@ -191,6 +192,8 @@ export default function FAQ() {
             </div>
           ))}
         </div>
+
+        <AdUnit slot="2874691530" style={{ marginTop: '48px' }} />
       </div>
     </div>
   )

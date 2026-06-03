@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { BLOG_POSTS } from '../data/blogPosts'
+import AdUnit from '../components/ui/AdUnit'
 
 export default function Blog() {
   useSEO({
@@ -77,6 +78,7 @@ export default function Blog() {
           ))}
         </div>
 
+        <AdUnit slot="2874691530" style={{ marginTop: '48px' }} />
       </div>
     </div>
   )

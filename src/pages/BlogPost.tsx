@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { BLOG_POSTS } from '../data/blogPosts'
+import AdUnit from '../components/ui/AdUnit'
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>()
@@ -88,6 +89,9 @@ export default function BlogPost() {
             Start tracking for free →
           </Link>
         </div>
+
+        {/* Ad — below article CTA */}
+        <AdUnit slot="2874691530" style={{ margin: '32px 0' }} />
 
         {/* Other articles */}
         {otherPosts.length > 0 && (
