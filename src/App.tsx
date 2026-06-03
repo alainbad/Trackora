@@ -12,6 +12,7 @@ import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import FAQ from './pages/FAQ'
 import Plans from './pages/Plans'
+import Contact from './pages/Contact'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import { AuthProvider } from './contexts/AuthContext'
@@ -56,6 +57,7 @@ export default function App() {
             <Route path="/blog/:slug"         element={<BlogPost />} />
             <Route path="/faq"                element={<FAQ />} />
             <Route path="/plans"              element={<Plans />} />
+            <Route path="/contact"            element={<Contact />} />
           </Routes>
           <Footer />
         </div>

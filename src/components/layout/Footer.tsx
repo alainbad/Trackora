@@ -67,6 +67,7 @@ export default function Footer() {
                 { label: 'Features',        href: '/#features' },
                 { label: 'Pricing Plans',   href: '/plans' },
                 { label: 'FAQ',             href: '/faq' },
+                { label: 'Contact Us',      href: '/contact' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
@@ -200,7 +201,8 @@ export default function Footer() {
             <Link to="/privacy" style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Privacy Policy</Link>
             <Link to="/terms"   style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Terms of Service</Link>
             <Link to="/about"   style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>About</Link>
-            <Link to="/faq"    style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>FAQ</Link>
+            <Link to="/faq"     style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>FAQ</Link>
+            <Link to="/contact" style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Contact</Link>
           </div>
         </div>
       </div>
