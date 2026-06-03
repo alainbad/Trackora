@@ -38,7 +38,7 @@ export default function Navbar() {
     { label: 'Track',     href: '/track' },
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Features',  href: '/#features' },
-    { label: 'Plans',     href: '/#pricing' },
+    { label: 'Plans',     href: '/plans' },
   ]
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || ''
