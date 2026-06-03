@@ -112,31 +112,19 @@ export function findCandidates(text: string): Candidate[] {
     add(`${m[1]}-${m[2]}`, 'mawb', 'Air Waybill (MAWB)')
   }
 
-  // 2b. DHL Express / generic 10-digit waybill appearing after AWB-style keyword.
-  //     DHL AWBs are always 10 digits; the existing patterns miss them because
-  //     mawbRe expects 11 digits and courier12Re expects 12 spaced digits.
-  //     Matching keyword-preceded forms avoids false positives from phone numbers.
-  const dhl10Re = /\b(?:air\s+waybill|airwaybill|waybill|AWB|MAWB|DHL)\s*(?:no\.?|number|#|:)?\s*:?\s*(\d{10})\b/gi
-  for (const m of T.matchAll(dhl10Re)) {
-    add(m[1], 'reference', 'Air Waybill (10-digit)')
-  }
-  // Fallback: standalone 10-digit numbers that appear ≥ 2 times in the document
-  // (tracking numbers are always repeated on shipping labels; random refs are not).
-  // When multiple numbers qualify, keep only the most frequent one — the real AWB
-  // appears in the header, barcode, and each copy; phone numbers appear once or twice.
-  // Only runs when no keyword-preceded AWB was already found.
-  if (![...found.values()].some(c => c.label === 'Air Waybill (10-digit)')) {
-    const standalone10Re = /\b(\d{10})\b/g
-    const tally = new Map<string, number>()
-    for (const m of T.matchAll(standalone10Re)) {
-      tally.set(m[1], (tally.get(m[1]) ?? 0) + 1)
-    }
-    const qualified = [...tally.entries()].filter(([, count]) => count >= 2)
-    if (qualified.length > 0) {
-      const maxCount = Math.max(...qualified.map(([, c]) => c))
-      const winners = qualified.filter(([, c]) => c === maxCount)
-      // Only add if there's a single clear winner to avoid ambiguity
-      if (winners.length === 1) add(winners[0][0], 'reference', 'Air Waybill (10-digit)')
+  // 2b. DHL Express / generic 10-digit waybill.
+  //     Strategy: find any AWB-related keyword anywhere in the text, then scan up to
+  //     250 chars ahead for a 10-digit number. This handles DHL's two-column PDF layout
+  //     where pdf.js puts the label and the value on separate lines (they are never
+  //     adjacent in the joined text stream, so a single regex can't span them).
+  const awbKwRe = /\b(?:air\s*waybill|airwaybill|waybill\s*(?:no\.?|number|#)?|AWB\s*(?:no\.?|number|#)?|MAWB\s*(?:no\.?|number|#)?)\b/gi
+  for (const km of T.matchAll(awbKwRe)) {
+    const start = (km.index ?? 0) + km[0].length
+    const ahead = T.slice(start, start + 250)
+    const numMatch = /\b(\d{10})\b/.exec(ahead)
+    if (numMatch) {
+      add(numMatch[1], 'reference', 'Air Waybill (10-digit)')
+      break
     }
   }
 
