@@ -113,11 +113,12 @@ export function findCandidates(text: string): Candidate[] {
   }
 
   // 2b. DHL Express / generic 10-digit waybill.
-  //     Strategy: find any AWB-related keyword anywhere in the text, then scan up to
-  //     250 chars ahead for a 10-digit number. This handles DHL's two-column PDF layout
-  //     where pdf.js puts the label and the value on separate lines (they are never
-  //     adjacent in the joined text stream, so a single regex can't span them).
-  const awbKwRe = /\b(?:air\s*waybill|airwaybill|waybill\s*(?:no\.?|number|#)?|AWB\s*(?:no\.?|number|#)?|MAWB\s*(?:no\.?|number|#)?)\b/gi
+  //     Strategy: find qualified AWB keyword (must be followed by No/Number/Tracking/#
+  //     to avoid matching bare "WAYBILL DOC" headers), then scan up to 250 chars ahead
+  //     for a 10-digit number. Handles DHL's two-column PDF layout where the label and
+  //     value land on separate text lines in the pdfjs stream.
+  //     e.g. "Waybill Number: … 4631248775"  or  "Waybill Tracking Number 4631248775"
+  const awbKwRe = /\b(?:air\s*waybill|airwaybill|waybill\s+(?:no\.?|number|tracking|#)|AWB\s*(?:no\.?|number|#)?|MAWB\s*(?:no\.?|number|#)?)\b/gi
   for (const km of T.matchAll(awbKwRe)) {
     const start = (km.index ?? 0) + km[0].length
     const ahead = T.slice(start, start + 250)
