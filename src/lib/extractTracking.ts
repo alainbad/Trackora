@@ -120,6 +120,19 @@ export function findCandidates(text: string): Candidate[] {
   for (const m of T.matchAll(dhl10Re)) {
     add(m[1], 'reference', 'Air Waybill (10-digit)')
   }
+  // Fallback: standalone 10-digit numbers that appear ≥ 2 times in the document
+  // (tracking numbers are always repeated on shipping labels; random refs are not).
+  // Only runs when no keyword-preceded AWB was already found.
+  if (![...found.values()].some(c => c.label === 'Air Waybill (10-digit)')) {
+    const standalone10Re = /\b(\d{10})\b/g
+    const tally = new Map<string, number>()
+    for (const m of T.matchAll(standalone10Re)) {
+      tally.set(m[1], (tally.get(m[1]) ?? 0) + 1)
+    }
+    for (const [num, count] of tally) {
+      if (count >= 2) add(num, 'reference', 'Air Waybill (10-digit)')
+    }
+  }
 
   // 3. Express courier labels — tracking number printed as grouped digits near barcode.
   //    FedEx Express, DHL Express, TNT all use 4+4+4 = 12-digit format on shipping labels
