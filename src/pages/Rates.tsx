@@ -196,53 +196,48 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
 }
 
 // ── Air carrier logos ─────────────────────────────────────────────────────────
-const AIR_LOGO_DOMAIN: Record<AirCarrier, string> = {
-  Emirates:   'emirates.com',
-  Lufthansa:  'lufthansa.com',
-  Qatar:      'qatarairways.com',
-  Turkish:    'turkishairlines.com',
-  Etihad:     'etihad.com',
-  Cargolux:   'cargolux.com',
-  OmanAir:    'omanair.com',
-  MEA:        'mea.com.lb',
-  DHLGlobal:  'dhl.com',
-  FedExCargo: 'fedex.com',
+// AfterShip slug for carriers that have one; others fall back to favicon chain
+const AIR_AFTERSHIP_SLUG: Partial<Record<AirCarrier, string>> = {
+  DHLGlobal:  'dhl',
+  FedExCargo: 'fedex',
+}
+const AIR_LOGO_DOMAIN: Partial<Record<AirCarrier, string>> = {
+  Emirates:  'emirates.com',
+  Lufthansa: 'lufthansa.com',
+  Qatar:     'qatarairways.com',
+  Turkish:   'turkishairlines.com',
+  Etihad:    'etihad.com',
+  Cargolux:  'cargolux.com',
+  OmanAir:   'omanair.com',
 }
 const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
   Emirates:'EK', Lufthansa:'LH', Qatar:'QR', Turkish:'TK', Etihad:'EY',
   Cargolux:'CV', OmanAir:'WY', MEA:'ME', DHLGlobal:'DHL', FedExCargo:'FDX',
 }
 
+const LOGO_STYLE = (size: number): React.CSSProperties => ({
+  width: size, height: size, objectFit: 'contain', borderRadius: '8px',
+  background: 'rgba(255,255,255,0.06)', padding: '5px', boxSizing: 'border-box', flexShrink: 0,
+})
+
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
   const meta = AIR_CARRIER_META[carrier]
-  const [meaFailed, setMeaFailed] = useState(false)
   const [idx, setIdx] = useState(0)
   const [failed, setFailed] = useState(false)
 
-  // MEA: use the self-hosted SVG on white background
-  if (carrier === 'MEA') {
-    if (!meaFailed) {
-      return (
-        <img src="/logos/mea.svg" alt="MEA" onError={() => setMeaFailed(true)}
-          style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px',
-            background: 'white', padding: Math.round(size * 0.1), boxSizing: 'border-box', flexShrink: 0 }}
-        />
-      )
-    }
-    return (
-      <div style={{
-        width: size, height: size, borderRadius: '8px', flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: meta.bg, border: `1px solid ${meta.border}`,
-        fontSize: size <= 28 ? '9px' : '11px', fontWeight: 800, color: meta.primary,
-      }}>ME</div>
-    )
-  }
+  const slug = AIR_AFTERSHIP_SLUG[carrier]
+  const domain = AIR_LOGO_DOMAIN[carrier]
 
-  const sources = [
-    `https://www.google.com/s2/favicons?domain=${AIR_LOGO_DOMAIN[carrier]}&sz=128`,
-    `https://icons.duckduckgo.com/ip3/${AIR_LOGO_DOMAIN[carrier]}.ico`,
-  ]
+  const sources: string[] = slug
+    ? [`${LOGO_BASE}/${slug}.svg`]
+    : carrier === 'MEA'
+      ? ['/logos/mea.svg']
+      : domain
+        ? [
+            `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+            `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+          ]
+        : []
 
   function handleError() {
     if (idx < sources.length - 1) setIdx(i => i + 1)
@@ -252,7 +247,7 @@ function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: nu
     if (e.currentTarget.naturalWidth < 12) handleError()
   }
 
-  if (failed) return (
+  if (failed || sources.length === 0) return (
     <div style={{
       width: size, height: size, borderRadius: '8px', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -263,8 +258,7 @@ function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: nu
   return (
     <img key={sources[idx]} src={sources[idx]} alt={carrier}
       onError={handleError} onLoad={handleLoad}
-      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px',
-        background: 'white', padding: '3px', boxSizing: 'border-box', flexShrink: 0 }}
+      style={LOGO_STYLE(size)}
     />
   )
 }
