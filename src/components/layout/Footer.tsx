@@ -68,6 +68,7 @@ export default function Footer() {
                 { label: 'Pricing Plans',   href: '/plans' },
                 { label: 'FAQ',             href: '/faq' },
                 { label: 'Contact Us',      href: '/contact' },
+                { label: 'Rate Calculator', href: '/rates' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>

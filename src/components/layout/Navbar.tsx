@@ -39,6 +39,7 @@ export default function Navbar() {
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Features',  href: '/#features' },
     { label: 'Plans',     href: '/plans' },
+    { label: 'Rates',     href: '/rates' },
   ]
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || ''
