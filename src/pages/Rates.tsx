@@ -195,16 +195,16 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
   )
 }
 
-// ── Air carrier logos — Wikimedia Commons (trademark of each airline) ────────
+// ── Air carrier logos — Clearbit (main airline domains give best coverage) ────
 const AIR_LOGO_URL: Record<AirCarrier, string> = {
-  Emirates:   'https://commons.wikimedia.org/wiki/Special:Redirect/file/Emirates%20logo.svg',
-  Lufthansa:  'https://commons.wikimedia.org/wiki/Special:Redirect/file/Lufthansa%20Logo%202018.svg',
-  Qatar:      'https://commons.wikimedia.org/wiki/Special:Redirect/file/Qatar%20Airways%20logo.svg',
-  Turkish:    'https://commons.wikimedia.org/wiki/Special:Redirect/file/Turkish%20Airlines%20logo%202019%20compact.svg',
-  Etihad:     'https://commons.wikimedia.org/wiki/Special:Redirect/file/Etihad-airways-logo.svg',
-  Cargolux:   'https://commons.wikimedia.org/wiki/Special:Redirect/file/Cargolux%20logo.svg',
-  OmanAir:    'https://de.wikipedia.org/wiki/Special:Redirect/file/Oman%20Air%20Logo.svg',
-  MEA:        'https://de.wikipedia.org/wiki/Special:Redirect/file/Middle%20East%20Airlines%20logo.svg',
+  Emirates:   'https://logo.clearbit.com/emirates.com',
+  Lufthansa:  'https://logo.clearbit.com/lufthansa.com',
+  Qatar:      'https://logo.clearbit.com/qatarairways.com',
+  Turkish:    'https://logo.clearbit.com/turkishairlines.com',
+  Etihad:     'https://logo.clearbit.com/etihad.com',
+  Cargolux:   'https://logo.clearbit.com/cargolux.com',
+  OmanAir:    'https://logo.clearbit.com/omanair.com',
+  MEA:        'https://logo.clearbit.com/mea.com.lb',
   DHLGlobal:  'https://logo.clearbit.com/dhl.com',
   FedExCargo: 'https://logo.clearbit.com/fedex.com',
 }
@@ -332,6 +332,86 @@ function PackagesInput({
   )
 }
 
+// ── State / region → primary airport fallback for postal code lookup ─────────
+const STATE_AIRPORT: Record<string, Record<string, string>> = {
+  DE: {
+    'Bayern': 'MUC', 'Bavaria': 'MUC',
+    'Baden-Württemberg': 'STR',
+    'Nordrhein-Westfalen': 'CGN', 'North Rhine-Westphalia': 'CGN',
+    'Hessen': 'FRA', 'Hesse': 'FRA',
+    'Hamburg': 'HAM', 'Bremen': 'BRE',
+    'Berlin': 'BER', 'Brandenburg': 'BER',
+    'Sachsen': 'DRS', 'Saxony': 'DRS',
+    'Sachsen-Anhalt': 'LEJ', 'Thüringen': 'LEJ', 'Thuringia': 'LEJ',
+    'Niedersachsen': 'HAJ', 'Lower Saxony': 'HAJ',
+    'Schleswig-Holstein': 'HAM', 'Mecklenburg-Vorpommern': 'HAM',
+    'Rheinland-Pfalz': 'FRA', 'Saarland': 'FRA',
+  },
+  US: {
+    'California': 'LAX', 'New York': 'JFK', 'Texas': 'DFW', 'Florida': 'MIA',
+    'Illinois': 'ORD', 'Georgia': 'ATL', 'Washington': 'SEA', 'Massachusetts': 'BOS',
+    'Colorado': 'DEN', 'Nevada': 'LAS', 'Arizona': 'PHX', 'Michigan': 'DTW',
+    'Pennsylvania': 'PHL', 'North Carolina': 'CLT', 'Missouri': 'STL',
+    'Maryland': 'BWI', 'Virginia': 'IAD', 'Oregon': 'PDX', 'Minnesota': 'MSP',
+    'Tennessee': 'BNA', 'Louisiana': 'MSY', 'Utah': 'SLC', 'Ohio': 'CMH',
+    'Indiana': 'IND', 'Wisconsin': 'MKE', 'Oklahoma': 'OKC', 'Kansas': 'MCI',
+    'Nebraska': 'OMA', 'New Mexico': 'ABQ', 'Hawaii': 'HNL', 'Alaska': 'ANC',
+  },
+  GB: {
+    'England': 'LHR', 'Scotland': 'EDI', 'Wales': 'CWL', 'Northern Ireland': 'BHD',
+    'Greater London': 'LHR', 'West Midlands': 'BHX', 'Greater Manchester': 'MAN',
+    'West Yorkshire': 'LBA', 'Merseyside': 'LPL', 'Tyne and Wear': 'NCL',
+    'South Yorkshire': 'MAN', 'Lothian': 'EDI', 'Strathclyde': 'GLA',
+  },
+  FR: {
+    'Île-de-France': 'CDG', 'Auvergne-Rhône-Alpes': 'LYS',
+    "Provence-Alpes-Côte d'Azur": 'MRS', 'Occitanie': 'TLS',
+    'Nouvelle-Aquitaine': 'BOD', 'Pays de la Loire': 'NTE',
+    'Hauts-de-France': 'LIL', 'Grand Est': 'SXB', 'Bretagne': 'RNS',
+    'Normandie': 'CDG',
+  },
+  IT: {
+    'Lazio': 'FCO', 'Lombardia': 'MXP', 'Veneto': 'VCE', 'Campania': 'NAP',
+    'Emilia-Romagna': 'BLQ', 'Toscana': 'FLR', 'Piemonte': 'TRN',
+    'Sicilia': 'CTA', 'Puglia': 'BRI', 'Liguria': 'GOA',
+  },
+  ES: {
+    'Madrid': 'MAD', 'Cataluña': 'BCN', 'Andalucía': 'AGP',
+    'Comunidad Valenciana': 'VLC', 'País Vasco': 'BIO', 'Aragón': 'ZAZ',
+    'Galicia': 'SCQ', 'Asturias': 'OVD', 'Canarias': 'ACE',
+  },
+  AU: {
+    'New South Wales': 'SYD', 'Victoria': 'MEL', 'Queensland': 'BNE',
+    'Western Australia': 'PER', 'South Australia': 'ADL',
+    'Australian Capital Territory': 'CBR', 'Tasmania': 'HBA', 'Northern Territory': 'DRW',
+  },
+  CA: {
+    'Ontario': 'YYZ', 'British Columbia': 'YVR', 'Quebec': 'YUL',
+    'Alberta': 'YYC', 'Manitoba': 'YWG', 'Saskatchewan': 'YQR',
+    'Nova Scotia': 'YHZ', 'New Brunswick': 'YQM',
+  },
+  IN: {
+    'Maharashtra': 'BOM', 'Delhi': 'DEL', 'Karnataka': 'BLR',
+    'Tamil Nadu': 'MAA', 'West Bengal': 'CCU', 'Telangana': 'HYD',
+    'Gujarat': 'AMD', 'Rajasthan': 'JAI', 'Uttar Pradesh': 'LKO',
+    'Punjab': 'ATQ', 'Kerala': 'COK',
+  },
+}
+
+function lookupStateAirport(country: string, state: string, cities: { code: string; label: string }[]) {
+  const map = STATE_AIRPORT[country]
+  if (!map || !state) return null
+  // exact match first, then partial
+  let code = map[state]
+  if (!code) {
+    const entry = Object.entries(map).find(([k]) =>
+      state.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(state.toLowerCase())
+    )
+    code = entry?.[1] ?? ''
+  }
+  return code ? (cities.find(c => c.code === code) ?? null) : null
+}
+
 // ── LocationField component ───────────────────────────────────────────────────
 function LocationField({
   label, country, onCountry, city, onCity, cities,
@@ -359,24 +439,20 @@ function LocationField({
         const place: string = data.places?.[0]?.['place name'] ?? ''
         const state: string = data.places?.[0]?.['state'] ?? ''
         if (place) {
-          // 1. Try matching place name against city labels
           const placeLower = place.toLowerCase()
+          // 1. Try matching detected place name against city labels
           let match = cities.find(c => {
             const cityName = c.label.toLowerCase().split(' (')[0]
             return c.label.toLowerCase().includes(placeLower.split(' ')[0]) ||
                    placeLower.includes(cityName)
           })
-          // 2. Fallback: match state/region name against city labels
-          if (!match && state) {
-            const stateLower = state.toLowerCase()
-            match = cities.find(c => c.label.toLowerCase().includes(stateLower.split(' ')[0]))
-          }
-          // 3. Final fallback: pick the first city in the list (country's main hub)
+          // 2. State/region → airport lookup table
+          if (!match && state) match = lookupStateAirport(country, state, cities) ?? undefined
+          // 3. Final fallback: country's first city (main hub)
           if (!match && cities.length > 0) match = cities[0]
 
           if (match) {
             onCity(match.code)
-            // Show "PlaceName → City" so user sees both the detected place and the selected city
             const cityDisplay = match.label.split(' (')[0]
             setHint(place === cityDisplay ? place : `${place} → ${cityDisplay}`)
           } else {
