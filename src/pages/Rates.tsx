@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship } from 'lucide-react'
+import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship, Plus, X } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useRateQuota } from '../hooks/useRateQuota'
@@ -22,6 +22,20 @@ const LOGO_BASE = 'https://assets.aftership.com/couriers/svg'
 
 // ── Generic searchable dropdown ───────────────────────────────────────────────
 interface SelectOption { value: string; label: string }
+
+// Module-level constants
+const COUNTRY_OPTIONS: SelectOption[] = COUNTRIES.map(c => ({ value: c.iso, label: c.name }))
+
+const INPUT_STYLE: React.CSSProperties = {
+  padding: '10px 14px', borderRadius: '10px', fontSize: '14px',
+  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+  color: '#f8fafc', outline: 'none', width: '100%', boxSizing: 'border-box',
+}
+
+const LABEL_STYLE: React.CSSProperties = {
+  fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600,
+  display: 'block', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.5px',
+}
 
 function SearchSelect({
   value, onChange, options, placeholder, searchPlaceholder = 'Search…', disabled = false,
@@ -181,18 +195,220 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
   )
 }
 
+// ── Air carrier logo with color-badge fallback ────────────────────────────────
+function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
+  const [ok, setOk] = useState(true)
+  const meta = AIR_CARRIER_META[carrier]
+  const displayName = carrier === 'DHLGlobal' ? 'DHL' : carrier === 'FedExCargo' ? 'FDX' : carrier === 'OmanAir' ? 'OMA' : carrier.slice(0, 3).toUpperCase()
+  if (!ok) return (
+    <div style={{
+      width: size, height: size, borderRadius: '8px', flexShrink: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: meta.bg, border: `1px solid ${meta.border}`,
+      fontSize: size <= 24 ? '8px' : '10px', fontWeight: 800, color: meta.primary, letterSpacing: '0.3px',
+    }}>{displayName}</div>
+  )
+  return (
+    <img src={`${LOGO_BASE}/${meta.slug}.svg`} alt={carrier} onError={() => setOk(false)}
+      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', padding: '4px', boxSizing: 'border-box', flexShrink: 0 }}
+    />
+  )
+}
+
+// ── Package item type ─────────────────────────────────────────────────────────
+interface PkgItem { id: number; weight: string; dimL: string; dimW: string; dimH: string }
+let _pkgId = 0
+function newPkg(): PkgItem { return { id: ++_pkgId, weight: '', dimL: '', dimW: '', dimH: '' } }
+
+// ── PackagesInput component ───────────────────────────────────────────────────
+function PackagesInput({
+  packages, onChange, unit, onUnit, divisor,
+}: {
+  packages: PkgItem[]
+  onChange: (pkgs: PkgItem[]) => void
+  unit: 'kg' | 'lbs'
+  onUnit: (u: 'kg' | 'lbs') => void
+  divisor: number
+}) {
+  function update(id: number, field: keyof PkgItem, val: string) {
+    onChange(packages.map(p => p.id === id ? { ...p, [field]: val } : p))
+  }
+  function remove(id: number) {
+    if (packages.length > 1) onChange(packages.filter(p => p.id !== id))
+  }
+  function add() { onChange([...packages, newPkg()]) }
+
+  const totalChargeable = packages.reduce((sum, p) => {
+    const actual = (parseFloat(p.weight) || 0) * (unit === 'lbs' ? 0.453592 : 1)
+    if (actual <= 0) return sum
+    const l = parseFloat(p.dimL) || 0, w = parseFloat(p.dimW) || 0, h = parseFloat(p.dimH) || 0
+    const vol = (l > 0 && w > 0 && h > 0) ? (l * w * h) / divisor : 0
+    return sum + Math.ceil(Math.max(actual, vol) * 2) / 2
+  }, 0)
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <label style={LABEL_STYLE}>Packages / Pallets</label>
+        <div style={{ display: 'flex', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {(['kg', 'lbs'] as const).map(u => (
+            <button key={u} onClick={() => onUnit(u)} style={{
+              padding: '5px 10px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', border: 'none',
+              background: unit === u ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.04)',
+              color: unit === u ? '#818cf8' : 'rgba(248,250,252,0.5)',
+            }}>{u}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        {packages.map((p, i) => (
+          <div key={p.id} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+            {packages.length > 1 && (
+              <span style={{ fontSize: '11px', color: 'rgba(248,250,252,0.3)', minWidth: '16px', flexShrink: 0 }}>#{i + 1}</span>
+            )}
+            <input
+              type="number" min="0.1" step="0.1" value={p.weight}
+              onChange={e => update(p.id, 'weight', e.target.value)}
+              placeholder={`Wt (${unit})`}
+              style={{ ...INPUT_STYLE, flex: '1.4', width: 'auto', minWidth: 0 }}
+            />
+            {(['dimL', 'dimW', 'dimH'] as const).map((f, fi) => (
+              <input
+                key={f} type="number" min="0" step="1" value={p[f]}
+                onChange={e => update(p.id, f, e.target.value)}
+                placeholder={['L', 'W', 'H'][fi]}
+                style={{ ...INPUT_STYLE, flex: 1, width: 'auto', minWidth: 0, textAlign: 'center', padding: '10px 4px', fontSize: '13px' }}
+              />
+            ))}
+            {packages.length > 1 ? (
+              <button onClick={() => remove(p.id)} style={{
+                padding: '8px 7px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: 'rgba(248,250,252,0.4)',
+                flexShrink: 0, display: 'flex', alignItems: 'center',
+              }}>
+                <X size={12} />
+              </button>
+            ) : <div style={{ width: '30px', flexShrink: 0 }} />}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px' }}>
+        <button onClick={add} style={{
+          display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 12px',
+          borderRadius: '8px', fontSize: '12px', fontWeight: 600,
+          cursor: 'pointer', border: '1px dashed rgba(255,255,255,0.15)',
+          background: 'transparent', color: 'rgba(248,250,252,0.45)',
+        }}>
+          <Plus size={12} /> Add box / pallet
+        </button>
+        {totalChargeable > 0 && (
+          <span style={{ fontSize: '11px', color: 'rgba(248,250,252,0.4)' }}>
+            Total: <strong style={{ color: '#818cf8' }}>{totalChargeable.toFixed(1)} kg</strong>
+          </span>
+        )}
+      </div>
+      <p style={{ fontSize: '11px', color: 'rgba(248,250,252,0.25)', margin: '4px 0 0' }}>
+        Dims in cm. Vol. = L×W×H÷{divisor}. Chargeable = higher value, rounded to 0.5 kg.
+      </p>
+    </div>
+  )
+}
+
+// ── LocationField component ───────────────────────────────────────────────────
+function LocationField({
+  label, country, onCountry, city, onCity, cities,
+}: {
+  label: string
+  country: string
+  onCountry: (v: string) => void
+  city: string
+  onCity: (v: string) => void
+  cities: { code: string; label: string }[]
+}) {
+  const [postal, setPostal] = useState('')
+  const [looking, setLooking] = useState(false)
+  const [hint, setHint] = useState('')
+
+  async function handlePostal(code: string) {
+    setPostal(code)
+    setHint('')
+    if (!country || code.replace(/\s/g, '').length < 3) return
+    setLooking(true)
+    try {
+      const res = await fetch(`https://api.zippopotam.us/${country.toLowerCase()}/${encodeURIComponent(code.trim())}`)
+      if (res.ok) {
+        const data = await res.json()
+        const place: string = data.places?.[0]?.['place name'] ?? ''
+        if (place) {
+          setHint(place)
+          const match = cities.find(c =>
+            c.label.toLowerCase().includes(place.toLowerCase().split(' ')[0]) ||
+            place.toLowerCase().includes(c.label.toLowerCase().split(' (')[0].toLowerCase())
+          )
+          if (match) onCity(match.code)
+        }
+      }
+    } catch { /* ignore */ }
+    setLooking(false)
+  }
+
+  return (
+    <div>
+      <label style={LABEL_STYLE}>{label}</label>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <SearchSelect
+          value={country}
+          onChange={v => { onCountry(v); setPostal(''); setHint('') }}
+          options={COUNTRY_OPTIONS}
+          placeholder="Select country…"
+          searchPlaceholder="Search country…"
+        />
+        {country && cities.length > 0 && (
+          <SearchSelect
+            value={city}
+            onChange={onCity}
+            options={cities.map(c => ({ value: c.code, label: c.label }))}
+            placeholder="Select city / airport (optional)"
+            searchPlaceholder="Search city…"
+          />
+        )}
+        {country && (
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              value={postal}
+              onChange={e => handlePostal(e.target.value)}
+              placeholder="Postal code (optional — auto-fills city)"
+              style={{ ...INPUT_STYLE, paddingRight: hint || looking ? '120px' : '14px', fontSize: '13px' }}
+            />
+            {looking && (
+              <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', color: 'rgba(248,250,252,0.35)' }}>
+                Looking up…
+              </span>
+            )}
+            {hint && !looking && (
+              <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', color: '#4ade80', maxWidth: '110px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {hint}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Air freight result group ──────────────────────────────────────────────────
 function AirCarrierGroup({ carrier, services }: { carrier: AirCarrier; services: AirRateResult[] }) {
   const meta = AIR_CARRIER_META[carrier]
+  const displayName = carrier === 'DHLGlobal' ? 'DHL Global Forwarding' : carrier === 'FedExCargo' ? 'FedEx Air Cargo' : carrier === 'OmanAir' ? 'Oman Air Cargo' : carrier
   return (
     <div style={{ borderRadius: '18px', overflow: 'hidden', border: `1px solid ${meta.border}`, background: meta.bg }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', borderBottom: `1px solid ${meta.border}` }}>
-        <img
-          src={`${LOGO_BASE}/${meta.slug}.svg`} alt={carrier}
-          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-          style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', padding: '5px', boxSizing: 'border-box', flexShrink: 0 }}
-        />
-        <span style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>{carrier}</span>
+        <AirCarrierLogo carrier={carrier} size={36} />
+        <span style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>{displayName}</span>
       </div>
 
       {services.map((r, i) => (
@@ -249,30 +465,24 @@ export default function Rates() {
   const [freightTab, setFreightTab] = useState<'express' | 'air'>('express')
 
   // Express courier state
-  const [originCountry, setOriginCountry]   = useState('')
-  const [originCity,    setOriginCity]      = useState('')
-  const [destCountry,   setDestCountry]     = useState('')
-  const [destCity,      setDestCity]        = useState('')
-  const [weight,        setWeight]          = useState('')
-  const [unit,          setUnit]            = useState<'kg' | 'lbs'>('kg')
-  const [dimL,          setDimL]            = useState('')
-  const [dimW,          setDimW]            = useState('')
-  const [dimH,          setDimH]            = useState('')
-  const [carriers,      setCarriers]        = useState<CarrierKey[]>(['DHL', 'FedEx', 'UPS', 'Aramex'])
-  const [results,       setResults]         = useState<RateResult[] | null>(null)
-  const [error,         setError]           = useState('')
-  const [loading,       setLoading]         = useState(false)
+  const [originCountry, setOriginCountry] = useState('')
+  const [originCity,    setOriginCity]    = useState('')
+  const [destCountry,   setDestCountry]   = useState('')
+  const [destCity,      setDestCity]      = useState('')
+  const [unit,          setUnit]          = useState<'kg' | 'lbs'>('kg')
+  const [pkgs,          setPkgs]          = useState<PkgItem[]>([newPkg()])
+  const [carriers,      setCarriers]      = useState<CarrierKey[]>(['DHL', 'FedEx', 'UPS', 'Aramex'])
+  const [results,       setResults]       = useState<RateResult[] | null>(null)
+  const [error,         setError]         = useState('')
+  const [loading,       setLoading]       = useState(false)
 
   // Air freight state
   const [airOriginCountry, setAirOriginCountry] = useState('')
   const [airOriginCity,    setAirOriginCity]    = useState('')
   const [airDestCountry,   setAirDestCountry]   = useState('')
   const [airDestCity,      setAirDestCity]      = useState('')
-  const [airWeight,        setAirWeight]        = useState('')
   const [airUnit,          setAirUnit]          = useState<'kg' | 'lbs'>('kg')
-  const [airDimL,          setAirDimL]          = useState('')
-  const [airDimW,          setAirDimW]          = useState('')
-  const [airDimH,          setAirDimH]          = useState('')
+  const [airPkgs,          setAirPkgs]          = useState<PkgItem[]>([newPkg()])
   const [commodity,        setCommodity]        = useState<CommodityType>('general')
   const [airCarriers,      setAirCarriers]      = useState<AirCarrier[]>(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'OmanAir', 'MEA', 'DHLGlobal', 'FedExCargo'])
   const [airResults,       setAirResults]       = useState<AirRateResult[] | null>(null)
@@ -285,13 +495,20 @@ export default function Rates() {
   const originCities = useMemo(() => getCities(originCountry), [originCountry])
   const destCities   = useMemo(() => getCities(destCountry),   [destCountry])
 
-  const countryOptions: SelectOption[] = COUNTRIES.map(c => ({ value: c.iso, label: c.name }))
-
-  function handleOriginCountry(iso: string) { setOriginCountry(iso); setOriginCity('') }
-  function handleDestCountry(iso: string)   { setDestCountry(iso);   setDestCity('')   }
-
   function toggleCarrier(c: CarrierKey) {
     setCarriers(prev => prev.includes(c) ? (prev.length > 1 ? prev.filter(x => x !== c) : prev) : [...prev, c])
+  }
+
+  function sumChargeableKg(items: PkgItem[], u: 'kg' | 'lbs', divisor: number): number {
+    let total = 0
+    for (const p of items) {
+      const actual = (parseFloat(p.weight) || 0) * (u === 'lbs' ? 0.453592 : 1)
+      if (actual <= 0) continue
+      const l = parseFloat(p.dimL) || 0, w = parseFloat(p.dimW) || 0, h = parseFloat(p.dimH) || 0
+      const vol = (l > 0 && w > 0 && h > 0) ? l * w * h / divisor : 0
+      total += Math.ceil(Math.max(actual, vol) * 2) / 2
+    }
+    return total
   }
 
   function calculate() {
@@ -299,15 +516,11 @@ export default function Rates() {
     if (!user) { setAuthModal('signup'); return }
     if (!originCountry) return setError('Please select an origin country.')
     if (!destCountry)   return setError('Please select a destination country.')
-    const w = parseFloat(weight)
-    if (!weight || isNaN(w) || w <= 0) return setError('Enter a valid weight.')
-    const kg = unit === 'lbs' ? w * 0.453592 : w
-    const l  = parseFloat(dimL) || 0
-    const ww = parseFloat(dimW) || 0
-    const h  = parseFloat(dimH) || 0
+    const totalKg = sumChargeableKg(pkgs, unit, 5000)
+    if (totalKg <= 0) return setError('Enter a valid weight for at least one package.')
     setLoading(true)
     setTimeout(() => {
-      setResults(calcRates(originCountry, destCountry, kg, l, ww, h, carriers))
+      setResults(calcRates(originCountry, destCountry, totalKg, 0, 0, 0, carriers))
       consume()
       setLoading(false)
     }, 400)
@@ -318,15 +531,11 @@ export default function Rates() {
     if (!user) { setAuthModal('signup'); return }
     if (!airOriginCountry) return setAirError('Please select an origin country.')
     if (!airDestCountry)   return setAirError('Please select a destination country.')
-    const w = parseFloat(airWeight)
-    if (!airWeight || isNaN(w) || w <= 0) return setAirError('Enter a valid weight.')
-    const kg = airUnit === 'lbs' ? w * 0.453592 : w
-    const l  = parseFloat(airDimL) || 0
-    const ww = parseFloat(airDimW) || 0
-    const h  = parseFloat(airDimH) || 0
+    const totalKg = sumChargeableKg(airPkgs, airUnit, 6000)
+    if (totalKg <= 0) return setAirError('Enter a valid weight for at least one package.')
     setAirLoading(true)
     setTimeout(() => {
-      setAirResults(calcAirRates(airOriginCountry, airDestCountry, kg, l, ww, h, airCarriers, commodity))
+      setAirResults(calcAirRates(airOriginCountry, airDestCountry, totalKg, 0, 0, 0, airCarriers, commodity))
       consume()
       setAirLoading(false)
     }, 400)
@@ -357,17 +566,6 @@ export default function Rates() {
     return Array.from(map.entries())
   }, [airResults])
 
-  const inputStyle: React.CSSProperties = {
-    padding: '10px 14px', borderRadius: '10px', fontSize: '14px',
-    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-    color: '#f8fafc', outline: 'none', width: '100%', boxSizing: 'border-box',
-  }
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600,
-    display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px',
-  }
-
   const airFormPanel = (
     <div style={{
       padding: isMobile ? '20px' : '28px', borderRadius: '20px',
@@ -381,70 +579,37 @@ export default function Rates() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
         {/* Origin */}
-        <div>
-          <label style={labelStyle}>Origin</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <SearchSelect value={airOriginCountry} onChange={v => { setAirOriginCountry(v); setAirOriginCity('') }}
-              options={countryOptions} placeholder="Select country…" searchPlaceholder="Search country…" />
-            {airOriginCountry && airOriginCities.length > 0 && (
-              <SearchSelect value={airOriginCity} onChange={setAirOriginCity}
-                options={airOriginCities.map(c => ({ value: c.code, label: c.label }))}
-                placeholder="Select city / airport (optional)" searchPlaceholder="Search city…" />
-            )}
-          </div>
-        </div>
+        <LocationField
+          label="Origin"
+          country={airOriginCountry}
+          onCountry={v => { setAirOriginCountry(v); setAirOriginCity('') }}
+          city={airOriginCity}
+          onCity={setAirOriginCity}
+          cities={airOriginCities}
+        />
 
         {/* Destination */}
-        <div>
-          <label style={labelStyle}>Destination</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <SearchSelect value={airDestCountry} onChange={v => { setAirDestCountry(v); setAirDestCity('') }}
-              options={countryOptions} placeholder="Select country…" searchPlaceholder="Search country…" />
-            {airDestCountry && airDestCities.length > 0 && (
-              <SearchSelect value={airDestCity} onChange={setAirDestCity}
-                options={airDestCities.map(c => ({ value: c.code, label: c.label }))}
-                placeholder="Select city / airport (optional)" searchPlaceholder="Search city…" />
-            )}
-          </div>
-        </div>
+        <LocationField
+          label="Destination"
+          country={airDestCountry}
+          onCountry={v => { setAirDestCountry(v); setAirDestCity('') }}
+          city={airDestCity}
+          onCity={setAirDestCity}
+          cities={airDestCities}
+        />
 
-        {/* Weight */}
-        <div>
-          <label style={labelStyle}>Weight</label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input type="number" min="1" step="0.5" value={airWeight} onChange={e => setAirWeight(e.target.value)}
-              placeholder="e.g. 200" style={{ ...inputStyle, flex: 1, width: 'auto' }} />
-            <div style={{ display: 'flex', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
-              {(['kg', 'lbs'] as const).map(u => (
-                <button key={u} onClick={() => setAirUnit(u)} style={{
-                  padding: '10px 13px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: 'none',
-                  background: airUnit === u ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.04)',
-                  color: airUnit === u ? '#818cf8' : 'rgba(248,250,252,0.5)',
-                }}>{u}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Dimensions */}
-        <div>
-          <label style={labelStyle}>
-            Dimensions (cm) <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, opacity: 0.6 }}>— optional</span>
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            {[{ val: airDimL, set: setAirDimL, ph: 'Length' }, { val: airDimW, set: setAirDimW, ph: 'Width' }, { val: airDimH, set: setAirDimH, ph: 'Height' }].map(({ val, set, ph }) => (
-              <input key={ph} type="number" min="0" step="1" value={val} onChange={e => set(e.target.value)} placeholder={ph}
-                style={{ ...inputStyle, textAlign: 'center', padding: '10px 6px' }} />
-            ))}
-          </div>
-          <p style={{ fontSize: '11px', color: 'rgba(248,250,252,0.3)', margin: '6px 0 0' }}>
-            Vol. weight = L × W × H ÷ 6000 (IATA air). Chargeable = higher, rounded up to 0.5 kg.
-          </p>
-        </div>
+        {/* Packages */}
+        <PackagesInput
+          packages={airPkgs}
+          onChange={setAirPkgs}
+          unit={airUnit}
+          onUnit={setAirUnit}
+          divisor={6000}
+        />
 
         {/* Commodity type */}
         <div>
-          <label style={labelStyle}>Commodity Type</label>
+          <label style={LABEL_STYLE}>Commodity Type</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
             {([
               { value: 'general',    label: 'General',    desc: 'Standard cargo' },
@@ -467,7 +632,7 @@ export default function Rates() {
 
         {/* Air carriers */}
         <div>
-          <label style={labelStyle}>Carriers</label>
+          <label style={LABEL_STYLE}>Carriers</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'OmanAir', 'MEA', 'DHLGlobal', 'FedExCargo'] as AirCarrier[]).map(c => {
               const meta = AIR_CARRIER_META[c]
@@ -582,86 +747,38 @@ export default function Rates() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
-        {/* Origin country + city */}
-        <div>
-          <label style={labelStyle}>Origin</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <SearchSelect
-              value={originCountry} onChange={handleOriginCountry}
-              options={countryOptions} placeholder="Select country…" searchPlaceholder="Search country…"
-            />
-            {originCountry && originCities.length > 0 && (
-              <SearchSelect
-                value={originCity} onChange={setOriginCity}
-                options={originCities.map(c => ({ value: c.code, label: c.label }))}
-                placeholder="Select city / airport (optional)" searchPlaceholder="Search city…"
-              />
-            )}
-          </div>
-        </div>
+        {/* Origin */}
+        <LocationField
+          label="Origin"
+          country={originCountry}
+          onCountry={v => { setOriginCountry(v); setOriginCity('') }}
+          city={originCity}
+          onCity={setOriginCity}
+          cities={originCities}
+        />
 
-        {/* Destination country + city */}
-        <div>
-          <label style={labelStyle}>Destination</label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <SearchSelect
-              value={destCountry} onChange={handleDestCountry}
-              options={countryOptions} placeholder="Select country…" searchPlaceholder="Search country…"
-            />
-            {destCountry && destCities.length > 0 && (
-              <SearchSelect
-                value={destCity} onChange={setDestCity}
-                options={destCities.map(c => ({ value: c.code, label: c.label }))}
-                placeholder="Select city / airport (optional)" searchPlaceholder="Search city…"
-              />
-            )}
-          </div>
-        </div>
+        {/* Destination */}
+        <LocationField
+          label="Destination"
+          country={destCountry}
+          onCountry={v => { setDestCountry(v); setDestCity('') }}
+          city={destCity}
+          onCity={setDestCity}
+          cities={destCities}
+        />
 
-        {/* Weight */}
-        <div>
-          <label style={labelStyle}>Weight</label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <input
-              type="number" min="0.1" step="0.1" value={weight}
-              onChange={e => setWeight(e.target.value)} placeholder="e.g. 2.5"
-              style={{ ...inputStyle, flex: 1, width: 'auto' }}
-            />
-            <div style={{ display: 'flex', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
-              {(['kg', 'lbs'] as const).map(u => (
-                <button key={u} onClick={() => setUnit(u)} style={{
-                  padding: '10px 13px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: 'none',
-                  background: unit === u ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.04)',
-                  color: unit === u ? '#818cf8' : 'rgba(248,250,252,0.5)',
-                }}>
-                  {u}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Dimensions */}
-        <div>
-          <label style={labelStyle}>
-            Dimensions (cm) <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, opacity: 0.6 }}>— optional</span>
-          </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            {[{ val: dimL, set: setDimL, ph: 'Length' }, { val: dimW, set: setDimW, ph: 'Width' }, { val: dimH, set: setDimH, ph: 'Height' }].map(({ val, set, ph }) => (
-              <input key={ph} type="number" min="0" step="0.1"
-                value={val} onChange={e => set(e.target.value)} placeholder={ph}
-                style={{ ...inputStyle, textAlign: 'center', padding: '10px 6px' }}
-              />
-            ))}
-          </div>
-          <p style={{ fontSize: '11px', color: 'rgba(248,250,252,0.3)', margin: '6px 0 0' }}>
-            Vol. weight = L × W × H ÷ 5000. Chargeable = higher, rounded up to 0.5 kg.
-          </p>
-        </div>
+        {/* Packages */}
+        <PackagesInput
+          packages={pkgs}
+          onChange={setPkgs}
+          unit={unit}
+          onUnit={setUnit}
+          divisor={5000}
+        />
 
         {/* Carriers */}
         <div>
-          <label style={labelStyle}>Carriers</label>
+          <label style={LABEL_STYLE}>Carriers</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {(['DHL', 'FedEx', 'UPS', 'Aramex'] as CarrierKey[]).map(c => {
               const meta = CARRIER_META[c]
