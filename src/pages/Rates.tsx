@@ -195,48 +195,77 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
   )
 }
 
-// ── Air carrier brand badges — inline SVG, no external requests ───────────────
-const AIR_BRAND: Record<AirCarrier, { bg: string; fg: string; stripe?: string; abbr: string }> = {
-  Emirates:   { bg: '#C8102E', fg: '#FFFFFF', stripe: '#D4AF37', abbr: 'EK'  },
-  Lufthansa:  { bg: '#05164D', fg: '#FFAD00', stripe: '#FFAD00', abbr: 'LH'  },
-  Qatar:      { bg: '#5C0632', fg: '#FFFFFF', stripe: '#C8A84B', abbr: 'QR'  },
-  Turkish:    { bg: '#C8102E', fg: '#FFFFFF',                    abbr: 'TK'  },
-  Etihad:     { bg: '#1A1A2E', fg: '#C6A84B', stripe: '#C6A84B', abbr: 'EY'  },
-  Cargolux:   { bg: '#D31245', fg: '#FFFFFF', stripe: '#FFD700', abbr: 'CV'  },
-  OmanAir:    { bg: '#990000', fg: '#FFFFFF', stripe: '#C8A84B', abbr: 'WY'  },
-  MEA:        { bg: '#006633', fg: '#FFFFFF', stripe: '#CE1126', abbr: 'ME'  },
-  DHLGlobal:  { bg: '#FFCC00', fg: '#D40511',                    abbr: 'DHL' },
-  FedExCargo: { bg: '#4D148C', fg: '#FF6200', stripe: '#FF6200', abbr: 'FDX' },
+// ── Air carrier logos ─────────────────────────────────────────────────────────
+const AIR_LOGO_DOMAIN: Record<AirCarrier, string> = {
+  Emirates:   'emirates.com',
+  Lufthansa:  'lufthansa.com',
+  Qatar:      'qatarairways.com',
+  Turkish:    'turkishairlines.com',
+  Etihad:     'etihad.com',
+  Cargolux:   'cargolux.com',
+  OmanAir:    'omanair.com',
+  MEA:        'mea.com.lb',
+  DHLGlobal:  'dhl.com',
+  FedExCargo: 'fedex.com',
+}
+const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
+  Emirates:'EK', Lufthansa:'LH', Qatar:'QR', Turkish:'TK', Etihad:'EY',
+  Cargolux:'CV', OmanAir:'WY', MEA:'ME', DHLGlobal:'DHL', FedExCargo:'FDX',
 }
 
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
-  const brand = AIR_BRAND[carrier]
+  const meta = AIR_CARRIER_META[carrier]
   const [meaFailed, setMeaFailed] = useState(false)
-  const rx = Math.round(size * 0.22)
-  const fs = brand.abbr.length > 2 ? Math.round(size * 0.26) : Math.round(size * 0.3)
+  const [idx, setIdx] = useState(0)
+  const [failed, setFailed] = useState(false)
 
-  if (carrier === 'MEA' && !meaFailed) {
+  // MEA: use the self-hosted SVG on white background
+  if (carrier === 'MEA') {
+    if (!meaFailed) {
+      return (
+        <img src="/logos/mea.svg" alt="MEA" onError={() => setMeaFailed(true)}
+          style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px',
+            background: 'white', padding: Math.round(size * 0.1), boxSizing: 'border-box', flexShrink: 0 }}
+        />
+      )
+    }
     return (
-      <img src="/logos/mea.svg" alt="MEA" onError={() => setMeaFailed(true)}
-        style={{ width: size, height: size, objectFit: 'contain', borderRadius: rx,
-          background: '#006633', padding: Math.round(size * 0.06), boxSizing: 'border-box', flexShrink: 0 }}
-      />
+      <div style={{
+        width: size, height: size, borderRadius: '8px', flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: meta.bg, border: `1px solid ${meta.border}`,
+        fontSize: size <= 28 ? '9px' : '11px', fontWeight: 800, color: meta.primary,
+      }}>ME</div>
     )
   }
 
+  const sources = [
+    `https://www.google.com/s2/favicons?domain=${AIR_LOGO_DOMAIN[carrier]}&sz=128`,
+    `https://icons.duckduckgo.com/ip3/${AIR_LOGO_DOMAIN[carrier]}.ico`,
+  ]
+
+  function handleError() {
+    if (idx < sources.length - 1) setIdx(i => i + 1)
+    else setFailed(true)
+  }
+  function handleLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    if (e.currentTarget.naturalWidth < 12) handleError()
+  }
+
+  if (failed) return (
+    <div style={{
+      width: size, height: size, borderRadius: '8px', flexShrink: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: meta.bg, border: `1px solid ${meta.border}`,
+      fontSize: size <= 28 ? '9px' : '11px', fontWeight: 800, color: meta.primary,
+    }}>{AIR_LOGO_ABBR[carrier]}</div>
+  )
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0, display: 'block' }}
-      aria-label={carrier} role="img">
-      <rect width="40" height="40" rx={rx * (40 / size)} fill={brand.bg} />
-      {brand.stripe && (
-        <rect x="0" y="29" width="40" height="11" fill={brand.stripe} opacity="0.3" />
-      )}
-      <text x="20" y="21" textAnchor="middle" dominantBaseline="middle"
-        fill={brand.fg} fontSize={fs * (40 / size)}
-        fontFamily="system-ui,-apple-system,sans-serif" fontWeight="900" letterSpacing="-0.5">
-        {brand.abbr}
-      </text>
-    </svg>
+    <img key={sources[idx]} src={sources[idx]} alt={carrier}
+      onError={handleError} onLoad={handleLoad}
+      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px',
+        background: 'white', padding: '3px', boxSizing: 'border-box', flexShrink: 0 }}
+    />
   )
 }
 
