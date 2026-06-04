@@ -51,7 +51,7 @@ function CountrySelect({
       </div>
       {open && (
         <div style={{
-          position: 'absolute', zIndex: 100, top: 'calc(100% + 6px)', left: 0, right: 0,
+          position: 'absolute', zIndex: 200, top: 'calc(100% + 6px)', left: 0, width: '100%',
           background: '#0f1629', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px',
           boxShadow: '0 12px 40px rgba(0,0,0,0.6)', overflow: 'hidden',
         }}>
@@ -445,8 +445,8 @@ export default function Rates() {
           gap: '24px',
           alignItems: 'start',
         }}>
-          {formPanel}
-          {resultsPanel}
+          <div style={{ minWidth: 0, overflow: 'visible' }}>{formPanel}</div>
+          <div style={{ minWidth: 0 }}>{resultsPanel}</div>
         </div>
 
         <AdUnit slot="5988077434" style={{ marginTop: '48px' }} />
