@@ -216,7 +216,7 @@ const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
 }
 
 const LOGO_STYLE = (size: number): React.CSSProperties => ({
-  width: size, height: size, objectFit: 'cover', borderRadius: '0',
+  width: size, height: size, objectFit: 'contain', borderRadius: '0',
   background: 'rgba(255,255,255,0.06)', padding: '0', boxSizing: 'border-box', flexShrink: 0,
 })
 
@@ -224,6 +224,7 @@ function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: nu
   const meta = AIR_CARRIER_META[carrier]
   const [idx, setIdx] = useState(0)
   const [failed, setFailed] = useState(false)
+
 
   const slug = AIR_AFTERSHIP_SLUG[carrier]
   const domain = AIR_LOGO_DOMAIN[carrier]
