@@ -195,8 +195,7 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
   )
 }
 
-// ── Air carrier logos — multi-source: Clearbit → DuckDuckGo favicon → badge ──
-// DuckDuckGo icon service is already in CSP img-src and covers every domain.
+// ── Air carrier logos — same 3-source chain used by the hero CarrierChip ─────
 const AIR_LOGO_DOMAIN: Record<AirCarrier, string> = {
   Emirates:   'emirates.com',
   Lufthansa:  'lufthansa.com',
@@ -213,18 +212,29 @@ const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
   Emirates:'EMI', Lufthansa:'LH', Qatar:'QR', Turkish:'TK', Etihad:'EY',
   Cargolux:'CLX', OmanAir:'OMA', MEA:'MEA', DHLGlobal:'DHL', FedExCargo:'FDX',
 }
-function airLogoSrc(domain: string, idx: number): string | null {
-  if (idx === 0) return `https://logo.clearbit.com/${domain}`
-  if (idx === 1) return `https://icons.duckduckgo.com/ip3/${domain}.ico`
-  return null
+function airLogoSources(domain: string): string[] {
+  return [
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+    `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+    `https://favicone.com/${domain}?s=128`,
+  ]
 }
 
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
   const [idx, setIdx] = useState(0)
+  const [failed, setFailed] = useState(false)
   const meta = AIR_CARRIER_META[carrier]
-  const domain = AIR_LOGO_DOMAIN[carrier]
-  const src = airLogoSrc(domain, idx)
-  if (!src) return (
+  const sources = airLogoSources(AIR_LOGO_DOMAIN[carrier])
+
+  function handleError() {
+    if (idx < sources.length - 1) setIdx(i => i + 1)
+    else setFailed(true)
+  }
+  function handleLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    if (e.currentTarget.naturalWidth < 12) handleError()
+  }
+
+  if (failed) return (
     <div style={{
       width: size, height: size, borderRadius: '8px', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -233,7 +243,8 @@ function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: nu
     }}>{AIR_LOGO_ABBR[carrier]}</div>
   )
   return (
-    <img key={src} src={src} alt={carrier} onError={() => setIdx(i => i + 1)}
+    <img key={sources[idx]} src={sources[idx]} alt={carrier}
+      onError={handleError} onLoad={handleLoad}
       style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px',
         background: 'white', padding: '3px', boxSizing: 'border-box', flexShrink: 0 }}
     />
