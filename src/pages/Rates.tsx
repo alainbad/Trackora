@@ -216,8 +216,8 @@ const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
 }
 
 const LOGO_STYLE = (size: number): React.CSSProperties => ({
-  width: size, height: size, objectFit: 'contain', borderRadius: '8px',
-  background: 'rgba(255,255,255,0.06)', padding: '5px', boxSizing: 'border-box', flexShrink: 0,
+  width: size, height: size, objectFit: 'cover', borderRadius: '0',
+  background: 'rgba(255,255,255,0.06)', padding: '0', boxSizing: 'border-box', flexShrink: 0,
 })
 
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
@@ -249,7 +249,7 @@ function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: nu
 
   if (failed || sources.length === 0) return (
     <div style={{
-      width: size, height: size, borderRadius: '8px', flexShrink: 0,
+      width: size, height: size, borderRadius: '0', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: meta.bg, border: `1px solid ${meta.border}`,
       fontSize: size <= 28 ? '9px' : '11px', fontWeight: 800, color: meta.primary,
