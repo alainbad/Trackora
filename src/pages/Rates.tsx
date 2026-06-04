@@ -212,19 +212,27 @@ const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
   Emirates:'EMI', Lufthansa:'LH', Qatar:'QR', Turkish:'TK', Etihad:'EY',
   Cargolux:'CLX', OmanAir:'OMA', MEA:'MEA', DHLGlobal:'DHL', FedExCargo:'FDX',
 }
-function airLogoSources(domain: string): string[] {
-  return [
+// Self-hosted logos for carriers whose favicons don't render well
+const AIR_LOGO_LOCAL: Partial<Record<AirCarrier, string>> = {
+  MEA: '/logos/mea.png',
+}
+
+function airLogoSources(carrier: AirCarrier): string[] {
+  const domain = AIR_LOGO_DOMAIN[carrier]
+  const local = AIR_LOGO_LOCAL[carrier]
+  const remote = [
     `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
     `https://icons.duckduckgo.com/ip3/${domain}.ico`,
     `https://favicone.com/${domain}?s=128`,
   ]
+  return local ? [local, ...remote] : remote
 }
 
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
   const [idx, setIdx] = useState(0)
   const [failed, setFailed] = useState(false)
   const meta = AIR_CARRIER_META[carrier]
-  const sources = airLogoSources(AIR_LOGO_DOMAIN[carrier])
+  const sources = airLogoSources(carrier)
 
   function handleError() {
     if (idx < sources.length - 1) setIdx(i => i + 1)
