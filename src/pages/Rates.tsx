@@ -472,19 +472,21 @@ export default function Rates() {
             {(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'AirFrance', 'MEA'] as AirCarrier[]).map(c => {
               const meta = AIR_CARRIER_META[c]
               const active = airCarriers.includes(c)
+              const displayName = c === 'AirFrance' ? 'Air France' : c
               return (
                 <button key={c} onClick={() => toggleAirCarrier(c)} style={{
                   padding: '8px 10px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
                   cursor: 'pointer', border: '1px solid', display: 'flex', alignItems: 'center', gap: '8px',
-                  borderColor: active ? meta.primary + '50' : 'rgba(255,255,255,0.08)',
-                  background: active ? meta.bg : 'rgba(255,255,255,0.02)',
-                  color: active ? meta.primary : 'rgba(248,250,252,0.35)',
+                  borderColor: active ? 'rgba(34,197,94,0.45)' : 'rgba(255,255,255,0.08)',
+                  background: active ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.02)',
+                  color: active ? '#4ade80' : 'rgba(248,250,252,0.35)',
+                  minWidth: 0,
                 }}>
-                  <img src={`${LOGO_BASE}/${meta.slug}.svg`} alt={c}
-                    style={{ width: '20px', height: '20px', objectFit: 'contain', opacity: active ? 1 : 0.4 }}
-                    onError={e => { (e.currentTarget as HTMLElement).style.display = 'none' }}
+                  <img src={`${LOGO_BASE}/${meta.slug}.svg`} alt={displayName}
+                    style={{ width: '22px', height: '22px', objectFit: 'contain', flexShrink: 0, borderRadius: '4px', background: 'rgba(255,255,255,0.08)', padding: '2px', boxSizing: 'border-box', opacity: active ? 1 : 0.35 }}
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; (e.currentTarget as HTMLImageElement).style.width = '0'; (e.currentTarget as HTMLImageElement).style.padding = '0' }}
                   />
-                  {c}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
                 </button>
               )
             })}
@@ -668,12 +670,12 @@ export default function Rates() {
                 <button key={c} onClick={() => toggleCarrier(c)} style={{
                   padding: '8px 10px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
                   cursor: 'pointer', border: '1px solid', display: 'flex', alignItems: 'center', gap: '8px',
-                  borderColor: active ? meta.primary + '50' : 'rgba(255,255,255,0.08)',
-                  background: active ? meta.bg : 'rgba(255,255,255,0.02)',
-                  color: active ? meta.primary : 'rgba(248,250,252,0.35)',
+                  borderColor: active ? 'rgba(34,197,94,0.45)' : 'rgba(255,255,255,0.08)',
+                  background: active ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.02)',
+                  color: active ? '#4ade80' : 'rgba(248,250,252,0.35)',
                 }}>
                   <img src={`${LOGO_BASE}/${meta.slug}.svg`} alt={c}
-                    style={{ width: '20px', height: '20px', objectFit: 'contain', opacity: active ? 1 : 0.4 }}
+                    style={{ width: '20px', height: '20px', objectFit: 'contain', opacity: active ? 1 : 0.35 }}
                     onError={e => { (e.currentTarget as HTMLElement).style.display = 'none' }}
                   />
                   {c}
