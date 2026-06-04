@@ -1,11 +1,13 @@
 import { useState, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Calculator, Package, Clock, ChevronDown, Zap } from 'lucide-react'
+import { Calculator, Package, Clock, ChevronDown, Zap, LogIn } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useRateQuota } from '../hooks/useRateQuota'
+import { useAuth } from '../contexts/AuthContext'
 import { calcRates, COUNTRIES, type RateResult } from '../data/shippingRates'
 import AdUnit from '../components/ui/AdUnit'
+import AuthModal from '../components/auth/AuthModal'
 
 type Carrier = 'DHL' | 'FedEx' | 'UPS' | 'Aramex'
 
@@ -165,7 +167,9 @@ export default function Rates() {
   })
 
   const isMobile = useIsMobile()
+  const { user } = useAuth()
   const { remaining, isLimited, isPro, consume } = useRateQuota()
+  const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null)
 
   const [origin,   setOrigin]   = useState('')
   const [dest,     setDest]     = useState('')
@@ -187,6 +191,7 @@ export default function Rates() {
 
   function calculate() {
     setError('')
+    if (!user) { setAuthModal('signup'); return }
     if (!origin) return setError('Please select an origin country.')
     if (!dest)   return setError('Please select a destination country.')
     const w = parseFloat(weight)
@@ -326,7 +331,43 @@ export default function Rates() {
           <p style={{ fontSize: '13px', color: '#f87171', margin: 0 }}>{error}</p>
         )}
 
-        {isLimited ? (
+        {!user ? (
+          <div style={{
+            padding: '20px', borderRadius: '14px', textAlign: 'center',
+            background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)',
+          }}>
+            <LogIn size={22} color="#818cf8" style={{ marginBottom: '10px' }} />
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '6px' }}>
+              Sign up to get rates
+            </p>
+            <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: '16px' }}>
+              Free account — takes 10 seconds. 30 rate searches/month included.
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setAuthModal('signup')}
+                style={{
+                  flex: 1, padding: '11px', borderRadius: '10px', fontSize: '14px', fontWeight: 700,
+                  cursor: 'pointer', border: 'none',
+                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                  color: 'white', boxShadow: '0 4px 14px rgba(99,102,241,0.3)',
+                }}
+              >
+                Create free account
+              </button>
+              <button
+                onClick={() => setAuthModal('signin')}
+                style={{
+                  flex: 1, padding: '11px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+                  cursor: 'pointer', border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.04)', color: 'rgba(248,250,252,0.75)',
+                }}
+              >
+                Sign in
+              </button>
+            </div>
+          </div>
+        ) : isLimited ? (
           <div style={{
             padding: '18px', borderRadius: '14px', textAlign: 'center',
             background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)',
@@ -481,6 +522,14 @@ export default function Rates() {
 
         <AdUnit slot="5988077434" style={{ marginTop: '48px' }} />
       </div>
+
+      {authModal && (
+        <AuthModal
+          initialMode={authModal}
+          onClose={() => setAuthModal(null)}
+          guestLimitMessage="Create a free account to access the shipping rate calculator."
+        />
+      )}
     </div>
   )
 }
