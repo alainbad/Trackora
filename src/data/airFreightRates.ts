@@ -1,6 +1,6 @@
 import { getZone } from './shippingRates'
 
-export type AirCarrier = 'Emirates' | 'Lufthansa' | 'Qatar' | 'Turkish' | 'Etihad' | 'Cargolux' | 'AirFrance' | 'MEA'
+export type AirCarrier = 'Emirates' | 'Lufthansa' | 'Qatar' | 'Turkish' | 'Etihad' | 'Cargolux' | 'OmanAir' | 'MEA' | 'DHLGlobal' | 'FedExCargo'
 export type CommodityType = 'general' | 'perishable' | 'dangerous'
 
 export interface AirCarrierService {
@@ -117,21 +117,21 @@ const CV_STANDARD_RATES: AirWeightBand[] = CV_PRIORITY_RATES.map(b => ({
   ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.81*100)/100]))
 }))
 
-// Air France Cargo — strong on Europe/Africa/Americas routes
-const T_AF_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3:'2–4 days', 4:'3–5 days', 5:'3–5 days', 6:'4–6 days', 7:'5–8 days' }
-const T_AF_STANDARD: Record<number,string> = { 1:'2–4 days', 2:'3–5 days', 3:'4–6 days', 4:'5–7 days', 5:'5–7 days', 6:'6–9 days', 7:'8–11 days' }
+// Oman Air Cargo — hub MCT (Muscat); strong on Middle East/India/Asia/East Africa routes
+const T_OA_PRIORITY: Record<number,string> = { 1:'1 day', 2:'1–2 days', 3:'2–3 days', 4:'2–3 days', 5:'3–4 days', 6:'3–5 days', 7:'4–7 days' }
+const T_OA_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'2–4 days', 3:'3–5 days', 4:'3–5 days', 5:'4–6 days', 6:'5–7 days', 7:'6–10 days' }
 
-const AF_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.7, 2:4.4, 3:5.7, 4:6.7, 5:8.1, 6:9.7, 7:11.4} },
-  { minKg:45,  maxKg:100,  zones:{1:3.1, 2:3.7, 3:4.8, 4:5.7, 5:6.8, 6:8.2, 7:9.6} },
-  { minKg:100, maxKg:300,  zones:{1:2.6, 2:3.2, 3:4.0, 4:4.8, 5:5.7, 6:6.9, 7:8.1} },
-  { minKg:300, maxKg:500,  zones:{1:2.1, 2:2.6, 3:3.3, 4:4.0, 5:4.7, 6:5.7, 7:6.7} },
-  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.2, 3:2.8, 4:3.3, 5:4.0, 6:4.8, 7:5.7} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:1.9,3:2.3,4:2.8,5:3.4,6:4.0,7:4.7} },
+const OA_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.3, 2:4.0, 3:5.1, 4:6.0, 5:7.3, 6:8.8, 7:10.4} },
+  { minKg:45,  maxKg:100,  zones:{1:2.8, 2:3.4, 3:4.3, 4:5.1, 5:6.1, 6:7.4, 7:8.7} },
+  { minKg:100, maxKg:300,  zones:{1:2.3, 2:2.8, 3:3.6, 4:4.3, 5:5.2, 6:6.2, 7:7.3} },
+  { minKg:300, maxKg:500,  zones:{1:1.9, 2:2.3, 3:3.0, 4:3.6, 5:4.3, 6:5.2, 7:6.1} },
+  { minKg:500, maxKg:1000, zones:{1:1.6, 2:2.0, 3:2.5, 4:3.0, 5:3.6, 6:4.4, 7:5.1} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.3,2:1.6,3:2.1,4:2.5,5:3.0,6:3.6,7:4.3} },
 ]
 
-const AF_STANDARD_RATES: AirWeightBand[] = AF_PRIORITY_RATES.map(b => ({
-  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.81*100)/100]))
+const OA_STANDARD_RATES: AirWeightBand[] = OA_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.82*100)/100]))
 }))
 
 // MEA Cargo — Middle East Airlines, Lebanon-based, hub BEY; strong on Middle East/Europe/Africa
@@ -151,6 +151,40 @@ const ME_STANDARD_RATES: AirWeightBand[] = ME_PRIORITY_RATES.map(b => ({
   ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.82*100)/100]))
 }))
 
+// DHL Global Forwarding — air freight arm (not express); hub-to-hub consolidated air cargo
+const T_DG_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3:'2–4 days', 4:'3–5 days', 5:'3–5 days', 6:'4–6 days', 7:'5–8 days' }
+const T_DG_STANDARD: Record<number,string> = { 1:'3–4 days', 2:'3–5 days', 3:'4–6 days', 4:'5–7 days', 5:'5–8 days', 6:'6–9 days', 7:'8–12 days' }
+
+const DG_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.6, 2:4.3, 3:5.5, 4:6.5, 5:7.8, 6:9.4, 7:11.0} },
+  { minKg:45,  maxKg:100,  zones:{1:3.0, 2:3.6, 3:4.6, 4:5.5, 5:6.6, 6:7.9, 7:9.3} },
+  { minKg:100, maxKg:300,  zones:{1:2.5, 2:3.1, 3:3.9, 4:4.6, 5:5.5, 6:6.7, 7:7.8} },
+  { minKg:300, maxKg:500,  zones:{1:2.1, 2:2.6, 3:3.2, 4:3.8, 5:4.6, 6:5.6, 7:6.6} },
+  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.2, 3:2.7, 4:3.2, 5:3.9, 6:4.7, 7:5.5} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:1.8,3:2.3,4:2.7,5:3.3,6:4.0,7:4.6} },
+]
+
+const DG_STANDARD_RATES: AirWeightBand[] = DG_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.78*100)/100]))
+}))
+
+// FedEx International Air Freight (bulk cargo, not parcel express)
+const T_FC_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3:'2–3 days', 4:'3–4 days', 5:'3–5 days', 6:'4–6 days', 7:'5–7 days' }
+const T_FC_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'3–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'5–8 days', 7:'7–10 days' }
+
+const FC_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.8, 2:4.5, 3:5.8, 4:6.8, 5:8.2, 6:9.8, 7:11.5} },
+  { minKg:45,  maxKg:100,  zones:{1:3.2, 2:3.8, 3:4.9, 4:5.7, 5:6.9, 6:8.3, 7:9.7} },
+  { minKg:100, maxKg:300,  zones:{1:2.7, 2:3.2, 3:4.1, 4:4.8, 5:5.8, 6:7.0, 7:8.2} },
+  { minKg:300, maxKg:500,  zones:{1:2.2, 2:2.7, 3:3.4, 4:4.0, 5:4.8, 6:5.8, 7:6.8} },
+  { minKg:500, maxKg:1000, zones:{1:1.9, 2:2.3, 3:2.9, 4:3.4, 5:4.1, 6:5.0, 7:5.8} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.6,2:1.9,3:2.4,4:2.9,5:3.5,6:4.2,7:4.9} },
+]
+
+const FC_STANDARD_RATES: AirWeightBand[] = FC_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.79*100)/100]))
+}))
+
 // ── Service catalogue ─────────────────────────────────────────────────────────
 export const AIR_CARRIER_SERVICES: AirCarrierService[] = [
   { carrier:'Emirates', serviceCode:'emi-priority', serviceName:'Emirates SkyCargo Priority',  transit:T_EMI_PRIORITY, rates:EMI_PRIORITY_RATES, minCharge:75 },
@@ -165,10 +199,14 @@ export const AIR_CARRIER_SERVICES: AirCarrierService[] = [
   { carrier:'Etihad',   serviceCode:'ey-standard',  serviceName:'Etihad Cargo Standard',       transit:T_EY_STANDARD,  rates:EY_STANDARD_RATES,  minCharge:70 },
   { carrier:'Cargolux', serviceCode:'cv-priority',  serviceName:'Cargolux Priority',           transit:T_CV_PRIORITY,  rates:CV_PRIORITY_RATES,  minCharge:85 },
   { carrier:'Cargolux', serviceCode:'cv-standard',  serviceName:'Cargolux Standard',           transit:T_CV_STANDARD,  rates:CV_STANDARD_RATES,  minCharge:85 },
-  { carrier:'AirFrance',serviceCode:'af-priority',  serviceName:'Air France Cargo Priority',   transit:T_AF_PRIORITY,  rates:AF_PRIORITY_RATES,  minCharge:75 },
-  { carrier:'AirFrance',serviceCode:'af-standard',  serviceName:'Air France Cargo Standard',   transit:T_AF_STANDARD,  rates:AF_STANDARD_RATES,  minCharge:75 },
-  { carrier:'MEA',      serviceCode:'me-priority',  serviceName:'MEA Cargo Priority',          transit:T_ME_PRIORITY,  rates:ME_PRIORITY_RATES,  minCharge:60 },
-  { carrier:'MEA',      serviceCode:'me-standard',  serviceName:'MEA Cargo Standard',          transit:T_ME_STANDARD,  rates:ME_STANDARD_RATES,  minCharge:60 },
+  { carrier:'OmanAir',  serviceCode:'oa-priority',  serviceName:'Oman Air Cargo Priority',     transit:T_OA_PRIORITY,  rates:OA_PRIORITY_RATES,  minCharge:60 },
+  { carrier:'OmanAir',  serviceCode:'oa-standard',  serviceName:'Oman Air Cargo Standard',     transit:T_OA_STANDARD,  rates:OA_STANDARD_RATES,  minCharge:60 },
+  { carrier:'MEA',       serviceCode:'me-priority',  serviceName:'MEA Cargo Priority',              transit:T_ME_PRIORITY,  rates:ME_PRIORITY_RATES,  minCharge:60 },
+  { carrier:'MEA',       serviceCode:'me-standard',  serviceName:'MEA Cargo Standard',              transit:T_ME_STANDARD,  rates:ME_STANDARD_RATES,  minCharge:60 },
+  { carrier:'DHLGlobal', serviceCode:'dg-priority',  serviceName:'DHL Global Forwarding Priority',  transit:T_DG_PRIORITY,  rates:DG_PRIORITY_RATES,  minCharge:80 },
+  { carrier:'DHLGlobal', serviceCode:'dg-standard',  serviceName:'DHL Global Forwarding Standard',  transit:T_DG_STANDARD,  rates:DG_STANDARD_RATES,  minCharge:80 },
+  { carrier:'FedExCargo',serviceCode:'fc-priority',  serviceName:'FedEx International Air Priority', transit:T_FC_PRIORITY,  rates:FC_PRIORITY_RATES,  minCharge:75 },
+  { carrier:'FedExCargo',serviceCode:'fc-standard',  serviceName:'FedEx International Air Economy',  transit:T_FC_STANDARD,  rates:FC_STANDARD_RATES,  minCharge:75 },
 ]
 
 // ── Result type ───────────────────────────────────────────────────────────────
@@ -259,6 +297,8 @@ export const AIR_CARRIER_META: Record<AirCarrier, { primary: string; bg: string;
   Turkish:  { primary: '#E31E2D', bg: 'rgba(227,30,45,0.07)',   border: 'rgba(227,30,45,0.2)',   slug: 'turkish-cargo'     },
   Etihad:   { primary: '#B8985A', bg: 'rgba(184,152,90,0.07)',  border: 'rgba(184,152,90,0.2)',  slug: 'etihad-cargo'      },
   Cargolux: { primary: '#E8232A', bg: 'rgba(232,35,42,0.07)',   border: 'rgba(232,35,42,0.2)',   slug: 'cargolux'          },
-  AirFrance:{ primary: '#002157', bg: 'rgba(0,33,87,0.12)',     border: 'rgba(0,33,87,0.3)',     slug: 'air-france-cargo'  },
-  MEA:      { primary: '#006341', bg: 'rgba(0,99,65,0.09)',     border: 'rgba(0,99,65,0.25)',    slug: 'mea'               },
+  OmanAir:  { primary: '#CC0001', bg: 'rgba(204,0,1,0.07)',     border: 'rgba(204,0,1,0.22)',    slug: 'oman-air'          },
+  MEA:       { primary: '#006341', bg: 'rgba(0,99,65,0.09)',    border: 'rgba(0,99,65,0.25)',    slug: 'mea'                    },
+  DHLGlobal: { primary: '#FFCC00', bg: 'rgba(255,204,0,0.07)', border: 'rgba(255,204,0,0.2)',   slug: 'dhl-global-forwarding'  },
+  FedExCargo:{ primary: '#FF6200', bg: 'rgba(255,98,0,0.07)',  border: 'rgba(255,98,0,0.2)',    slug: 'fedex'                  },
 }
