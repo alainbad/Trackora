@@ -7,24 +7,27 @@ import { useRateQuota } from '../hooks/useRateQuota'
 import { calcRates, COUNTRIES, type RateResult } from '../data/shippingRates'
 import AdUnit from '../components/ui/AdUnit'
 
-type Carrier = 'DHL' | 'FedEx' | 'UPS'
+type Carrier = 'DHL' | 'FedEx' | 'UPS' | 'Aramex'
 
-const CARRIER_COLORS: Record<Carrier, { primary: string; bg: string }> = {
-  DHL:   { primary: '#FFCC00', bg: 'rgba(255,204,0,0.08)'  },
-  FedEx: { primary: '#FF6200', bg: 'rgba(255,98,0,0.08)'   },
-  UPS:   { primary: '#8B6914', bg: 'rgba(139,105,20,0.08)' },
+const CARRIER_META: Record<Carrier, { primary: string; bg: string; border: string; service: string; slug: string }> = {
+  DHL:    { primary: '#FFCC00', bg: 'rgba(255,204,0,0.07)',   border: 'rgba(255,204,0,0.2)',  service: 'DHL Express Worldwide',           slug: 'dhl'    },
+  FedEx:  { primary: '#FF6200', bg: 'rgba(255,98,0,0.07)',    border: 'rgba(255,98,0,0.2)',   service: 'FedEx International Priority',    slug: 'fedex'  },
+  UPS:    { primary: '#C8960C', bg: 'rgba(200,150,12,0.07)',  border: 'rgba(200,150,12,0.2)', service: 'UPS Worldwide Express',           slug: 'ups'    },
+  Aramex: { primary: '#E8412C', bg: 'rgba(232,65,44,0.07)',   border: 'rgba(232,65,44,0.2)',  service: 'Aramex Express International',   slug: 'aramex' },
 }
+
+const LOGO_BASE = 'https://assets.aftership.com/couriers/svg'
 
 // Searchable country dropdown
 function CountrySelect({
   value, onChange, placeholder,
 }: { value: string; onChange: (iso: string) => void; placeholder: string }) {
-  const [query, setQuery]   = useState('')
-  const [open, setOpen]     = useState(false)
-  const ref                 = useRef<HTMLDivElement>(null)
+  const [query, setQuery] = useState('')
+  const [open, setOpen]   = useState(false)
+  const ref               = useRef<HTMLDivElement>(null)
 
   const filtered = useMemo(() =>
-    COUNTRIES.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 60),
+    COUNTRIES.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 80),
     [query]
   )
   const selected = COUNTRIES.find(c => c.iso === value)
@@ -46,14 +49,16 @@ function CountrySelect({
           color: selected ? '#f8fafc' : 'rgba(248,250,252,0.35)', fontSize: '14px',
         }}
       >
-        <span>{selected ? selected.name : placeholder}</span>
-        <ChevronDown size={14} color="rgba(248,250,252,0.4)" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {selected ? selected.name : placeholder}
+        </span>
+        <ChevronDown size={14} color="rgba(248,250,252,0.4)" style={{ flexShrink: 0, marginLeft: '8px', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
       </div>
       {open && (
         <div style={{
-          position: 'absolute', zIndex: 200, top: 'calc(100% + 6px)', left: 0, width: '100%',
+          position: 'absolute', zIndex: 200, top: 'calc(100% + 6px)', left: 0, right: 0,
           background: '#0f1629', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px',
-          boxShadow: '0 12px 40px rgba(0,0,0,0.6)', overflow: 'hidden',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.7)', overflow: 'hidden',
         }}>
           <div style={{ padding: '8px' }}>
             <input
@@ -85,9 +90,7 @@ function CountrySelect({
               </div>
             ))}
             {filtered.length === 0 && (
-              <div style={{ padding: '14px', fontSize: '13px', color: 'rgba(248,250,252,0.35)', textAlign: 'center' }}>
-                No results
-              </div>
+              <div style={{ padding: '14px', fontSize: '13px', color: 'rgba(248,250,252,0.35)', textAlign: 'center' }}>No results</div>
             )}
           </div>
         </div>
@@ -96,37 +99,58 @@ function CountrySelect({
   )
 }
 
+function CarrierLogo({ carrier }: { carrier: Carrier }) {
+  const [ok, setOk] = useState(true)
+  const meta = CARRIER_META[carrier]
+  if (!ok) return (
+    <div style={{
+      width: '44px', height: '44px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: meta.bg, border: `1px solid ${meta.border}`, fontSize: '11px', fontWeight: 700, color: meta.primary,
+    }}>
+      {carrier.slice(0, 3)}
+    </div>
+  )
+  return (
+    <img
+      src={`${LOGO_BASE}/${meta.slug}.svg`}
+      alt={carrier}
+      onError={() => setOk(false)}
+      style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', padding: '6px', boxSizing: 'border-box' }}
+    />
+  )
+}
+
 function ResultCard({ result }: { result: RateResult }) {
-  const colors = CARRIER_COLORS[result.carrier]
+  const meta = CARRIER_META[result.carrier as Carrier]
   return (
     <div style={{
-      padding: '22px 24px', borderRadius: '16px',
-      background: colors.bg, border: `1px solid ${colors.primary}30`,
+      padding: '20px 22px', borderRadius: '16px',
+      background: meta.bg, border: `1px solid ${meta.border}`,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <div>
-          <div style={{ fontSize: '17px', fontWeight: 700, color: '#f8fafc' }}>{result.carrier}</div>
-          <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.45)', marginTop: '2px' }}>
-            {result.carrier === 'DHL' ? 'DHL Express Worldwide' :
-             result.carrier === 'FedEx' ? 'FedEx International Priority' :
-             'UPS Worldwide Express'}
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
+        <CarrierLogo carrier={result.carrier as Carrier} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>{result.carrier}</div>
+          <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.45)', marginTop: '2px' }}>{meta.service}</div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '22px', fontWeight: 800, color: colors.primary }}>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{ fontSize: '20px', fontWeight: 800, color: meta.primary, whiteSpace: 'nowrap' }}>
             ~${result.low}–${result.high}
           </div>
           <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.4)', marginTop: '2px' }}>USD estimate</div>
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: 'rgba(248,250,252,0.5)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: 'rgba(248,250,252,0.5)', flexWrap: 'wrap' }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <Clock size={12} />
           {result.transitDays}
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
           <Package size={12} />
-          {result.chargeableKg.toFixed(2)} kg chargeable
+          {result.chargeableKg.toFixed(1)} kg chargeable
+          {result.volKg > result.actualKg && (
+            <span style={{ color: 'rgba(248,250,252,0.35)' }}>(vol: {result.volKg.toFixed(2)} kg)</span>
+          )}
         </span>
       </div>
     </div>
@@ -135,25 +159,25 @@ function ResultCard({ result }: { result: RateResult }) {
 
 export default function Rates() {
   useSEO({
-    title: 'Shipping Rate Calculator — DHL, FedEx, UPS Estimates | Trackora',
-    description: 'Free international shipping rate calculator for DHL Express, FedEx, and UPS. Get instant estimated rates based on weight, dimensions, origin, and destination.',
+    title: 'Shipping Rate Calculator — DHL, FedEx, UPS, Aramex Estimates | Trackora',
+    description: 'Free international shipping rate calculator for DHL Express, FedEx, UPS, and Aramex. Get instant estimated rates based on weight, dimensions, origin, and destination.',
     canonical: 'https://www.track-ora.com/rates',
   })
 
   const isMobile = useIsMobile()
   const { remaining, isLimited, isPro, consume } = useRateQuota()
 
-  const [origin,    setOrigin]    = useState('')
-  const [dest,      setDest]      = useState('')
-  const [weight,    setWeight]    = useState('')
-  const [unit,      setUnit]      = useState<'kg' | 'lbs'>('kg')
-  const [dimL,      setDimL]      = useState('')
-  const [dimW,      setDimW]      = useState('')
-  const [dimH,      setDimH]      = useState('')
-  const [carriers,  setCarriers]  = useState<Carrier[]>(['DHL', 'FedEx', 'UPS'])
-  const [results,   setResults]   = useState<RateResult[] | null>(null)
-  const [error,     setError]     = useState('')
-  const [loading,   setLoading]   = useState(false)
+  const [origin,   setOrigin]   = useState('')
+  const [dest,     setDest]     = useState('')
+  const [weight,   setWeight]   = useState('')
+  const [unit,     setUnit]     = useState<'kg' | 'lbs'>('kg')
+  const [dimL,     setDimL]     = useState('')
+  const [dimW,     setDimW]     = useState('')
+  const [dimH,     setDimH]     = useState('')
+  const [carriers, setCarriers] = useState<Carrier[]>(['DHL', 'FedEx', 'UPS', 'Aramex'])
+  const [results,  setResults]  = useState<RateResult[] | null>(null)
+  const [error,    setError]    = useState('')
+  const [loading,  setLoading]  = useState(false)
 
   function toggleCarrier(c: Carrier) {
     setCarriers(prev =>
@@ -182,19 +206,26 @@ export default function Rates() {
     }, 400)
   }
 
+  const inputStyle: React.CSSProperties = {
+    padding: '10px 14px', borderRadius: '10px', fontSize: '14px',
+    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+    color: '#f8fafc', outline: 'none', width: '100%', boxSizing: 'border-box',
+  }
+
   const formPanel = (
     <div style={{
-      padding: isMobile ? '24px' : '32px', borderRadius: '20px',
+      padding: isMobile ? '20px' : '28px', borderRadius: '20px',
       background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+      boxSizing: 'border-box', width: '100%',
     }}>
-      <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc', marginBottom: '20px' }}>
+      <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc', marginBottom: '18px' }}>
         Shipment Details
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {/* Origin */}
         <div>
-          <label style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Origin Country
           </label>
           <CountrySelect value={origin} onChange={setOrigin} placeholder="Select origin…" />
@@ -202,7 +233,7 @@ export default function Rates() {
 
         {/* Destination */}
         <div>
-          <label style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Destination Country
           </label>
           <CountrySelect value={dest} onChange={setDest} placeholder="Select destination…" />
@@ -210,7 +241,7 @@ export default function Rates() {
 
         {/* Weight */}
         <div>
-          <label style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Weight
           </label>
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -218,16 +249,12 @@ export default function Rates() {
               type="number" min="0.1" step="0.1"
               value={weight} onChange={e => setWeight(e.target.value)}
               placeholder="e.g. 2.5"
-              style={{
-                flex: 1, padding: '10px 14px', borderRadius: '10px', fontSize: '14px',
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-                color: '#f8fafc', outline: 'none',
-              }}
+              style={{ ...inputStyle, flex: 1, width: 'auto' }}
             />
-            <div style={{ display: 'flex', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
               {(['kg', 'lbs'] as const).map(u => (
                 <button key={u} onClick={() => setUnit(u)} style={{
-                  padding: '10px 14px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: 'none',
+                  padding: '10px 13px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: 'none',
                   background: unit === u ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.04)',
                   color: unit === u ? '#818cf8' : 'rgba(248,250,252,0.5)',
                 }}>
@@ -240,61 +267,65 @@ export default function Rates() {
 
         {/* Dimensions */}
         <div>
-          <label style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Dimensions (cm) <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— optional</span>
+          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Dimensions (cm) <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, opacity: 0.6 }}>— optional</span>
           </label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
             {[
-              { val: dimL, set: setDimL, ph: 'L' },
-              { val: dimW, set: setDimW, ph: 'W' },
-              { val: dimH, set: setDimH, ph: 'H' },
+              { val: dimL, set: setDimL, ph: 'Length' },
+              { val: dimW, set: setDimW, ph: 'Width'  },
+              { val: dimH, set: setDimH, ph: 'Height' },
             ].map(({ val, set, ph }) => (
               <input
                 key={ph} type="number" min="0" step="0.1"
                 value={val} onChange={e => set(e.target.value)} placeholder={ph}
-                style={{
-                  padding: '10px 10px', borderRadius: '10px', fontSize: '14px', textAlign: 'center',
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#f8fafc', outline: 'none',
-                }}
+                style={{ ...inputStyle, textAlign: 'center', padding: '10px 6px' }}
               />
             ))}
           </div>
-          <p style={{ fontSize: '11px', color: 'rgba(248,250,252,0.3)', marginTop: '6px' }}>
-            Used to calculate volumetric weight (L × W × H ÷ 5000)
+          <p style={{ fontSize: '11px', color: 'rgba(248,250,252,0.3)', marginTop: '6px', margin: '6px 0 0' }}>
+            Volumetric weight = L × W × H ÷ 5000. Chargeable = higher of actual vs volumetric, rounded up to 0.5 kg.
           </p>
         </div>
 
         {/* Carriers */}
         <div>
-          <label style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', fontWeight: 600, display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
             Carriers
           </label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {(['DHL', 'FedEx', 'UPS'] as Carrier[]).map(c => (
-              <button
-                key={c}
-                onClick={() => toggleCarrier(c)}
-                style={{
-                  flex: 1, padding: '8px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
-                  cursor: 'pointer', border: '1px solid',
-                  borderColor: carriers.includes(c) ? CARRIER_COLORS[c].primary + '60' : 'rgba(255,255,255,0.1)',
-                  background: carriers.includes(c) ? CARRIER_COLORS[c].bg : 'rgba(255,255,255,0.02)',
-                  color: carriers.includes(c) ? CARRIER_COLORS[c].primary : 'rgba(248,250,252,0.4)',
-                }}
-              >
-                {c}
-              </button>
-            ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {(['DHL', 'FedEx', 'UPS', 'Aramex'] as Carrier[]).map(c => {
+              const meta = CARRIER_META[c]
+              const active = carriers.includes(c)
+              return (
+                <button
+                  key={c}
+                  onClick={() => toggleCarrier(c)}
+                  style={{
+                    padding: '8px 10px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                    cursor: 'pointer', border: '1px solid', display: 'flex', alignItems: 'center', gap: '8px',
+                    borderColor: active ? meta.primary + '50' : 'rgba(255,255,255,0.08)',
+                    background: active ? meta.bg : 'rgba(255,255,255,0.02)',
+                    color: active ? meta.primary : 'rgba(248,250,252,0.35)',
+                  }}
+                >
+                  <img
+                    src={`${LOGO_BASE}/${meta.slug}.svg`}
+                    alt={c}
+                    style={{ width: '20px', height: '20px', objectFit: 'contain', opacity: active ? 1 : 0.4 }}
+                    onError={e => { (e.currentTarget as HTMLElement).style.display = 'none' }}
+                  />
+                  {c}
+                </button>
+              )
+            })}
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <p style={{ fontSize: '13px', color: '#f87171', margin: 0 }}>{error}</p>
         )}
 
-        {/* CTA / quota */}
         {isLimited ? (
           <div style={{
             padding: '18px', borderRadius: '14px', textAlign: 'center',
@@ -333,7 +364,7 @@ export default function Rates() {
             >
               {loading ? (
                 <span style={{ display: 'inline-flex', gap: '4px' }}>
-                  {[0,1,2].map(i => (
+                  {[0, 1, 2].map(i => (
                     <span key={i} style={{
                       width: '5px', height: '5px', borderRadius: '50%', background: 'white',
                       animation: 'pulse 1s ease-in-out infinite', animationDelay: `${i * 0.2}s`,
@@ -356,14 +387,13 @@ export default function Rates() {
   )
 
   const resultsPanel = (
-    <div>
+    <div style={{ width: '100%', boxSizing: 'border-box' }}>
       {results ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {results.map(r => <ResultCard key={r.carrier} result={r} />)}
 
-          {/* Disclaimer */}
           <div style={{
-            padding: '16px', borderRadius: '12px',
+            padding: '14px 16px', borderRadius: '12px',
             background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <p style={{ fontSize: '12px', color: 'rgba(248,250,252,0.35)', lineHeight: 1.7, margin: 0 }}>
@@ -373,7 +403,6 @@ export default function Rates() {
             </p>
           </div>
 
-          {/* CTA */}
           <div style={{
             padding: '20px', borderRadius: '14px', textAlign: 'center',
             background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)',
@@ -396,7 +425,7 @@ export default function Rates() {
         </div>
       ) : (
         <div style={{
-          height: '100%', minHeight: '260px',
+          minHeight: '240px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           padding: '40px', borderRadius: '20px', gap: '14px',
           background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)',
@@ -417,7 +446,7 @@ export default function Rates() {
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: '72px', paddingBottom: '80px' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 24px' }}>
+      <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 24px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: '48px', textAlign: 'center' }}>
@@ -434,19 +463,20 @@ export default function Rates() {
             Shipping Rate Calculator
           </h1>
           <p style={{ fontSize: isMobile ? '15px' : '18px', color: 'rgba(248,250,252,0.55)', lineHeight: 1.7, maxWidth: '540px', margin: '0 auto' }}>
-            Get instant estimated rates for DHL Express, FedEx International Priority, and UPS Worldwide Express.
+            Instant estimated rates for DHL, FedEx, UPS, and Aramex — based on weight, dimensions, and route.
           </p>
         </div>
 
         {/* Main layout */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '420px 1fr',
+          gridTemplateColumns: isMobile ? '1fr' : '400px 1fr',
           gap: '24px',
           alignItems: 'start',
+          width: '100%',
         }}>
-          <div style={{ minWidth: 0, overflow: 'visible' }}>{formPanel}</div>
-          <div style={{ minWidth: 0 }}>{resultsPanel}</div>
+          <div style={{ minWidth: 0, width: '100%' }}>{formPanel}</div>
+          <div style={{ minWidth: 0, width: '100%' }}>{resultsPanel}</div>
         </div>
 
         <AdUnit slot="5988077434" style={{ marginTop: '48px' }} />

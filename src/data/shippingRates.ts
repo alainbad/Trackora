@@ -92,12 +92,26 @@ const TRANSIT_DAYS: Record<number, string> = {
   7: '6–10 business days',
 }
 
+// Aramex — strong in ME/Asia/Africa, competitive vs DHL in those lanes
+export const ARAMEX_RATES: WeightBand[] = [
+  { maxKg: 0.5, zones: { 1: 14, 2: 18, 3: 28, 4: 36, 5: 48, 6: 64, 7: 84 } },
+  { maxKg: 1,   zones: { 1: 17, 2: 22, 3: 34, 4: 44, 5: 58, 6: 76, 7: 99 } },
+  { maxKg: 2,   zones: { 1: 21, 2: 27, 3: 41, 4: 54, 5: 70, 6: 92, 7: 119 } },
+  { maxKg: 5,   zones: { 1: 30, 2: 38, 3: 58, 4: 76, 5: 99, 6: 129, 7: 168 } },
+  { maxKg: 10,  zones: { 1: 44, 2: 56, 3: 85, 4: 111, 5: 144, 6: 188, 7: 244 } },
+  { maxKg: 20,  zones: { 1: 65, 2: 83, 3: 126, 4: 164, 5: 213, 6: 278, 7: 361 } },
+  { maxKg: 30,  zones: { 1: 87, 2: 111, 3: 168, 4: 220, 5: 285, 6: 372, 7: 483 } },
+  { maxKg: 70,  zones: { 1: 146, 2: 186, 3: 282, 4: 368, 5: 478, 6: 623, 7: 809 } },
+]
+
 export interface RateResult {
-  carrier: 'DHL' | 'FedEx' | 'UPS'
+  carrier: 'DHL' | 'FedEx' | 'UPS' | 'Aramex'
   low: number
   high: number
   transitDays: string
   chargeableKg: number
+  volKg: number
+  actualKg: number
 }
 
 function lookupRate(table: WeightBand[], kg: number, zone: number): number {
@@ -119,16 +133,20 @@ export function calcRates(
   dimL: number,
   dimW: number,
   dimH: number,
-  carriers: ('DHL' | 'FedEx' | 'UPS')[],
+  carriers: ('DHL' | 'FedEx' | 'UPS' | 'Aramex')[],
 ): RateResult[] {
-  const volKg = (dimL * dimW * dimH) / 5000
-  const chargeableKg = Math.max(actualKg, volKg > 0 ? volKg : 0)
+  // Volumetric divisor: 5000 for express (cm³ → kg)
+  const volKg = (dimL > 0 && dimW > 0 && dimH > 0) ? (dimL * dimW * dimH) / 5000 : 0
+  // Round chargeable weight up to nearest 0.5 kg (standard carrier practice)
+  const rawChargeable = Math.max(actualKg, volKg)
+  const chargeableKg  = Math.ceil(rawChargeable * 2) / 2
   const zone = getZone(originIso, destIso)
 
   const tables: Record<string, WeightBand[]> = {
     DHL: DHL_RATES,
     FedEx: FEDEX_RATES,
     UPS: UPS_RATES,
+    Aramex: ARAMEX_RATES,
   }
 
   return carriers.map(carrier => {
@@ -136,7 +154,7 @@ export function calcRates(
     const withFuel = base * 1.2  // ~20% fuel surcharge
     const low  = Math.round(withFuel * 0.9)
     const high = Math.round(withFuel * 1.1)
-    return { carrier, low, high, transitDays: TRANSIT_DAYS[Math.min(zone, 7)], chargeableKg }
+    return { carrier, low, high, transitDays: TRANSIT_DAYS[Math.min(zone, 7)], chargeableKg, volKg, actualKg }
   })
 }
 
