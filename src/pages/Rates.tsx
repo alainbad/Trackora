@@ -183,8 +183,8 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function Rates() {
   useSEO({
-    title: 'Shipping Rate Calculator — DHL, FedEx, UPS, Aramex Estimates | Trackora',
-    description: 'Free international shipping rate calculator for DHL Express, FedEx, UPS, and Aramex. Get instant estimated rates based on weight, dimensions, origin, and destination.',
+    title: 'Shipping Rate Calculator — DHL, FedEx, UPS & Aramex Instant Estimates | Trackora',
+    description: 'Calculate international shipping rates instantly. Compare DHL Express, FedEx International Priority & Economy, UPS Worldwide Express & Expedited, and Aramex — by weight, dimensions, origin and destination. Free to use.',
     canonical: 'https://www.track-ora.com/rates',
   })
 
@@ -498,6 +498,70 @@ export default function Rates() {
           guestLimitMessage="Create a free account to access the shipping rate calculator."
         />
       )}
+
+      {/* JSON-LD structured data */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'WebApplication',
+            '@id': 'https://www.track-ora.com/rates#app',
+            name: 'Trackora Shipping Rate Calculator',
+            url: 'https://www.track-ora.com/rates',
+            description: 'Free international shipping rate calculator. Compare DHL, FedEx, UPS, and Aramex rates by weight, dimensions, origin and destination.',
+            applicationCategory: 'BusinessApplication',
+            operatingSystem: 'Web',
+            offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', description: 'Free rate estimates with a free Trackora account' },
+            featureList: [
+              'DHL Express Worldwide and DHL Express Easy rates',
+              'FedEx International Priority and Economy rates',
+              'UPS Worldwide Express and Expedited rates',
+              'Aramex Express and Deferred International rates',
+              'Volumetric weight calculation',
+              'Fuel surcharge included',
+              'Transit time estimates per service',
+            ],
+            publisher: { '@type': 'Organization', name: 'Trackora', url: 'https://www.track-ora.com' },
+          },
+          {
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'How do I calculate international shipping rates?',
+                acceptedAnswer: { '@type': 'Answer', text: 'Enter your origin country, destination country, package weight, and optional dimensions on the Trackora Rate Calculator. We instantly compare DHL, FedEx, UPS, and Aramex rates including fuel surcharges.' },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is volumetric weight in shipping?',
+                acceptedAnswer: { '@type': 'Answer', text: 'Volumetric (dimensional) weight = Length × Width × Height (cm) ÷ 5000. Carriers charge whichever is higher — actual weight or volumetric weight — rounded up to the nearest 0.5 kg.' },
+              },
+              {
+                '@type': 'Question',
+                name: 'What is the difference between FedEx International Priority and Economy?',
+                acceptedAnswer: { '@type': 'Answer', text: 'FedEx International Priority delivers in 1–5 business days depending on zone. FedEx International Economy is 20–30% cheaper but takes 2–14 business days. Both are available on the Trackora rate calculator.' },
+              },
+              {
+                '@type': 'Question',
+                name: 'Is DHL Express cheaper than FedEx International Priority?',
+                acceptedAnswer: { '@type': 'Answer', text: 'Rates vary by route, weight, and zone. DHL is often cheaper for Middle East and Asia lanes, while FedEx can be more competitive for US routes. Use the Trackora calculator to compare both instantly.' },
+              },
+              {
+                '@type': 'Question',
+                name: 'Are these shipping rates accurate?',
+                acceptedAnswer: { '@type': 'Answer', text: 'The estimates are based on 2024 published carrier rate cards and include a ~20% fuel surcharge. They are indicative estimates — actual charges may vary based on remote area surcharges and current carrier rates. Contact the carrier for a binding quote.' },
+              },
+            ],
+          },
+          {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.track-ora.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Shipping Rate Calculator', item: 'https://www.track-ora.com/rates' },
+            ],
+          },
+        ],
+      }) }} />
     </div>
   )
 }
