@@ -274,7 +274,7 @@ export default function Rates() {
   const [airDimW,          setAirDimW]          = useState('')
   const [airDimH,          setAirDimH]          = useState('')
   const [commodity,        setCommodity]        = useState<CommodityType>('general')
-  const [airCarriers,      setAirCarriers]      = useState<AirCarrier[]>(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad'])
+  const [airCarriers,      setAirCarriers]      = useState<AirCarrier[]>(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'AirFrance', 'MEA'])
   const [airResults,       setAirResults]       = useState<AirRateResult[] | null>(null)
   const [airError,         setAirError]         = useState('')
   const [airLoading,       setAirLoading]       = useState(false)
@@ -469,7 +469,7 @@ export default function Rates() {
         <div>
           <label style={labelStyle}>Carriers</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            {(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad'] as AirCarrier[]).map(c => {
+            {(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'AirFrance', 'MEA'] as AirCarrier[]).map(c => {
               const meta = AIR_CARRIER_META[c]
               const active = airCarriers.includes(c)
               return (

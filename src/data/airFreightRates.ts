@@ -1,6 +1,6 @@
 import { getZone } from './shippingRates'
 
-export type AirCarrier = 'Emirates' | 'Lufthansa' | 'Qatar' | 'Turkish' | 'Etihad'
+export type AirCarrier = 'Emirates' | 'Lufthansa' | 'Qatar' | 'Turkish' | 'Etihad' | 'Cargolux' | 'AirFrance' | 'MEA'
 export type CommodityType = 'general' | 'perishable' | 'dangerous'
 
 export interface AirCarrierService {
@@ -100,6 +100,57 @@ const EY_STANDARD_RATES: AirWeightBand[] = EY_PRIORITY_RATES.map(b => ({
   ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.82*100)/100]))
 }))
 
+// Cargolux — Luxembourg all-cargo carrier, strong on EU/transatlantic/Asia heavy freight
+const T_CV_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3:'2–4 days', 4:'3–5 days', 5:'3–5 days', 6:'4–6 days', 7:'5–8 days' }
+const T_CV_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'3–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'5–8 days', 7:'7–10 days' }
+
+const CV_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.9, 2:4.6, 3:5.9, 4:7.0, 5:8.4, 6:10.0, 7:11.8} },
+  { minKg:45,  maxKg:100,  zones:{1:3.3, 2:3.9, 3:5.0, 4:5.9, 5:7.1, 6:8.5,  7:10.0} },
+  { minKg:100, maxKg:300,  zones:{1:2.7, 2:3.3, 3:4.2, 4:4.9, 5:5.9, 6:7.1,  7:8.4} },
+  { minKg:300, maxKg:500,  zones:{1:2.2, 2:2.7, 3:3.5, 4:4.1, 5:5.0, 6:6.0,  7:7.0} },
+  { minKg:500, maxKg:1000, zones:{1:1.9, 2:2.3, 3:2.9, 4:3.4, 5:4.2, 6:5.1,  7:5.9} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.6,2:1.9,3:2.4,4:2.9,5:3.5,6:4.2,7:4.9} },
+]
+
+const CV_STANDARD_RATES: AirWeightBand[] = CV_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.81*100)/100]))
+}))
+
+// Air France Cargo — strong on Europe/Africa/Americas routes
+const T_AF_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3:'2–4 days', 4:'3–5 days', 5:'3–5 days', 6:'4–6 days', 7:'5–8 days' }
+const T_AF_STANDARD: Record<number,string> = { 1:'2–4 days', 2:'3–5 days', 3:'4–6 days', 4:'5–7 days', 5:'5–7 days', 6:'6–9 days', 7:'8–11 days' }
+
+const AF_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.7, 2:4.4, 3:5.7, 4:6.7, 5:8.1, 6:9.7, 7:11.4} },
+  { minKg:45,  maxKg:100,  zones:{1:3.1, 2:3.7, 3:4.8, 4:5.7, 5:6.8, 6:8.2, 7:9.6} },
+  { minKg:100, maxKg:300,  zones:{1:2.6, 2:3.2, 3:4.0, 4:4.8, 5:5.7, 6:6.9, 7:8.1} },
+  { minKg:300, maxKg:500,  zones:{1:2.1, 2:2.6, 3:3.3, 4:4.0, 5:4.7, 6:5.7, 7:6.7} },
+  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.2, 3:2.8, 4:3.3, 5:4.0, 6:4.8, 7:5.7} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:1.9,3:2.3,4:2.8,5:3.4,6:4.0,7:4.7} },
+]
+
+const AF_STANDARD_RATES: AirWeightBand[] = AF_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.81*100)/100]))
+}))
+
+// MEA Cargo — Middle East Airlines, Lebanon-based, hub BEY; strong on Middle East/Europe/Africa
+const T_ME_PRIORITY: Record<number,string> = { 1:'1 day', 2:'1–2 days', 3:'2–3 days', 4:'2–4 days', 5:'3–5 days', 6:'4–6 days', 7:'5–8 days' }
+const T_ME_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'2–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'6–8 days', 7:'7–11 days' }
+
+const ME_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.4, 2:4.1, 3:5.2, 4:6.2, 5:7.5, 6:9.0, 7:10.6} },
+  { minKg:45,  maxKg:100,  zones:{1:2.9, 2:3.5, 3:4.4, 4:5.2, 5:6.3, 6:7.6, 7:8.9} },
+  { minKg:100, maxKg:300,  zones:{1:2.4, 2:2.9, 3:3.7, 4:4.4, 5:5.3, 6:6.4, 7:7.5} },
+  { minKg:300, maxKg:500,  zones:{1:2.0, 2:2.4, 3:3.1, 4:3.7, 5:4.4, 6:5.3, 7:6.2} },
+  { minKg:500, maxKg:1000, zones:{1:1.7, 2:2.0, 3:2.6, 4:3.1, 5:3.7, 6:4.5, 7:5.2} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.4,2:1.7,3:2.2,4:2.6,5:3.1,6:3.7,7:4.4} },
+]
+
+const ME_STANDARD_RATES: AirWeightBand[] = ME_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.82*100)/100]))
+}))
+
 // ── Service catalogue ─────────────────────────────────────────────────────────
 export const AIR_CARRIER_SERVICES: AirCarrierService[] = [
   { carrier:'Emirates', serviceCode:'emi-priority', serviceName:'Emirates SkyCargo Priority',  transit:T_EMI_PRIORITY, rates:EMI_PRIORITY_RATES, minCharge:75 },
@@ -112,6 +163,12 @@ export const AIR_CARRIER_SERVICES: AirCarrierService[] = [
   { carrier:'Turkish',  serviceCode:'tk-standard',  serviceName:'Turkish Cargo TK Standard',   transit:T_TK_STANDARD,  rates:TK_STANDARD_RATES,  minCharge:65 },
   { carrier:'Etihad',   serviceCode:'ey-priority',  serviceName:'Etihad Cargo Priority',       transit:T_EY_PRIORITY,  rates:EY_PRIORITY_RATES,  minCharge:70 },
   { carrier:'Etihad',   serviceCode:'ey-standard',  serviceName:'Etihad Cargo Standard',       transit:T_EY_STANDARD,  rates:EY_STANDARD_RATES,  minCharge:70 },
+  { carrier:'Cargolux', serviceCode:'cv-priority',  serviceName:'Cargolux Priority',           transit:T_CV_PRIORITY,  rates:CV_PRIORITY_RATES,  minCharge:85 },
+  { carrier:'Cargolux', serviceCode:'cv-standard',  serviceName:'Cargolux Standard',           transit:T_CV_STANDARD,  rates:CV_STANDARD_RATES,  minCharge:85 },
+  { carrier:'AirFrance',serviceCode:'af-priority',  serviceName:'Air France Cargo Priority',   transit:T_AF_PRIORITY,  rates:AF_PRIORITY_RATES,  minCharge:75 },
+  { carrier:'AirFrance',serviceCode:'af-standard',  serviceName:'Air France Cargo Standard',   transit:T_AF_STANDARD,  rates:AF_STANDARD_RATES,  minCharge:75 },
+  { carrier:'MEA',      serviceCode:'me-priority',  serviceName:'MEA Cargo Priority',          transit:T_ME_PRIORITY,  rates:ME_PRIORITY_RATES,  minCharge:60 },
+  { carrier:'MEA',      serviceCode:'me-standard',  serviceName:'MEA Cargo Standard',          transit:T_ME_STANDARD,  rates:ME_STANDARD_RATES,  minCharge:60 },
 ]
 
 // ── Result type ───────────────────────────────────────────────────────────────
@@ -201,4 +258,7 @@ export const AIR_CARRIER_META: Record<AirCarrier, { primary: string; bg: string;
   Qatar:    { primary: '#5C0632', bg: 'rgba(92,6,50,0.10)',     border: 'rgba(92,6,50,0.25)',    slug: 'qatar-cargo'       },
   Turkish:  { primary: '#E31E2D', bg: 'rgba(227,30,45,0.07)',   border: 'rgba(227,30,45,0.2)',   slug: 'turkish-cargo'     },
   Etihad:   { primary: '#B8985A', bg: 'rgba(184,152,90,0.07)',  border: 'rgba(184,152,90,0.2)',  slug: 'etihad-cargo'      },
+  Cargolux: { primary: '#E8232A', bg: 'rgba(232,35,42,0.07)',   border: 'rgba(232,35,42,0.2)',   slug: 'cargolux'          },
+  AirFrance:{ primary: '#002157', bg: 'rgba(0,33,87,0.12)',     border: 'rgba(0,33,87,0.3)',     slug: 'air-france-cargo'  },
+  MEA:      { primary: '#006341', bg: 'rgba(0,99,65,0.09)',     border: 'rgba(0,99,65,0.25)',    slug: 'mea'               },
 }
