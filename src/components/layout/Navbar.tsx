@@ -128,7 +128,7 @@ export default function Navbar() {
                       onClick={() => setAuthModal('signup')}
                       style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, border: 'none', color: 'white', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', boxShadow: '0 4px 15px rgba(99,102,241,0.35)', cursor: 'pointer' }}
                     >
-                      <Zap size={14} />Get Pro
+                      <Zap size={14} />Sign Up Free
                     </button>
                   </>
                 )}
@@ -234,7 +234,7 @@ export default function Navbar() {
                       onClick={() => { setMenuOpen(false); setAuthModal('signup') }}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '13px', borderRadius: '12px', fontSize: '15px', fontWeight: 700, border: 'none', color: 'white', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', boxShadow: '0 4px 15px rgba(99,102,241,0.35)', cursor: 'pointer' }}
                     >
-                      <Zap size={16} />Get Pro
+                      <Zap size={16} />Sign Up Free
                     </button>
                   </>
                 )}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, ArrowLeft, Share2, Bell, RefreshCw, ScanLine, Plus, X, Check, BellOff, Upload, FileText, Loader2, Mail } from 'lucide-react'
+import { Search, ArrowLeft, Share2, Bell, RefreshCw, ScanLine, Plus, X, Check, BellOff, Upload, FileText, Loader2, Mail, Zap } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useSEO } from '../hooks/useSEO'
 import type { Shipment } from '../data/mockShipments'
@@ -94,6 +95,9 @@ export default function Track() {
   const [emailAlertsSaving, setEmailAlertsSaving] = useState(false)
   const [airlineRedirect,   setAirlineRedirect]   = useState<AirlineRedirect | null>(null)
   const [containerRedirect, setContainerRedirect] = useState<ContainerRedirect | null>(null)
+  const [showSavePrompt,    setShowSavePrompt]    = useState(true)
+  const [showStickyNudge,   setShowStickyNudge]   = useState(true)
+  const [showSignupModal,   setShowSignupModal]   = useState(false)
 
   // Document upload (AWB / BOL) → extract tracking numbers
   const [extracting, setExtracting] = useState(false)
@@ -326,6 +330,13 @@ export default function Track() {
     localStorage.setItem(GUEST_USES_KEY, String(uses + 1))
     return true
   }
+
+  useEffect(() => {
+    if (shipment) {
+      setShowSavePrompt(true)
+      setShowStickyNudge(true)
+    }
+  }, [shipment?.trackingNumber])
 
   // Load persisted alert state whenever the tracked shipment changes
   useEffect(() => {
@@ -989,6 +1000,45 @@ export default function Track() {
               )
             })()}
 
+            {!user && showSavePrompt && (
+              <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                gap: '16px', padding: '16px 20px', marginBottom: '20px',
+                borderRadius: '14px', borderLeft: '4px solid #6366f1',
+                background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                  <Zap size={16} color="#818cf8" style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
+                      Save this shipment &amp; get status alerts
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', marginTop: '2px' }}>
+                      Free account · takes 10 seconds
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    onClick={() => setShowSignupModal(true)}
+                    style={{
+                      padding: '11px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
+                      background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none',
+                      color: 'white', cursor: 'pointer',
+                    }}
+                  >
+                    Sign Up Free
+                  </button>
+                  <button
+                    onClick={() => setShowSavePrompt(false)}
+                    style={{ background: 'none', border: 'none', color: 'rgba(248,250,252,0.4)', cursor: 'pointer', padding: '4px' }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Header */}
             <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', marginBottom: isMobile ? '16px' : '24px', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1309,6 +1359,43 @@ export default function Track() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin 0.8s linear infinite; }
       `}</style>
+
+      {!user && shipment && showStickyNudge && createPortal(
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
+          background: 'rgba(10,15,30,0.97)', backdropFilter: 'blur(16px)',
+          borderTop: '1px solid rgba(99,102,241,0.3)',
+          padding: '12px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span style={{ fontSize: '14px', color: 'rgba(248,250,252,0.8)' }}>
+            🔔 Get notified when <strong style={{ color: '#f8fafc' }}>{shipment.trackingNumber}</strong> updates —
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => setShowSignupModal(true)}
+              style={{
+                padding: '7px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
+                background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none',
+                color: 'white', cursor: 'pointer',
+              }}
+            >
+              Sign in free →
+            </button>
+            <button
+              onClick={() => setShowStickyNudge(false)}
+              style={{ background: 'none', border: 'none', color: 'rgba(248,250,252,0.4)', cursor: 'pointer', padding: '4px' }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showSignupModal && (
+        <AuthModal initialMode="signup" onClose={() => setShowSignupModal(false)} />
+      )}
 
       {/* Guest limit wall — requires sign-up after 3 free tracks */}
       {showAuthWall && (
