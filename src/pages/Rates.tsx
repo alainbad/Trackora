@@ -195,22 +195,38 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
   )
 }
 
-// ── Air carrier logo with color-badge fallback ────────────────────────────────
+// ── Air carrier logos — Wikimedia Commons (trademark of each airline) ────────
+const AIR_LOGO_URL: Record<AirCarrier, string> = {
+  Emirates:   'https://commons.wikimedia.org/wiki/Special:Redirect/file/Emirates%20logo.svg',
+  Lufthansa:  'https://commons.wikimedia.org/wiki/Special:Redirect/file/Lufthansa%20Logo%202018.svg',
+  Qatar:      'https://commons.wikimedia.org/wiki/Special:Redirect/file/Qatar%20Airways%20logo.svg',
+  Turkish:    'https://commons.wikimedia.org/wiki/Special:Redirect/file/Turkish%20Airlines%20logo%202019%20compact.svg',
+  Etihad:     'https://commons.wikimedia.org/wiki/Special:Redirect/file/Etihad-airways-logo.svg',
+  Cargolux:   'https://commons.wikimedia.org/wiki/Special:Redirect/file/Cargolux%20logo.svg',
+  OmanAir:    'https://de.wikipedia.org/wiki/Special:Redirect/file/Oman%20Air%20Logo.svg',
+  MEA:        'https://de.wikipedia.org/wiki/Special:Redirect/file/Middle%20East%20Airlines%20logo.svg',
+  DHLGlobal:  'https://logo.clearbit.com/dhl.com',
+  FedExCargo: 'https://logo.clearbit.com/fedex.com',
+}
+const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
+  Emirates:'EMI', Lufthansa:'LH', Qatar:'QR', Turkish:'TK', Etihad:'EY',
+  Cargolux:'CLX', OmanAir:'OMA', MEA:'MEA', DHLGlobal:'DHL', FedExCargo:'FDX',
+}
+
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
   const [ok, setOk] = useState(true)
   const meta = AIR_CARRIER_META[carrier]
-  const displayName = carrier === 'DHLGlobal' ? 'DHL' : carrier === 'FedExCargo' ? 'FDX' : carrier === 'OmanAir' ? 'OMA' : carrier.slice(0, 3).toUpperCase()
   if (!ok) return (
     <div style={{
       width: size, height: size, borderRadius: '8px', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: meta.bg, border: `1px solid ${meta.border}`,
-      fontSize: size <= 24 ? '8px' : '10px', fontWeight: 800, color: meta.primary, letterSpacing: '0.3px',
-    }}>{displayName}</div>
+      fontSize: size <= 28 ? '9px' : '11px', fontWeight: 800, color: meta.primary, letterSpacing: '0.3px',
+    }}>{AIR_LOGO_ABBR[carrier]}</div>
   )
   return (
-    <img src={`${LOGO_BASE}/${meta.slug}.svg`} alt={carrier} onError={() => setOk(false)}
-      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', padding: '4px', boxSizing: 'border-box', flexShrink: 0 }}
+    <img src={AIR_LOGO_URL[carrier]} alt={carrier} onError={() => setOk(false)}
+      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px', background: 'white', padding: '4px', boxSizing: 'border-box', flexShrink: 0 }}
     />
   )
 }
@@ -341,13 +357,31 @@ function LocationField({
       if (res.ok) {
         const data = await res.json()
         const place: string = data.places?.[0]?.['place name'] ?? ''
+        const state: string = data.places?.[0]?.['state'] ?? ''
         if (place) {
-          setHint(place)
-          const match = cities.find(c =>
-            c.label.toLowerCase().includes(place.toLowerCase().split(' ')[0]) ||
-            place.toLowerCase().includes(c.label.toLowerCase().split(' (')[0].toLowerCase())
-          )
-          if (match) onCity(match.code)
+          // 1. Try matching place name against city labels
+          const placeLower = place.toLowerCase()
+          let match = cities.find(c => {
+            const cityName = c.label.toLowerCase().split(' (')[0]
+            return c.label.toLowerCase().includes(placeLower.split(' ')[0]) ||
+                   placeLower.includes(cityName)
+          })
+          // 2. Fallback: match state/region name against city labels
+          if (!match && state) {
+            const stateLower = state.toLowerCase()
+            match = cities.find(c => c.label.toLowerCase().includes(stateLower.split(' ')[0]))
+          }
+          // 3. Final fallback: pick the first city in the list (country's main hub)
+          if (!match && cities.length > 0) match = cities[0]
+
+          if (match) {
+            onCity(match.code)
+            // Show "PlaceName → City" so user sees both the detected place and the selected city
+            const cityDisplay = match.label.split(' (')[0]
+            setHint(place === cityDisplay ? place : `${place} → ${cityDisplay}`)
+          } else {
+            setHint(place)
+          }
         }
       }
     } catch { /* ignore */ }
