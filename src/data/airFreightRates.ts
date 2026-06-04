@@ -1,0 +1,204 @@
+import { getZone } from './shippingRates'
+
+export type AirCarrier = 'Emirates' | 'Lufthansa' | 'Qatar' | 'Turkish' | 'Etihad'
+export type CommodityType = 'general' | 'perishable' | 'dangerous'
+
+export interface AirCarrierService {
+  carrier: AirCarrier
+  serviceCode: string
+  serviceName: string
+  transit: Record<number, string>
+  // per-kg rates at weight breaks per zone
+  rates: AirWeightBand[]
+  minCharge: number  // USD minimum per shipment
+}
+
+interface AirWeightBand {
+  minKg: number   // lower bound (exclusive, 0 = no lower bound)
+  maxKg: number   // upper bound (inclusive), Infinity for last band
+  zones: Record<number, number>  // zone → rate per kg (USD)
+}
+
+// ── Transit tables ────────────────────────────────────────────────────────────
+const T_EMI_PRIORITY:  Record<number,string> = { 1:'1 day', 2:'1–2 days', 3:'2–3 days', 4:'2–3 days', 5:'3–4 days', 6:'3–5 days', 7:'4–6 days' }
+const T_EMI_STANDARD:  Record<number,string> = { 1:'2–3 days', 2:'2–4 days', 3:'3–5 days', 4:'3–5 days', 5:'4–6 days', 6:'5–7 days', 7:'6–9 days' }
+const T_LH_PRIORITY:   Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3:'2–4 days', 4:'3–4 days', 5:'3–5 days', 6:'4–6 days', 7:'5–7 days' }
+const T_LH_STANDARD:   Record<number,string> = { 1:'2–3 days', 2:'3–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'5–8 days', 7:'6–10 days' }
+const T_QR_PRIORITY:   Record<number,string> = { 1:'1 day', 2:'1–2 days', 3:'2–3 days', 4:'2–4 days', 5:'3–4 days', 6:'3–5 days', 7:'4–6 days' }
+const T_QR_STANDARD:   Record<number,string> = { 1:'2–3 days', 2:'2–4 days', 3:'3–5 days', 4:'4–6 days', 5:'4–6 days', 6:'5–7 days', 7:'6–9 days' }
+const T_TK_PRIORITY:   Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3:'2–4 days', 4:'3–5 days', 5:'3–5 days', 6:'4–6 days', 7:'5–8 days' }
+const T_TK_STANDARD:   Record<number,string> = { 1:'2–3 days', 2:'3–5 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'5–8 days', 7:'7–10 days' }
+const T_EY_PRIORITY:   Record<number,string> = { 1:'1 day', 2:'1–2 days', 3:'2–3 days', 4:'2–4 days', 5:'3–5 days', 6:'4–6 days', 7:'5–7 days' }
+const T_EY_STANDARD:   Record<number,string> = { 1:'2–3 days', 2:'2–4 days', 3:'3–5 days', 4:'3–6 days', 5:'4–7 days', 6:'5–8 days', 7:'6–10 days' }
+
+// ── Rate tables (per kg, USD, before fuel surcharge) ──────────────────────────
+// Weight breaks: <45 kg | 45–100 | 100–300 | 300–500 | 500–1000 | >1000
+// Heavier = cheaper per kg (standard air freight tiering)
+
+const EMI_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.8, 2:4.5, 3:5.8, 4:6.8, 5:8.2, 6:9.8, 7:11.5} },
+  { minKg:45,  maxKg:100,  zones:{1:3.2, 2:3.8, 3:4.9, 4:5.7, 5:6.9, 6:8.3, 7:9.7} },
+  { minKg:100, maxKg:300,  zones:{1:2.7, 2:3.2, 3:4.1, 4:4.8, 5:5.8, 6:7.0, 7:8.2} },
+  { minKg:300, maxKg:500,  zones:{1:2.2, 2:2.7, 3:3.4, 4:4.0, 5:4.8, 6:5.8, 7:6.8} },
+  { minKg:500, maxKg:1000, zones:{1:1.9, 2:2.3, 3:2.9, 4:3.4, 5:4.1, 6:5.0, 7:5.8} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.6,2:1.9,3:2.4,4:2.8,5:3.4,6:4.1,7:4.8} },
+]
+
+const EMI_STANDARD_RATES: AirWeightBand[] = EMI_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.82*100)/100]))
+}))
+
+const LH_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:4.0, 2:4.8, 3:6.0, 4:7.2, 5:8.6, 6:10.2,7:12.0} },
+  { minKg:45,  maxKg:100,  zones:{1:3.4, 2:4.0, 3:5.1, 4:6.1, 5:7.2, 6:8.6, 7:10.1} },
+  { minKg:100, maxKg:300,  zones:{1:2.8, 2:3.4, 3:4.3, 4:5.1, 5:6.1, 6:7.3, 7:8.5} },
+  { minKg:300, maxKg:500,  zones:{1:2.3, 2:2.8, 3:3.6, 4:4.2, 5:5.1, 6:6.1, 7:7.1} },
+  { minKg:500, maxKg:1000, zones:{1:2.0, 2:2.4, 3:3.0, 4:3.6, 5:4.3, 6:5.2, 7:6.0} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.7,2:2.0,3:2.5,4:3.0,5:3.6,6:4.3,7:5.0} },
+]
+
+const LH_STANDARD_RATES: AirWeightBand[] = LH_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.80*100)/100]))
+}))
+
+const QR_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.6, 2:4.3, 3:5.5, 4:6.5, 5:7.9, 6:9.4, 7:11.0} },
+  { minKg:45,  maxKg:100,  zones:{1:3.0, 2:3.6, 3:4.7, 4:5.5, 5:6.6, 6:7.9, 7:9.3} },
+  { minKg:100, maxKg:300,  zones:{1:2.5, 2:3.1, 3:3.9, 4:4.6, 5:5.6, 6:6.7, 7:7.8} },
+  { minKg:300, maxKg:500,  zones:{1:2.1, 2:2.6, 3:3.3, 4:3.8, 5:4.6, 6:5.5, 7:6.5} },
+  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.2, 3:2.8, 4:3.2, 5:3.9, 6:4.7, 7:5.5} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:1.8,3:2.3,4:2.7,5:3.3,6:3.9,7:4.6} },
+]
+
+const QR_STANDARD_RATES: AirWeightBand[] = QR_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.83*100)/100]))
+}))
+
+const TK_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.5, 2:4.2, 3:5.3, 4:6.3, 5:7.6, 6:9.1, 7:10.7} },
+  { minKg:45,  maxKg:100,  zones:{1:2.9, 2:3.5, 3:4.5, 4:5.3, 5:6.4, 6:7.7, 7:9.0} },
+  { minKg:100, maxKg:300,  zones:{1:2.4, 2:3.0, 3:3.8, 4:4.4, 5:5.4, 6:6.5, 7:7.6} },
+  { minKg:300, maxKg:500,  zones:{1:2.0, 2:2.5, 3:3.2, 4:3.7, 5:4.4, 6:5.3, 7:6.3} },
+  { minKg:500, maxKg:1000, zones:{1:1.7, 2:2.1, 3:2.7, 4:3.1, 5:3.8, 6:4.5, 7:5.3} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.4,2:1.8,3:2.2,4:2.6,5:3.1,6:3.8,7:4.4} },
+]
+
+const TK_STANDARD_RATES: AirWeightBand[] = TK_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.81*100)/100]))
+}))
+
+const EY_PRIORITY_RATES: AirWeightBand[] = [
+  { minKg:0,   maxKg:45,   zones:{1:3.7, 2:4.4, 3:5.6, 4:6.6, 5:8.0, 6:9.5, 7:11.2} },
+  { minKg:45,  maxKg:100,  zones:{1:3.1, 2:3.7, 3:4.8, 4:5.6, 5:6.7, 6:8.0, 7:9.4} },
+  { minKg:100, maxKg:300,  zones:{1:2.6, 2:3.2, 3:4.0, 4:4.7, 5:5.7, 6:6.8, 7:7.9} },
+  { minKg:300, maxKg:500,  zones:{1:2.1, 2:2.6, 3:3.3, 4:3.9, 5:4.7, 6:5.6, 7:6.6} },
+  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.2, 3:2.8, 4:3.3, 5:4.0, 6:4.8, 7:5.6} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:1.9,3:2.3,4:2.8,5:3.3,6:4.0,7:4.7} },
+]
+
+const EY_STANDARD_RATES: AirWeightBand[] = EY_PRIORITY_RATES.map(b => ({
+  ...b, zones: Object.fromEntries(Object.entries(b.zones).map(([z,r])=>[z, Math.round(r*0.82*100)/100]))
+}))
+
+// ── Service catalogue ─────────────────────────────────────────────────────────
+export const AIR_CARRIER_SERVICES: AirCarrierService[] = [
+  { carrier:'Emirates', serviceCode:'emi-priority', serviceName:'Emirates SkyCargo Priority',  transit:T_EMI_PRIORITY, rates:EMI_PRIORITY_RATES, minCharge:75 },
+  { carrier:'Emirates', serviceCode:'emi-standard', serviceName:'Emirates SkyCargo Standard',  transit:T_EMI_STANDARD, rates:EMI_STANDARD_RATES, minCharge:75 },
+  { carrier:'Lufthansa',serviceCode:'lh-priority',  serviceName:'Lufthansa Cargo td.Flash',    transit:T_LH_PRIORITY,  rates:LH_PRIORITY_RATES,  minCharge:80 },
+  { carrier:'Lufthansa',serviceCode:'lh-standard',  serviceName:'Lufthansa Cargo td.Pro',      transit:T_LH_STANDARD,  rates:LH_STANDARD_RATES,  minCharge:80 },
+  { carrier:'Qatar',    serviceCode:'qr-priority',  serviceName:'Qatar Airways Cargo Priority', transit:T_QR_PRIORITY,  rates:QR_PRIORITY_RATES,  minCharge:70 },
+  { carrier:'Qatar',    serviceCode:'qr-standard',  serviceName:'Qatar Airways Cargo Standard', transit:T_QR_STANDARD,  rates:QR_STANDARD_RATES,  minCharge:70 },
+  { carrier:'Turkish',  serviceCode:'tk-priority',  serviceName:'Turkish Cargo TK Priority',   transit:T_TK_PRIORITY,  rates:TK_PRIORITY_RATES,  minCharge:65 },
+  { carrier:'Turkish',  serviceCode:'tk-standard',  serviceName:'Turkish Cargo TK Standard',   transit:T_TK_STANDARD,  rates:TK_STANDARD_RATES,  minCharge:65 },
+  { carrier:'Etihad',   serviceCode:'ey-priority',  serviceName:'Etihad Cargo Priority',       transit:T_EY_PRIORITY,  rates:EY_PRIORITY_RATES,  minCharge:70 },
+  { carrier:'Etihad',   serviceCode:'ey-standard',  serviceName:'Etihad Cargo Standard',       transit:T_EY_STANDARD,  rates:EY_STANDARD_RATES,  minCharge:70 },
+]
+
+// ── Result type ───────────────────────────────────────────────────────────────
+export interface AirRateResult {
+  carrier: AirCarrier
+  serviceCode: string
+  serviceName: string
+  ratePerKgLow: number
+  ratePerKgHigh: number
+  totalLow: number
+  totalHigh: number
+  transitDays: string
+  chargeableKg: number
+  volKg: number
+  actualKg: number
+  minChargeApplied: boolean
+}
+
+// ── Commodity surcharge multipliers ──────────────────────────────────────────
+export const COMMODITY_MULTIPLIER: Record<CommodityType, number> = {
+  general: 1.0,
+  perishable: 1.15,
+  dangerous: 1.25,
+}
+
+// ── Calculation ───────────────────────────────────────────────────────────────
+function lookupRatePerKg(bands: AirWeightBand[], kg: number, zone: number): number {
+  const capped = Math.min(zone, 7)
+  for (const band of bands) {
+    if (kg > band.minKg && kg <= band.maxKg) return band.zones[capped] ?? 0
+  }
+  // fallback to last band
+  return bands[bands.length - 1].zones[Math.min(zone, 7)] ?? 0
+}
+
+export function calcAirRates(
+  originIso: string,
+  destIso: string,
+  actualKg: number,
+  dimL: number,
+  dimW: number,
+  dimH: number,
+  carriers: AirCarrier[],
+  commodity: CommodityType,
+): AirRateResult[] {
+  // IATA volumetric divisor for air = 6000
+  const volKg = (dimL > 0 && dimW > 0 && dimH > 0) ? (dimL * dimW * dimH) / 6000 : 0
+  const rawChargeable = Math.max(actualKg, volKg)
+  // Round up to nearest 0.5 kg
+  const chargeableKg = Math.ceil(rawChargeable * 2) / 2
+  const zone = getZone(originIso, destIso)
+  const commodityMult = COMMODITY_MULTIPLIER[commodity]
+
+  return AIR_CARRIER_SERVICES
+    .filter(s => carriers.includes(s.carrier))
+    .map(s => {
+      const baseRatePerKg = lookupRatePerKg(s.rates, chargeableKg, zone)
+      const rateWithFuel  = baseRatePerKg * 1.30 * commodityMult  // 30% fuel surcharge
+      const ratePerKgLow  = Math.round(rateWithFuel * 0.92 * 100) / 100
+      const ratePerKgHigh = Math.round(rateWithFuel * 1.08 * 100) / 100
+
+      const calcLow  = Math.round(ratePerKgLow  * chargeableKg)
+      const calcHigh = Math.round(ratePerKgHigh * chargeableKg)
+      const minChargeApplied = calcLow < s.minCharge
+
+      return {
+        carrier:          s.carrier,
+        serviceCode:      s.serviceCode,
+        serviceName:      s.serviceName,
+        ratePerKgLow,
+        ratePerKgHigh,
+        totalLow:         Math.max(calcLow,  s.minCharge),
+        totalHigh:        Math.max(calcHigh, s.minCharge),
+        transitDays:      s.transit[Math.min(zone, 7)],
+        chargeableKg,
+        volKg,
+        actualKg,
+        minChargeApplied,
+      }
+    })
+}
+
+// ── Carrier meta ──────────────────────────────────────────────────────────────
+export const AIR_CARRIER_META: Record<AirCarrier, { primary: string; bg: string; border: string; slug: string }> = {
+  Emirates: { primary: '#C8A84B', bg: 'rgba(200,168,75,0.07)',  border: 'rgba(200,168,75,0.2)',  slug: 'emirates-skycargo' },
+  Lufthansa:{ primary: '#0062AA', bg: 'rgba(0,98,170,0.07)',    border: 'rgba(0,98,170,0.2)',    slug: 'lufthansa-cargo'   },
+  Qatar:    { primary: '#5C0632', bg: 'rgba(92,6,50,0.10)',     border: 'rgba(92,6,50,0.25)',    slug: 'qatar-cargo'       },
+  Turkish:  { primary: '#E31E2D', bg: 'rgba(227,30,45,0.07)',   border: 'rgba(227,30,45,0.2)',   slug: 'turkish-cargo'     },
+  Etihad:   { primary: '#B8985A', bg: 'rgba(184,152,90,0.07)',  border: 'rgba(184,152,90,0.2)',  slug: 'etihad-cargo'      },
+}
