@@ -195,28 +195,36 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
   )
 }
 
-// ── Air carrier logos — Clearbit (main airline domains give best coverage) ────
-const AIR_LOGO_URL: Record<AirCarrier, string> = {
-  Emirates:   'https://logo.clearbit.com/emirates.com',
-  Lufthansa:  'https://logo.clearbit.com/lufthansa.com',
-  Qatar:      'https://logo.clearbit.com/qatarairways.com',
-  Turkish:    'https://logo.clearbit.com/turkishairlines.com',
-  Etihad:     'https://logo.clearbit.com/etihad.com',
-  Cargolux:   'https://logo.clearbit.com/cargolux.com',
-  OmanAir:    'https://logo.clearbit.com/omanair.com',
-  MEA:        'https://logo.clearbit.com/mea.com.lb',
-  DHLGlobal:  'https://logo.clearbit.com/dhl.com',
-  FedExCargo: 'https://logo.clearbit.com/fedex.com',
+// ── Air carrier logos — multi-source: Clearbit → DuckDuckGo favicon → badge ──
+// DuckDuckGo icon service is already in CSP img-src and covers every domain.
+const AIR_LOGO_DOMAIN: Record<AirCarrier, string> = {
+  Emirates:   'emirates.com',
+  Lufthansa:  'lufthansa.com',
+  Qatar:      'qatarairways.com',
+  Turkish:    'turkishairlines.com',
+  Etihad:     'etihad.com',
+  Cargolux:   'cargolux.com',
+  OmanAir:    'omanair.com',
+  MEA:        'mea.com.lb',
+  DHLGlobal:  'dhl.com',
+  FedExCargo: 'fedex.com',
 }
 const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
   Emirates:'EMI', Lufthansa:'LH', Qatar:'QR', Turkish:'TK', Etihad:'EY',
   Cargolux:'CLX', OmanAir:'OMA', MEA:'MEA', DHLGlobal:'DHL', FedExCargo:'FDX',
 }
+function airLogoSrc(domain: string, idx: number): string | null {
+  if (idx === 0) return `https://logo.clearbit.com/${domain}`
+  if (idx === 1) return `https://icons.duckduckgo.com/ip3/${domain}.ico`
+  return null
+}
 
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
-  const [ok, setOk] = useState(true)
+  const [idx, setIdx] = useState(0)
   const meta = AIR_CARRIER_META[carrier]
-  if (!ok) return (
+  const domain = AIR_LOGO_DOMAIN[carrier]
+  const src = airLogoSrc(domain, idx)
+  if (!src) return (
     <div style={{
       width: size, height: size, borderRadius: '8px', flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -225,8 +233,9 @@ function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: nu
     }}>{AIR_LOGO_ABBR[carrier]}</div>
   )
   return (
-    <img src={AIR_LOGO_URL[carrier]} alt={carrier} onError={() => setOk(false)}
-      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px', background: 'white', padding: '4px', boxSizing: 'border-box', flexShrink: 0 }}
+    <img key={src} src={src} alt={carrier} onError={() => setIdx(i => i + 1)}
+      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px',
+        background: 'white', padding: '3px', boxSizing: 'border-box', flexShrink: 0 }}
     />
   )
 }
@@ -745,7 +754,6 @@ export default function Rates() {
           <label style={LABEL_STYLE}>Carriers</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'OmanAir', 'MEA', 'DHLGlobal', 'FedExCargo'] as AirCarrier[]).map(c => {
-              const meta = AIR_CARRIER_META[c]
               const active = airCarriers.includes(c)
               const displayName = c === 'OmanAir' ? 'Oman Air' : c === 'DHLGlobal' ? 'DHL Global' : c === 'FedExCargo' ? 'FedEx Cargo' : c
               return (
@@ -757,10 +765,9 @@ export default function Rates() {
                   color: active ? '#4ade80' : 'rgba(248,250,252,0.35)',
                   minWidth: 0,
                 }}>
-                  <img src={`${LOGO_BASE}/${meta.slug}.svg`} alt={displayName}
-                    style={{ width: '22px', height: '22px', objectFit: 'contain', flexShrink: 0, borderRadius: '4px', background: 'rgba(255,255,255,0.08)', padding: '2px', boxSizing: 'border-box', opacity: active ? 1 : 0.35 }}
-                    onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; (e.currentTarget as HTMLImageElement).style.width = '0'; (e.currentTarget as HTMLImageElement).style.padding = '0' }}
-                  />
+                  <div style={{ opacity: active ? 1 : 0.4, flexShrink: 0 }}>
+                    <AirCarrierLogo carrier={c} size={22} />
+                  </div>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
                 </button>
               )
