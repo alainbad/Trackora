@@ -1,6 +1,4 @@
-// Simplified zone matrix: originRegion + destRegion → zone (1–9)
-// Regions: ME=Middle East, EU=Europe, NA=North America, AS=Asia, AF=Africa, SA=South America, OC=Oceania
-
+// Simplified zone matrix: originRegion + destRegion → zone (1–7)
 const REGION_ZONES: Record<string, Record<string, number>> = {
   ME: { ME: 1, EU: 3, NA: 5, AS: 2, AF: 4, SA: 6, OC: 5 },
   EU: { EU: 1, ME: 3, NA: 4, AS: 4, AF: 4, SA: 5, OC: 6 },
@@ -12,27 +10,20 @@ const REGION_ZONES: Record<string, Record<string, number>> = {
 }
 
 const COUNTRY_REGION: Record<string, string> = {
-  // Middle East
   AE: 'ME', SA: 'ME', QA: 'ME', KW: 'ME', BH: 'ME', OM: 'ME', JO: 'ME', LB: 'ME',
   IL: 'ME', EG: 'ME', IQ: 'ME', IR: 'ME', YE: 'ME', SY: 'ME', TR: 'ME',
-  // Europe
   DE: 'EU', FR: 'EU', GB: 'EU', IT: 'EU', ES: 'EU', NL: 'EU', BE: 'EU', CH: 'EU',
   AT: 'EU', SE: 'EU', NO: 'EU', DK: 'EU', FI: 'EU', PL: 'EU', CZ: 'EU', PT: 'EU',
   GR: 'EU', HU: 'EU', RO: 'EU', UA: 'EU', RU: 'EU', IE: 'EU', LU: 'EU', HR: 'EU',
   SK: 'EU', BG: 'EU', LT: 'EU', LV: 'EU', EE: 'EU', SI: 'EU', RS: 'EU',
-  // North America
   US: 'NA', CA: 'NA', MX: 'NA',
-  // Asia
   CN: 'AS', JP: 'AS', KR: 'AS', IN: 'AS', SG: 'AS', HK: 'AS', TW: 'AS', TH: 'AS',
   MY: 'AS', ID: 'AS', PH: 'AS', VN: 'AS', PK: 'AS', BD: 'AS', LK: 'AS', NP: 'AS',
   MM: 'AS', KH: 'AS', MN: 'AS',
-  // Africa
   ZA: 'AF', NG: 'AF', KE: 'AF', ET: 'AF', GH: 'AF', TZ: 'AF', MA: 'AF', DZ: 'AF',
   TN: 'AF', UG: 'AF', SN: 'AF', CI: 'AF', CM: 'AF', AO: 'AF', MZ: 'AF', ZM: 'AF',
-  // South America
   BR: 'SA', AR: 'SA', CL: 'SA', CO: 'SA', PE: 'SA', VE: 'SA', EC: 'SA', BO: 'SA',
   PY: 'SA', UY: 'SA',
-  // Oceania
   AU: 'OC', NZ: 'OC', FJ: 'OC', PG: 'OC',
 }
 
@@ -43,13 +34,37 @@ export function getZone(originIso: string, destIso: string): number {
   return REGION_ZONES[or]?.[dr] ?? 5
 }
 
-// Rate tables: base price (USD) per zone at each weight break
-// Each entry: { maxKg, zones: { 1..7: price } }
-// Source: simplified from published 2024 international express rate cards
-
 interface WeightBand { maxKg: number; zones: Record<number, number> }
 
-export const DHL_RATES: WeightBand[] = [
+// ── Service definitions ───────────────────────────────────────────────────────
+
+export type CarrierKey = 'DHL' | 'FedEx' | 'UPS' | 'Aramex'
+
+export interface CarrierService {
+  carrier: CarrierKey
+  serviceCode: string
+  serviceName: string
+  // per-zone transit strings (keys 1–7)
+  transit: Record<number, string>
+  rates: WeightBand[]
+}
+
+// ── Transit tables ────────────────────────────────────────────────────────────
+// Each service has distinct times per zone.
+
+const T_DHL_EXPRESS:    Record<number, string> = { 1: '1–2 days', 2: '1–3 days', 3: '2–4 days', 4: '3–5 days', 5: '4–6 days', 6: '5–7 days', 7: '6–8 days' }
+const T_DHL_EASY:       Record<number, string> = { 1: '2–3 days', 2: '2–4 days', 3: '3–5 days', 4: '4–7 days', 5: '5–8 days', 6: '6–10 days', 7: '8–12 days' }
+const T_FEDEX_PRIORITY: Record<number, string> = { 1: '1–2 days', 2: '1–3 days', 3: '2–3 days', 4: '3–4 days', 5: '3–5 days', 6: '4–6 days', 7: '5–7 days' }
+const T_FEDEX_ECONOMY:  Record<number, string> = { 1: '2–4 days', 2: '3–5 days', 3: '4–6 days', 4: '5–7 days', 5: '6–9 days', 6: '7–11 days', 7: '9–14 days' }
+const T_UPS_EXPRESS:    Record<number, string> = { 1: '1–2 days', 2: '1–3 days', 3: '2–4 days', 4: '3–5 days', 5: '3–5 days', 6: '4–7 days', 7: '5–8 days' }
+const T_UPS_EXPEDITED:  Record<number, string> = { 1: '2–3 days', 2: '3–5 days', 3: '4–6 days', 4: '5–8 days', 5: '6–9 days', 6: '7–11 days', 7: '8–13 days' }
+const T_ARAMEX_EXPRESS: Record<number, string> = { 1: '1–2 days', 2: '2–3 days', 3: '3–5 days', 4: '4–6 days', 5: '5–7 days', 6: '6–9 days', 7: '7–10 days' }
+const T_ARAMEX_DEFERRED:Record<number, string> = { 1: '3–5 days', 2: '4–6 days', 3: '5–8 days', 4: '6–9 days', 5: '7–11 days', 6: '8–13 days', 7: '10–16 days' }
+
+// ── Rate tables ───────────────────────────────────────────────────────────────
+// Economy/Easy/Expedited/Deferred services are ~20–30% cheaper than express.
+
+const DHL_EXPRESS_RATES: WeightBand[] = [
   { maxKg: 0.5, zones: { 1: 22, 2: 28, 3: 35, 4: 42, 5: 52, 6: 68, 7: 88 } },
   { maxKg: 1,   zones: { 1: 26, 2: 33, 3: 42, 4: 51, 5: 63, 6: 82, 7: 106 } },
   { maxKg: 2,   zones: { 1: 31, 2: 39, 3: 50, 4: 62, 5: 77, 6: 99, 7: 128 } },
@@ -60,7 +75,12 @@ export const DHL_RATES: WeightBand[] = [
   { maxKg: 70,  zones: { 1: 198, 2: 258, 3: 339, 4: 422, 5: 525, 6: 669, 7: 867 } },
 ]
 
-export const FEDEX_RATES: WeightBand[] = [
+const DHL_EASY_RATES: WeightBand[] = DHL_EXPRESS_RATES.map(b => ({
+  maxKg: b.maxKg,
+  zones: Object.fromEntries(Object.entries(b.zones).map(([z, p]) => [z, Math.round(p * 0.75)])),
+}))
+
+const FEDEX_PRIORITY_RATES: WeightBand[] = [
   { maxKg: 0.5, zones: { 1: 25, 2: 30, 3: 38, 4: 46, 5: 57, 6: 74, 7: 96 } },
   { maxKg: 1,   zones: { 1: 29, 2: 37, 3: 47, 4: 57, 5: 71, 6: 92, 7: 119 } },
   { maxKg: 2,   zones: { 1: 35, 2: 44, 3: 57, 4: 70, 5: 87, 6: 112, 7: 145 } },
@@ -71,7 +91,12 @@ export const FEDEX_RATES: WeightBand[] = [
   { maxKg: 70,  zones: { 1: 226, 2: 290, 3: 381, 4: 475, 5: 592, 6: 755, 7: 978 } },
 ]
 
-export const UPS_RATES: WeightBand[] = [
+const FEDEX_ECONOMY_RATES: WeightBand[] = FEDEX_PRIORITY_RATES.map(b => ({
+  maxKg: b.maxKg,
+  zones: Object.fromEntries(Object.entries(b.zones).map(([z, p]) => [z, Math.round(p * 0.72)])),
+}))
+
+const UPS_EXPRESS_RATES: WeightBand[] = [
   { maxKg: 0.5, zones: { 1: 23, 2: 29, 3: 37, 4: 45, 5: 55, 6: 72, 7: 93 } },
   { maxKg: 1,   zones: { 1: 27, 2: 35, 3: 44, 4: 54, 5: 67, 6: 87, 7: 113 } },
   { maxKg: 2,   zones: { 1: 33, 2: 41, 3: 53, 4: 66, 5: 82, 6: 105, 7: 136 } },
@@ -82,18 +107,12 @@ export const UPS_RATES: WeightBand[] = [
   { maxKg: 70,  zones: { 1: 213, 2: 273, 3: 358, 4: 447, 5: 557, 6: 710, 7: 920 } },
 ]
 
-const TRANSIT_DAYS: Record<number, string> = {
-  1: '1–2 business days',
-  2: '1–3 business days',
-  3: '2–4 business days',
-  4: '3–5 business days',
-  5: '4–6 business days',
-  6: '5–8 business days',
-  7: '6–10 business days',
-}
+const UPS_EXPEDITED_RATES: WeightBand[] = UPS_EXPRESS_RATES.map(b => ({
+  maxKg: b.maxKg,
+  zones: Object.fromEntries(Object.entries(b.zones).map(([z, p]) => [z, Math.round(p * 0.78)])),
+}))
 
-// Aramex — strong in ME/Asia/Africa, competitive vs DHL in those lanes
-export const ARAMEX_RATES: WeightBand[] = [
+const ARAMEX_EXPRESS_RATES: WeightBand[] = [
   { maxKg: 0.5, zones: { 1: 14, 2: 18, 3: 28, 4: 36, 5: 48, 6: 64, 7: 84 } },
   { maxKg: 1,   zones: { 1: 17, 2: 22, 3: 34, 4: 44, 5: 58, 6: 76, 7: 99 } },
   { maxKg: 2,   zones: { 1: 21, 2: 27, 3: 41, 4: 54, 5: 70, 6: 92, 7: 119 } },
@@ -104,8 +123,30 @@ export const ARAMEX_RATES: WeightBand[] = [
   { maxKg: 70,  zones: { 1: 146, 2: 186, 3: 282, 4: 368, 5: 478, 6: 623, 7: 809 } },
 ]
 
+const ARAMEX_DEFERRED_RATES: WeightBand[] = ARAMEX_EXPRESS_RATES.map(b => ({
+  maxKg: b.maxKg,
+  zones: Object.fromEntries(Object.entries(b.zones).map(([z, p]) => [z, Math.round(p * 0.70)])),
+}))
+
+// ── Service catalogue ─────────────────────────────────────────────────────────
+
+export const CARRIER_SERVICES: CarrierService[] = [
+  { carrier: 'DHL',    serviceCode: 'dhl-express',        serviceName: 'DHL Express Worldwide',         transit: T_DHL_EXPRESS,     rates: DHL_EXPRESS_RATES    },
+  { carrier: 'DHL',    serviceCode: 'dhl-easy',           serviceName: 'DHL Express Easy',              transit: T_DHL_EASY,        rates: DHL_EASY_RATES        },
+  { carrier: 'FedEx',  serviceCode: 'fedex-priority',     serviceName: 'FedEx International Priority',  transit: T_FEDEX_PRIORITY,  rates: FEDEX_PRIORITY_RATES  },
+  { carrier: 'FedEx',  serviceCode: 'fedex-economy',      serviceName: 'FedEx International Economy',   transit: T_FEDEX_ECONOMY,   rates: FEDEX_ECONOMY_RATES   },
+  { carrier: 'UPS',    serviceCode: 'ups-express',        serviceName: 'UPS Worldwide Express',         transit: T_UPS_EXPRESS,     rates: UPS_EXPRESS_RATES     },
+  { carrier: 'UPS',    serviceCode: 'ups-expedited',      serviceName: 'UPS Worldwide Expedited',       transit: T_UPS_EXPEDITED,   rates: UPS_EXPEDITED_RATES   },
+  { carrier: 'Aramex', serviceCode: 'aramex-express',     serviceName: 'Aramex Express International',  transit: T_ARAMEX_EXPRESS,  rates: ARAMEX_EXPRESS_RATES  },
+  { carrier: 'Aramex', serviceCode: 'aramex-deferred',    serviceName: 'Aramex Deferred International', transit: T_ARAMEX_DEFERRED, rates: ARAMEX_DEFERRED_RATES },
+]
+
+// ── Result type ───────────────────────────────────────────────────────────────
+
 export interface RateResult {
-  carrier: 'DHL' | 'FedEx' | 'UPS' | 'Aramex'
+  carrier: CarrierKey
+  serviceCode: string
+  serviceName: string
   low: number
   high: number
   transitDays: string
@@ -114,16 +155,16 @@ export interface RateResult {
   actualKg: number
 }
 
+// ── Calculation ───────────────────────────────────────────────────────────────
+
 function lookupRate(table: WeightBand[], kg: number, zone: number): number {
   const capped = Math.min(zone, 7)
   for (const band of table) {
     if (kg <= band.maxKg) return band.zones[capped] ?? 0
   }
-  // over 70 kg: extrapolate linearly from last band
   const last = table[table.length - 1]
   const base = last.zones[capped] ?? 0
-  const perKg = base / last.maxKg
-  return Math.round(perKg * kg)
+  return Math.round((base / last.maxKg) * kg)
 }
 
 export function calcRates(
@@ -133,32 +174,34 @@ export function calcRates(
   dimL: number,
   dimW: number,
   dimH: number,
-  carriers: ('DHL' | 'FedEx' | 'UPS' | 'Aramex')[],
+  carriers: CarrierKey[],
 ): RateResult[] {
-  // Volumetric divisor: 5000 for express (cm³ → kg)
   const volKg = (dimL > 0 && dimW > 0 && dimH > 0) ? (dimL * dimW * dimH) / 5000 : 0
-  // Round chargeable weight up to nearest 0.5 kg (standard carrier practice)
   const rawChargeable = Math.max(actualKg, volKg)
   const chargeableKg  = Math.ceil(rawChargeable * 2) / 2
   const zone = getZone(originIso, destIso)
 
-  const tables: Record<string, WeightBand[]> = {
-    DHL: DHL_RATES,
-    FedEx: FEDEX_RATES,
-    UPS: UPS_RATES,
-    Aramex: ARAMEX_RATES,
-  }
-
-  return carriers.map(carrier => {
-    const base = lookupRate(tables[carrier], chargeableKg, zone)
-    const withFuel = base * 1.2  // ~20% fuel surcharge
-    const low  = Math.round(withFuel * 0.9)
-    const high = Math.round(withFuel * 1.1)
-    return { carrier, low, high, transitDays: TRANSIT_DAYS[Math.min(zone, 7)], chargeableKg, volKg, actualKg }
-  })
+  return CARRIER_SERVICES
+    .filter(s => carriers.includes(s.carrier))
+    .map(s => {
+      const base     = lookupRate(s.rates, chargeableKg, zone)
+      const withFuel = base * 1.2
+      return {
+        carrier:      s.carrier,
+        serviceCode:  s.serviceCode,
+        serviceName:  s.serviceName,
+        low:          Math.round(withFuel * 0.9),
+        high:         Math.round(withFuel * 1.1),
+        transitDays:  s.transit[Math.min(zone, 7)],
+        chargeableKg,
+        volKg,
+        actualKg,
+      }
+    })
 }
 
-// Country list for dropdowns
+// ── Country list ──────────────────────────────────────────────────────────────
+
 export const COUNTRIES: { iso: string; name: string }[] = [
   { iso: 'AE', name: 'United Arab Emirates' },
   { iso: 'AF', name: 'Afghanistan' },

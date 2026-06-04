@@ -1,60 +1,68 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Calculator, Package, Clock, ChevronDown, Zap, LogIn } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useRateQuota } from '../hooks/useRateQuota'
 import { useAuth } from '../contexts/AuthContext'
-import { calcRates, COUNTRIES, type RateResult } from '../data/shippingRates'
+import { calcRates, COUNTRIES, type RateResult, type CarrierKey } from '../data/shippingRates'
+import { getCities } from '../data/shippingCities'
 import AdUnit from '../components/ui/AdUnit'
 import AuthModal from '../components/auth/AuthModal'
 
-type Carrier = 'DHL' | 'FedEx' | 'UPS' | 'Aramex'
-
-const CARRIER_META: Record<Carrier, { primary: string; bg: string; border: string; service: string; slug: string }> = {
-  DHL:    { primary: '#FFCC00', bg: 'rgba(255,204,0,0.07)',   border: 'rgba(255,204,0,0.2)',  service: 'DHL Express Worldwide',           slug: 'dhl'    },
-  FedEx:  { primary: '#FF6200', bg: 'rgba(255,98,0,0.07)',    border: 'rgba(255,98,0,0.2)',   service: 'FedEx International Priority',    slug: 'fedex'  },
-  UPS:    { primary: '#C8960C', bg: 'rgba(200,150,12,0.07)',  border: 'rgba(200,150,12,0.2)', service: 'UPS Worldwide Express',           slug: 'ups'    },
-  Aramex: { primary: '#E8412C', bg: 'rgba(232,65,44,0.07)',   border: 'rgba(232,65,44,0.2)',  service: 'Aramex Express International',   slug: 'aramex' },
+const CARRIER_META: Record<CarrierKey, { primary: string; bg: string; border: string; slug: string }> = {
+  DHL:    { primary: '#FFCC00', bg: 'rgba(255,204,0,0.07)',   border: 'rgba(255,204,0,0.2)',  slug: 'dhl'    },
+  FedEx:  { primary: '#FF6200', bg: 'rgba(255,98,0,0.07)',    border: 'rgba(255,98,0,0.2)',   slug: 'fedex'  },
+  UPS:    { primary: '#C8960C', bg: 'rgba(200,150,12,0.07)',  border: 'rgba(200,150,12,0.2)', slug: 'ups'    },
+  Aramex: { primary: '#E8412C', bg: 'rgba(232,65,44,0.07)',   border: 'rgba(232,65,44,0.2)',  slug: 'aramex' },
 }
 
 const LOGO_BASE = 'https://assets.aftership.com/couriers/svg'
 
-// Searchable country dropdown
-function CountrySelect({
-  value, onChange, placeholder,
-}: { value: string; onChange: (iso: string) => void; placeholder: string }) {
+// ── Generic searchable dropdown ───────────────────────────────────────────────
+interface SelectOption { value: string; label: string }
+
+function SearchSelect({
+  value, onChange, options, placeholder, searchPlaceholder = 'Search…', disabled = false,
+}: {
+  value: string
+  onChange: (v: string) => void
+  options: SelectOption[]
+  placeholder: string
+  searchPlaceholder?: string
+  disabled?: boolean
+}) {
   const [query, setQuery] = useState('')
   const [open, setOpen]   = useState(false)
-  const ref               = useRef<HTMLDivElement>(null)
 
   const filtered = useMemo(() =>
-    COUNTRIES.filter(c => c.name.toLowerCase().includes(query.toLowerCase())).slice(0, 80),
-    [query]
+    options.filter(o => o.label.toLowerCase().includes(query.toLowerCase())).slice(0, 80),
+    [options, query]
   )
-  const selected = COUNTRIES.find(c => c.iso === value)
+  const selected = options.find(o => o.value === value)
 
-  function pick(iso: string) {
-    onChange(iso)
-    setQuery('')
-    setOpen(false)
-  }
+  function pick(v: string) { onChange(v); setQuery(''); setOpen(false) }
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <div
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { if (!disabled) setOpen(o => !o) }}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 14px', borderRadius: '10px', cursor: 'pointer',
-          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-          color: selected ? '#f8fafc' : 'rgba(248,250,252,0.35)', fontSize: '14px',
+          padding: '10px 14px', borderRadius: '10px',
+          cursor: disabled ? 'default' : 'pointer',
+          background: disabled ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          color: selected ? '#f8fafc' : 'rgba(248,250,252,0.3)', fontSize: '14px',
+          opacity: disabled ? 0.5 : 1,
         }}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {selected ? selected.name : placeholder}
+          {selected ? selected.label : placeholder}
         </span>
-        <ChevronDown size={14} color="rgba(248,250,252,0.4)" style={{ flexShrink: 0, marginLeft: '8px', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+        {!disabled && (
+          <ChevronDown size={14} color="rgba(248,250,252,0.4)" style={{ flexShrink: 0, marginLeft: '8px', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+        )}
       </div>
       {open && (
         <div style={{
@@ -64,10 +72,8 @@ function CountrySelect({
         }}>
           <div style={{ padding: '8px' }}>
             <input
-              autoFocus
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search country…"
+              autoFocus value={query} onChange={e => setQuery(e.target.value)}
+              placeholder={searchPlaceholder}
               style={{
                 width: '100%', padding: '8px 12px', borderRadius: '8px', fontSize: '13px',
                 background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -76,19 +82,17 @@ function CountrySelect({
             />
           </div>
           <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
-            {filtered.map(c => (
-              <div
-                key={c.iso}
-                onClick={() => pick(c.iso)}
+            {filtered.map(o => (
+              <div key={o.value} onClick={() => pick(o.value)}
                 style={{
                   padding: '9px 14px', fontSize: '14px', cursor: 'pointer',
-                  color: c.iso === value ? '#818cf8' : 'rgba(248,250,252,0.8)',
-                  background: c.iso === value ? 'rgba(99,102,241,0.1)' : 'transparent',
+                  color: o.value === value ? '#818cf8' : 'rgba(248,250,252,0.8)',
+                  background: o.value === value ? 'rgba(99,102,241,0.1)' : 'transparent',
                 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = c.iso === value ? 'rgba(99,102,241,0.1)' : 'transparent' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = o.value === value ? 'rgba(99,102,241,0.1)' : 'transparent' }}
               >
-                {c.name}
+                {o.label}
               </div>
             ))}
             {filtered.length === 0 && (
@@ -101,64 +105,82 @@ function CountrySelect({
   )
 }
 
-function CarrierLogo({ carrier }: { carrier: Carrier }) {
+// ── Carrier logo ──────────────────────────────────────────────────────────────
+function CarrierLogo({ carrier, size = 36 }: { carrier: CarrierKey; size?: number }) {
   const [ok, setOk] = useState(true)
   const meta = CARRIER_META[carrier]
   if (!ok) return (
     <div style={{
-      width: '44px', height: '44px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: meta.bg, border: `1px solid ${meta.border}`, fontSize: '11px', fontWeight: 700, color: meta.primary,
+      width: size, height: size, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: meta.bg, border: `1px solid ${meta.border}`, fontSize: '10px', fontWeight: 700, color: meta.primary,
     }}>
       {carrier.slice(0, 3)}
     </div>
   )
   return (
     <img
-      src={`${LOGO_BASE}/${meta.slug}.svg`}
-      alt={carrier}
+      src={`${LOGO_BASE}/${meta.slug}.svg`} alt={carrier}
       onError={() => setOk(false)}
-      style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '10px', background: 'rgba(255,255,255,0.06)', padding: '6px', boxSizing: 'border-box' }}
+      style={{ width: size, height: size, objectFit: 'contain', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', padding: '5px', boxSizing: 'border-box', flexShrink: 0 }}
     />
   )
 }
 
-function ResultCard({ result }: { result: RateResult }) {
-  const meta = CARRIER_META[result.carrier as Carrier]
+// ── Result group: one carrier, two services ───────────────────────────────────
+function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: RateResult[] }) {
+  const meta = CARRIER_META[carrier]
   return (
     <div style={{
-      padding: '20px 22px', borderRadius: '16px',
-      background: meta.bg, border: `1px solid ${meta.border}`,
+      borderRadius: '18px', overflow: 'hidden',
+      border: `1px solid ${meta.border}`,
+      background: meta.bg,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px' }}>
-        <CarrierLogo carrier={result.carrier as Carrier} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>{result.carrier}</div>
-          <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.45)', marginTop: '2px' }}>{meta.service}</div>
-        </div>
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <div style={{ fontSize: '20px', fontWeight: 800, color: meta.primary, whiteSpace: 'nowrap' }}>
-            ~${result.low}–${result.high}
+      {/* Carrier header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', borderBottom: `1px solid ${meta.border}` }}>
+        <CarrierLogo carrier={carrier} size={36} />
+        <span style={{ fontSize: '16px', fontWeight: 700, color: '#f8fafc' }}>{carrier}</span>
+      </div>
+
+      {/* Service rows */}
+      {services.map((r, i) => (
+        <div key={r.serviceCode} style={{
+          padding: '14px 20px',
+          borderBottom: i < services.length - 1 ? `1px solid ${meta.border}` : 'none',
+          display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+        }}>
+          {/* Service name + transit */}
+          <div style={{ flex: 1, minWidth: '160px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '4px' }}>
+              {r.serviceName}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: 'rgba(248,250,252,0.45)', flexWrap: 'wrap' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={11} /> {r.transitDays}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Package size={11} />
+                {r.chargeableKg.toFixed(1)} kg
+                {r.volKg > r.actualKg && (
+                  <span style={{ color: 'rgba(248,250,252,0.3)' }}>(vol)</span>
+                )}
+              </span>
+            </div>
           </div>
-          <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.4)', marginTop: '2px' }}>USD estimate</div>
+
+          {/* Price */}
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <div style={{ fontSize: '19px', fontWeight: 800, color: meta.primary, whiteSpace: 'nowrap' }}>
+              ~${r.low}–${r.high}
+            </div>
+            <div style={{ fontSize: '11px', color: 'rgba(248,250,252,0.35)', marginTop: '2px' }}>USD estimate</div>
+          </div>
         </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12px', color: 'rgba(248,250,252,0.5)', flexWrap: 'wrap' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <Clock size={12} />
-          {result.transitDays}
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <Package size={12} />
-          {result.chargeableKg.toFixed(1)} kg chargeable
-          {result.volKg > result.actualKg && (
-            <span style={{ color: 'rgba(248,250,252,0.35)' }}>(vol: {result.volKg.toFixed(2)} kg)</span>
-          )}
-        </span>
-      </div>
+      ))}
     </div>
   )
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function Rates() {
   useSEO({
     title: 'Shipping Rate Calculator — DHL, FedEx, UPS, Aramex Estimates | Trackora',
@@ -171,50 +193,71 @@ export default function Rates() {
   const { remaining, isLimited, isPro, consume } = useRateQuota()
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null)
 
-  const [origin,   setOrigin]   = useState('')
-  const [dest,     setDest]     = useState('')
-  const [weight,   setWeight]   = useState('')
-  const [unit,     setUnit]     = useState<'kg' | 'lbs'>('kg')
-  const [dimL,     setDimL]     = useState('')
-  const [dimW,     setDimW]     = useState('')
-  const [dimH,     setDimH]     = useState('')
-  const [carriers, setCarriers] = useState<Carrier[]>(['DHL', 'FedEx', 'UPS', 'Aramex'])
-  const [results,  setResults]  = useState<RateResult[] | null>(null)
-  const [error,    setError]    = useState('')
-  const [loading,  setLoading]  = useState(false)
+  const [originCountry, setOriginCountry]   = useState('')
+  const [originCity,    setOriginCity]      = useState('')
+  const [destCountry,   setDestCountry]     = useState('')
+  const [destCity,      setDestCity]        = useState('')
+  const [weight,        setWeight]          = useState('')
+  const [unit,          setUnit]            = useState<'kg' | 'lbs'>('kg')
+  const [dimL,          setDimL]            = useState('')
+  const [dimW,          setDimW]            = useState('')
+  const [dimH,          setDimH]            = useState('')
+  const [carriers,      setCarriers]        = useState<CarrierKey[]>(['DHL', 'FedEx', 'UPS', 'Aramex'])
+  const [results,       setResults]         = useState<RateResult[] | null>(null)
+  const [error,         setError]           = useState('')
+  const [loading,       setLoading]         = useState(false)
 
-  function toggleCarrier(c: Carrier) {
-    setCarriers(prev =>
-      prev.includes(c) ? (prev.length > 1 ? prev.filter(x => x !== c) : prev) : [...prev, c]
-    )
+  const originCities = useMemo(() => getCities(originCountry), [originCountry])
+  const destCities   = useMemo(() => getCities(destCountry),   [destCountry])
+
+  const countryOptions: SelectOption[] = COUNTRIES.map(c => ({ value: c.iso, label: c.name }))
+
+  function handleOriginCountry(iso: string) { setOriginCountry(iso); setOriginCity('') }
+  function handleDestCountry(iso: string)   { setDestCountry(iso);   setDestCity('')   }
+
+  function toggleCarrier(c: CarrierKey) {
+    setCarriers(prev => prev.includes(c) ? (prev.length > 1 ? prev.filter(x => x !== c) : prev) : [...prev, c])
   }
 
   function calculate() {
     setError('')
     if (!user) { setAuthModal('signup'); return }
-    if (!origin) return setError('Please select an origin country.')
-    if (!dest)   return setError('Please select a destination country.')
+    if (!originCountry) return setError('Please select an origin country.')
+    if (!destCountry)   return setError('Please select a destination country.')
     const w = parseFloat(weight)
     if (!weight || isNaN(w) || w <= 0) return setError('Enter a valid weight.')
-
     const kg = unit === 'lbs' ? w * 0.453592 : w
     const l  = parseFloat(dimL) || 0
     const ww = parseFloat(dimW) || 0
     const h  = parseFloat(dimH) || 0
-
     setLoading(true)
     setTimeout(() => {
-      const res = calcRates(origin, dest, kg, l, ww, h, carriers)
-      setResults(res)
+      setResults(calcRates(originCountry, destCountry, kg, l, ww, h, carriers))
       consume()
       setLoading(false)
     }, 400)
   }
 
+  // Group results by carrier
+  const grouped = useMemo(() => {
+    if (!results) return []
+    const map = new Map<CarrierKey, RateResult[]>()
+    for (const r of results) {
+      if (!map.has(r.carrier)) map.set(r.carrier, [])
+      map.get(r.carrier)!.push(r)
+    }
+    return Array.from(map.entries())
+  }, [results])
+
   const inputStyle: React.CSSProperties = {
     padding: '10px 14px', borderRadius: '10px', fontSize: '14px',
     background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
     color: '#f8fafc', outline: 'none', width: '100%', boxSizing: 'border-box',
+  }
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600,
+    display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px',
   }
 
   const formPanel = (
@@ -228,32 +271,50 @@ export default function Rates() {
       </h2>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {/* Origin */}
+
+        {/* Origin country + city */}
         <div>
-          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Origin Country
-          </label>
-          <CountrySelect value={origin} onChange={setOrigin} placeholder="Select origin…" />
+          <label style={labelStyle}>Origin</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <SearchSelect
+              value={originCountry} onChange={handleOriginCountry}
+              options={countryOptions} placeholder="Select country…" searchPlaceholder="Search country…"
+            />
+            {originCountry && originCities.length > 0 && (
+              <SearchSelect
+                value={originCity} onChange={setOriginCity}
+                options={originCities.map(c => ({ value: c.code, label: c.label }))}
+                placeholder="Select city / airport (optional)" searchPlaceholder="Search city…"
+              />
+            )}
+          </div>
         </div>
 
-        {/* Destination */}
+        {/* Destination country + city */}
         <div>
-          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Destination Country
-          </label>
-          <CountrySelect value={dest} onChange={setDest} placeholder="Select destination…" />
+          <label style={labelStyle}>Destination</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <SearchSelect
+              value={destCountry} onChange={handleDestCountry}
+              options={countryOptions} placeholder="Select country…" searchPlaceholder="Search country…"
+            />
+            {destCountry && destCities.length > 0 && (
+              <SearchSelect
+                value={destCity} onChange={setDestCity}
+                options={destCities.map(c => ({ value: c.code, label: c.label }))}
+                placeholder="Select city / airport (optional)" searchPlaceholder="Search city…"
+              />
+            )}
+          </div>
         </div>
 
         {/* Weight */}
         <div>
-          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Weight
-          </label>
+          <label style={labelStyle}>Weight</label>
           <div style={{ display: 'flex', gap: '8px' }}>
             <input
-              type="number" min="0.1" step="0.1"
-              value={weight} onChange={e => setWeight(e.target.value)}
-              placeholder="e.g. 2.5"
+              type="number" min="0.1" step="0.1" value={weight}
+              onChange={e => setWeight(e.target.value)} placeholder="e.g. 2.5"
               style={{ ...inputStyle, flex: 1, width: 'auto' }}
             />
             <div style={{ display: 'flex', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
@@ -272,51 +333,38 @@ export default function Rates() {
 
         {/* Dimensions */}
         <div>
-          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          <label style={labelStyle}>
             Dimensions (cm) <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, opacity: 0.6 }}>— optional</span>
           </label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            {[
-              { val: dimL, set: setDimL, ph: 'Length' },
-              { val: dimW, set: setDimW, ph: 'Width'  },
-              { val: dimH, set: setDimH, ph: 'Height' },
-            ].map(({ val, set, ph }) => (
-              <input
-                key={ph} type="number" min="0" step="0.1"
+            {[{ val: dimL, set: setDimL, ph: 'Length' }, { val: dimW, set: setDimW, ph: 'Width' }, { val: dimH, set: setDimH, ph: 'Height' }].map(({ val, set, ph }) => (
+              <input key={ph} type="number" min="0" step="0.1"
                 value={val} onChange={e => set(e.target.value)} placeholder={ph}
                 style={{ ...inputStyle, textAlign: 'center', padding: '10px 6px' }}
               />
             ))}
           </div>
-          <p style={{ fontSize: '11px', color: 'rgba(248,250,252,0.3)', marginTop: '6px', margin: '6px 0 0' }}>
-            Volumetric weight = L × W × H ÷ 5000. Chargeable = higher of actual vs volumetric, rounded up to 0.5 kg.
+          <p style={{ fontSize: '11px', color: 'rgba(248,250,252,0.3)', margin: '6px 0 0' }}>
+            Vol. weight = L × W × H ÷ 5000. Chargeable = higher, rounded up to 0.5 kg.
           </p>
         </div>
 
         {/* Carriers */}
         <div>
-          <label style={{ fontSize: '11px', color: 'rgba(248,250,252,0.45)', fontWeight: 600, display: 'block', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Carriers
-          </label>
+          <label style={labelStyle}>Carriers</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            {(['DHL', 'FedEx', 'UPS', 'Aramex'] as Carrier[]).map(c => {
+            {(['DHL', 'FedEx', 'UPS', 'Aramex'] as CarrierKey[]).map(c => {
               const meta = CARRIER_META[c]
               const active = carriers.includes(c)
               return (
-                <button
-                  key={c}
-                  onClick={() => toggleCarrier(c)}
-                  style={{
-                    padding: '8px 10px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
-                    cursor: 'pointer', border: '1px solid', display: 'flex', alignItems: 'center', gap: '8px',
-                    borderColor: active ? meta.primary + '50' : 'rgba(255,255,255,0.08)',
-                    background: active ? meta.bg : 'rgba(255,255,255,0.02)',
-                    color: active ? meta.primary : 'rgba(248,250,252,0.35)',
-                  }}
-                >
-                  <img
-                    src={`${LOGO_BASE}/${meta.slug}.svg`}
-                    alt={c}
+                <button key={c} onClick={() => toggleCarrier(c)} style={{
+                  padding: '8px 10px', borderRadius: '10px', fontSize: '13px', fontWeight: 600,
+                  cursor: 'pointer', border: '1px solid', display: 'flex', alignItems: 'center', gap: '8px',
+                  borderColor: active ? meta.primary + '50' : 'rgba(255,255,255,0.08)',
+                  background: active ? meta.bg : 'rgba(255,255,255,0.02)',
+                  color: active ? meta.primary : 'rgba(248,250,252,0.35)',
+                }}>
+                  <img src={`${LOGO_BASE}/${meta.slug}.svg`} alt={c}
                     style={{ width: '20px', height: '20px', objectFit: 'contain', opacity: active ? 1 : 0.4 }}
                     onError={e => { (e.currentTarget as HTMLElement).style.display = 'none' }}
                   />
@@ -327,94 +375,51 @@ export default function Rates() {
           </div>
         </div>
 
-        {error && (
-          <p style={{ fontSize: '13px', color: '#f87171', margin: 0 }}>{error}</p>
-        )}
+        {error && <p style={{ fontSize: '13px', color: '#f87171', margin: 0 }}>{error}</p>}
 
+        {/* CTA — three states: guest / quota-exceeded / normal */}
         {!user ? (
-          <div style={{
-            padding: '20px', borderRadius: '14px', textAlign: 'center',
-            background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)',
-          }}>
+          <div style={{ padding: '20px', borderRadius: '14px', textAlign: 'center', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)' }}>
             <LogIn size={22} color="#818cf8" style={{ marginBottom: '10px' }} />
-            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '6px' }}>
-              Sign up to get rates
-            </p>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '6px' }}>Sign up to get rates</p>
             <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: '16px' }}>
               Free account — takes 10 seconds. 30 rate searches/month included.
             </p>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => setAuthModal('signup')}
-                style={{
-                  flex: 1, padding: '11px', borderRadius: '10px', fontSize: '14px', fontWeight: 700,
-                  cursor: 'pointer', border: 'none',
-                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                  color: 'white', boxShadow: '0 4px 14px rgba(99,102,241,0.3)',
-                }}
-              >
-                Create free account
-              </button>
-              <button
-                onClick={() => setAuthModal('signin')}
-                style={{
-                  flex: 1, padding: '11px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
-                  cursor: 'pointer', border: '1px solid rgba(255,255,255,0.12)',
-                  background: 'rgba(255,255,255,0.04)', color: 'rgba(248,250,252,0.75)',
-                }}
-              >
-                Sign in
-              </button>
+              <button onClick={() => setAuthModal('signup')} style={{
+                flex: 1, padding: '11px', borderRadius: '10px', fontSize: '14px', fontWeight: 700,
+                cursor: 'pointer', border: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                color: 'white', boxShadow: '0 4px 14px rgba(99,102,241,0.3)',
+              }}>Create free account</button>
+              <button onClick={() => setAuthModal('signin')} style={{
+                flex: 1, padding: '11px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+                cursor: 'pointer', border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.04)', color: 'rgba(248,250,252,0.75)',
+              }}>Sign in</button>
             </div>
           </div>
         ) : isLimited ? (
-          <div style={{
-            padding: '18px', borderRadius: '14px', textAlign: 'center',
-            background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)',
-          }}>
-            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '6px' }}>
-              Monthly limit reached
-            </p>
+          <div style={{ padding: '18px', borderRadius: '14px', textAlign: 'center', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)' }}>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '6px' }}>Monthly limit reached</p>
             <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: '14px' }}>
               Free accounts get 30 rate searches/month. Upgrade to Pro for unlimited.
             </p>
-            <Link
-              to="/plans"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                padding: '10px 22px', borderRadius: '10px', textDecoration: 'none',
-                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                color: 'white', fontSize: '14px', fontWeight: 700,
-              }}
-            >
+            <Link to="/plans" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '10px', textDecoration: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', fontSize: '14px', fontWeight: 700 }}>
               <Zap size={14} /> Upgrade to Pro
             </Link>
           </div>
         ) : (
           <>
-            <button
-              onClick={calculate}
-              disabled={loading}
-              style={{
-                width: '100%', padding: '13px', borderRadius: '12px', fontSize: '15px', fontWeight: 700,
-                cursor: loading ? 'default' : 'pointer', border: 'none',
-                background: loading ? 'rgba(99,102,241,0.4)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                color: 'white', boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              }}
-            >
-              {loading ? (
-                <span style={{ display: 'inline-flex', gap: '4px' }}>
-                  {[0, 1, 2].map(i => (
-                    <span key={i} style={{
-                      width: '5px', height: '5px', borderRadius: '50%', background: 'white',
-                      animation: 'pulse 1s ease-in-out infinite', animationDelay: `${i * 0.2}s`,
-                    }} />
-                  ))}
-                </span>
-              ) : (
-                <><Calculator size={16} /> Calculate Rates</>
-              )}
+            <button onClick={calculate} disabled={loading} style={{
+              width: '100%', padding: '13px', borderRadius: '12px', fontSize: '15px', fontWeight: 700,
+              cursor: loading ? 'default' : 'pointer', border: 'none',
+              background: loading ? 'rgba(99,102,241,0.4)' : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              color: 'white', boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            }}>
+              {loading
+                ? <span style={{ display: 'inline-flex', gap: '4px' }}>{[0,1,2].map(i => <span key={i} style={{ width:'5px', height:'5px', borderRadius:'50%', background:'white', animation:'pulse 1s ease-in-out infinite', animationDelay:`${i*0.2}s` }} />)}</span>
+                : <><Calculator size={16} /> Calculate Rates</>}
             </button>
             {!isPro && (
               <p style={{ fontSize: '12px', color: 'rgba(248,250,252,0.3)', textAlign: 'center', margin: 0 }}>
@@ -429,52 +434,29 @@ export default function Rates() {
 
   const resultsPanel = (
     <div style={{ width: '100%', boxSizing: 'border-box' }}>
-      {results ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {results.map(r => <ResultCard key={r.carrier} result={r} />)}
+      {grouped.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {grouped.map(([carrier, services]) => (
+            <CarrierGroup key={carrier} carrier={carrier} services={services} />
+          ))}
 
-          <div style={{
-            padding: '14px 16px', borderRadius: '12px',
-            background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
-          }}>
+          <div style={{ padding: '14px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
             <p style={{ fontSize: '12px', color: 'rgba(248,250,252,0.35)', lineHeight: 1.7, margin: 0 }}>
               Estimates include a ~20% fuel surcharge and are based on 2024 published rate cards.
-              Actual charges may vary based on remote area surcharges, additional services, and current carrier rates.
-              Contact the carrier directly for a binding quote.
+              Actual charges may vary. Contact the carrier directly for a binding quote.
             </p>
           </div>
 
-          <div style={{
-            padding: '20px', borderRadius: '14px', textAlign: 'center',
-            background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)',
-          }}>
-            <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', marginBottom: '12px' }}>
-              Already shipped? Track it in real time.
-            </p>
-            <Link
-              to="/track"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                padding: '10px 22px', borderRadius: '10px', textDecoration: 'none',
-                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                color: 'white', fontSize: '14px', fontWeight: 700,
-              }}
-            >
+          <div style={{ padding: '20px', borderRadius: '14px', textAlign: 'center', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)' }}>
+            <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', marginBottom: '12px' }}>Already shipped? Track it in real time.</p>
+            <Link to="/track" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '10px', textDecoration: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', fontSize: '14px', fontWeight: 700 }}>
               Track a shipment →
             </Link>
           </div>
         </div>
       ) : (
-        <div style={{
-          minHeight: '240px',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          padding: '40px', borderRadius: '20px', gap: '14px',
-          background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)',
-        }}>
-          <div style={{
-            width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)',
-          }}>
+        <div style={{ minHeight: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', borderRadius: '20px', gap: '14px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
             <Calculator size={24} color="#6366f1" />
           </div>
           <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.4)', textAlign: 'center', margin: 0, lineHeight: 1.6 }}>
@@ -489,33 +471,19 @@ export default function Rates() {
     <div style={{ minHeight: '100vh', paddingTop: '72px', paddingBottom: '80px' }}>
       <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 24px' }}>
 
-        {/* Header */}
         <div style={{ marginBottom: '48px', textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            padding: '4px 12px', borderRadius: '100px', marginBottom: '16px',
-            background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
-            fontSize: '11px', color: '#818cf8', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase',
-          }}>
-            <Calculator size={11} />
-            Rate Calculator
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '100px', marginBottom: '16px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', fontSize: '11px', color: '#818cf8', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <Calculator size={11} /> Rate Calculator
           </div>
           <h1 style={{ fontSize: isMobile ? '28px' : '44px', fontWeight: 800, color: '#f8fafc', letterSpacing: '-1.5px', marginBottom: '14px', lineHeight: 1.1 }}>
             Shipping Rate Calculator
           </h1>
-          <p style={{ fontSize: isMobile ? '15px' : '18px', color: 'rgba(248,250,252,0.55)', lineHeight: 1.7, maxWidth: '540px', margin: '0 auto' }}>
-            Instant estimated rates for DHL, FedEx, UPS, and Aramex — based on weight, dimensions, and route.
+          <p style={{ fontSize: isMobile ? '15px' : '18px', color: 'rgba(248,250,252,0.55)', lineHeight: 1.7, maxWidth: '560px', margin: '0 auto' }}>
+            Instant estimated rates across all services — DHL, FedEx, UPS, and Aramex.
           </p>
         </div>
 
-        {/* Main layout */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '400px 1fr',
-          gap: '24px',
-          alignItems: 'start',
-          width: '100%',
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '400px 1fr', gap: '24px', alignItems: 'start', width: '100%' }}>
           <div style={{ minWidth: 0, width: '100%' }}>{formPanel}</div>
           <div style={{ minWidth: 0, width: '100%' }}>{resultsPanel}</div>
         </div>
