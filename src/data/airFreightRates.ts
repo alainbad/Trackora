@@ -36,12 +36,12 @@ const T_EY_STANDARD:   Record<number,string> = { 1:'2–3 days', 2:'2–4 days',
 // Heavier = cheaper per kg (standard air freight tiering)
 
 const EMI_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.8, 2:4.5, 3:5.8, 4:6.8, 5:8.2, 6:9.8, 7:11.5} },
-  { minKg:45,  maxKg:100,  zones:{1:3.2, 2:3.8, 3:4.9, 4:5.7, 5:6.9, 6:8.3, 7:9.7} },
-  { minKg:100, maxKg:300,  zones:{1:2.7, 2:3.2, 3:4.1, 4:4.8, 5:5.8, 6:7.0, 7:8.2} },
-  { minKg:300, maxKg:500,  zones:{1:2.2, 2:2.7, 3:3.4, 4:4.0, 5:4.8, 6:5.8, 7:6.8} },
-  { minKg:500, maxKg:1000, zones:{1:1.9, 2:2.3, 3:2.9, 4:3.4, 5:4.1, 6:5.0, 7:5.8} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.6,2:1.9,3:2.4,4:2.8,5:3.4,6:4.1,7:4.8} },
+  { minKg:0,   maxKg:45,   zones:{1:4.9, 2:5.9, 3:7.5, 4:8.8, 5:10.7, 6:12.7, 7:14.9} },
+  { minKg:45,  maxKg:100,  zones:{1:4.2, 2:4.9, 3:6.4, 4:7.4, 5:9.0,  6:10.8, 7:12.6} },
+  { minKg:100, maxKg:300,  zones:{1:3.5, 2:4.2, 3:5.3, 4:6.2, 5:7.5,  6:9.1,  7:10.7} },
+  { minKg:300, maxKg:500,  zones:{1:2.9, 2:3.5, 3:4.4, 4:5.2, 5:6.2,  6:7.5,  7:8.8} },
+  { minKg:500, maxKg:1000, zones:{1:2.5, 2:3.0, 3:3.8, 4:4.4, 5:5.3,  6:6.5,  7:7.5} },
+  { minKg:1000,maxKg:Infinity,zones:{1:2.1,2:2.5,3:3.1,4:3.6,5:4.4,6:5.3,7:6.2} },
 ]
 
 const EMI_STANDARD_RATES: AirWeightBand[] = EMI_PRIORITY_RATES.map(b => ({
@@ -49,12 +49,12 @@ const EMI_STANDARD_RATES: AirWeightBand[] = EMI_PRIORITY_RATES.map(b => ({
 }))
 
 const LH_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:4.0, 2:4.8, 3:6.0, 4:7.2, 5:8.6, 6:10.2,7:12.0} },
-  { minKg:45,  maxKg:100,  zones:{1:3.4, 2:4.0, 3:5.1, 4:6.1, 5:7.2, 6:8.6, 7:10.1} },
-  { minKg:100, maxKg:300,  zones:{1:2.8, 2:3.4, 3:4.3, 4:5.1, 5:6.1, 6:7.3, 7:8.5} },
-  { minKg:300, maxKg:500,  zones:{1:2.3, 2:2.8, 3:3.6, 4:4.2, 5:5.1, 6:6.1, 7:7.1} },
-  { minKg:500, maxKg:1000, zones:{1:2.0, 2:2.4, 3:3.0, 4:3.6, 5:4.3, 6:5.2, 7:6.0} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.7,2:2.0,3:2.5,4:3.0,5:3.6,6:4.3,7:5.0} },
+  { minKg:0,   maxKg:45,   zones:{1:5.6, 2:6.7, 3:8.4, 4:10.1, 5:12.0, 6:14.3, 7:16.8} },
+  { minKg:45,  maxKg:100,  zones:{1:4.8, 2:5.6, 3:7.1, 4:8.5,  5:10.1, 6:12.0, 7:14.1} },
+  { minKg:100, maxKg:300,  zones:{1:3.9, 2:4.8, 3:6.0, 4:7.1,  5:8.5,  6:10.2, 7:11.9} },
+  { minKg:300, maxKg:500,  zones:{1:3.2, 2:3.9, 3:5.0, 4:5.9,  5:7.1,  6:8.5,  7:9.9} },
+  { minKg:500, maxKg:1000, zones:{1:2.8, 2:3.4, 3:4.2, 4:5.0,  5:6.0,  6:7.3,  7:8.4} },
+  { minKg:1000,maxKg:Infinity,zones:{1:2.4,2:2.8,3:3.5,4:4.2,5:5.0,6:6.0,7:7.0} },
 ]
 
 const LH_STANDARD_RATES: AirWeightBand[] = LH_PRIORITY_RATES.map(b => ({
@@ -62,12 +62,12 @@ const LH_STANDARD_RATES: AirWeightBand[] = LH_PRIORITY_RATES.map(b => ({
 }))
 
 const QR_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.6, 2:4.3, 3:5.5, 4:6.5, 5:7.9, 6:9.4, 7:11.0} },
-  { minKg:45,  maxKg:100,  zones:{1:3.0, 2:3.6, 3:4.7, 4:5.5, 5:6.6, 6:7.9, 7:9.3} },
-  { minKg:100, maxKg:300,  zones:{1:2.5, 2:3.1, 3:3.9, 4:4.6, 5:5.6, 6:6.7, 7:7.8} },
-  { minKg:300, maxKg:500,  zones:{1:2.1, 2:2.6, 3:3.3, 4:3.8, 5:4.6, 6:5.5, 7:6.5} },
-  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.2, 3:2.8, 4:3.2, 5:3.9, 6:4.7, 7:5.5} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:1.8,3:2.3,4:2.7,5:3.3,6:3.9,7:4.6} },
+  { minKg:0,   maxKg:45,   zones:{1:4.7, 2:5.6, 3:7.2, 4:8.5, 5:10.3, 6:12.2, 7:14.3} },
+  { minKg:45,  maxKg:100,  zones:{1:3.9, 2:4.7, 3:6.1, 4:7.2, 5:8.6,  6:10.3, 7:12.1} },
+  { minKg:100, maxKg:300,  zones:{1:3.3, 2:4.0, 3:5.1, 4:6.0, 5:7.3,  6:8.7,  7:10.1} },
+  { minKg:300, maxKg:500,  zones:{1:2.7, 2:3.4, 3:4.3, 4:4.9, 5:6.0,  6:7.2,  7:8.5} },
+  { minKg:500, maxKg:1000, zones:{1:2.3, 2:2.9, 3:3.6, 4:4.2, 5:5.1,  6:6.1,  7:7.2} },
+  { minKg:1000,maxKg:Infinity,zones:{1:2.0,2:2.3,3:3.0,4:3.5,5:4.3,6:5.1,7:6.0} },
 ]
 
 const QR_STANDARD_RATES: AirWeightBand[] = QR_PRIORITY_RATES.map(b => ({
@@ -75,12 +75,12 @@ const QR_STANDARD_RATES: AirWeightBand[] = QR_PRIORITY_RATES.map(b => ({
 }))
 
 const TK_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.5, 2:4.2, 3:5.3, 4:6.3, 5:7.6, 6:9.1, 7:10.7} },
-  { minKg:45,  maxKg:100,  zones:{1:2.9, 2:3.5, 3:4.5, 4:5.3, 5:6.4, 6:7.7, 7:9.0} },
-  { minKg:100, maxKg:300,  zones:{1:2.4, 2:3.0, 3:3.8, 4:4.4, 5:5.4, 6:6.5, 7:7.6} },
-  { minKg:300, maxKg:500,  zones:{1:2.0, 2:2.5, 3:3.2, 4:3.7, 5:4.4, 6:5.3, 7:6.3} },
-  { minKg:500, maxKg:1000, zones:{1:1.7, 2:2.1, 3:2.7, 4:3.1, 5:3.8, 6:4.5, 7:5.3} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.4,2:1.8,3:2.2,4:2.6,5:3.1,6:3.8,7:4.4} },
+  { minKg:0,   maxKg:45,   zones:{1:4.4, 2:5.3, 3:6.6, 4:7.9, 5:9.5, 6:11.4, 7:13.4} },
+  { minKg:45,  maxKg:100,  zones:{1:3.6, 2:4.4, 3:5.6, 4:6.6, 5:8.0, 6:9.6,  7:11.3} },
+  { minKg:100, maxKg:300,  zones:{1:3.0, 2:3.8, 3:4.8, 4:5.5, 5:6.8, 6:8.1,  7:9.5} },
+  { minKg:300, maxKg:500,  zones:{1:2.5, 2:3.1, 3:4.0, 4:4.6, 5:5.5, 6:6.6,  7:7.9} },
+  { minKg:500, maxKg:1000, zones:{1:2.1, 2:2.6, 3:3.4, 4:3.9, 5:4.8, 6:5.6,  7:6.6} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.8,2:2.3,3:2.8,4:3.3,5:3.9,6:4.8,7:5.5} },
 ]
 
 const TK_STANDARD_RATES: AirWeightBand[] = TK_PRIORITY_RATES.map(b => ({
@@ -88,12 +88,12 @@ const TK_STANDARD_RATES: AirWeightBand[] = TK_PRIORITY_RATES.map(b => ({
 }))
 
 const EY_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.7, 2:4.4, 3:5.6, 4:6.6, 5:8.0, 6:9.5, 7:11.2} },
-  { minKg:45,  maxKg:100,  zones:{1:3.1, 2:3.7, 3:4.8, 4:5.6, 5:6.7, 6:8.0, 7:9.4} },
-  { minKg:100, maxKg:300,  zones:{1:2.6, 2:3.2, 3:4.0, 4:4.7, 5:5.7, 6:6.8, 7:7.9} },
-  { minKg:300, maxKg:500,  zones:{1:2.1, 2:2.6, 3:3.3, 4:3.9, 5:4.7, 6:5.6, 7:6.6} },
-  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.2, 3:2.8, 4:3.3, 5:4.0, 6:4.8, 7:5.6} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:1.9,3:2.3,4:2.8,5:3.3,6:4.0,7:4.7} },
+  { minKg:0,   maxKg:45,   zones:{1:4.8, 2:5.7, 3:7.3, 4:8.6, 5:10.4, 6:12.4, 7:14.6} },
+  { minKg:45,  maxKg:100,  zones:{1:4.0, 2:4.8, 3:6.2, 4:7.3, 5:8.7,  6:10.4, 7:12.2} },
+  { minKg:100, maxKg:300,  zones:{1:3.4, 2:4.2, 3:5.2, 4:6.1, 5:7.4,  6:8.8,  7:10.3} },
+  { minKg:300, maxKg:500,  zones:{1:2.7, 2:3.4, 3:4.3, 4:5.1, 5:6.1,  6:7.3,  7:8.6} },
+  { minKg:500, maxKg:1000, zones:{1:2.3, 2:2.9, 3:3.6, 4:4.3, 5:5.2,  6:6.2,  7:7.3} },
+  { minKg:1000,maxKg:Infinity,zones:{1:2.0,2:2.5,3:3.0,4:3.6,5:4.3,6:5.2,7:6.1} },
 ]
 
 const EY_STANDARD_RATES: AirWeightBand[] = EY_PRIORITY_RATES.map(b => ({
@@ -105,12 +105,12 @@ const T_CV_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3
 const T_CV_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'3–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'5–8 days', 7:'7–10 days' }
 
 const CV_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.9, 2:4.6, 3:5.9, 4:7.0, 5:8.4, 6:10.0, 7:11.8} },
-  { minKg:45,  maxKg:100,  zones:{1:3.3, 2:3.9, 3:5.0, 4:5.9, 5:7.1, 6:8.5,  7:10.0} },
-  { minKg:100, maxKg:300,  zones:{1:2.7, 2:3.3, 3:4.2, 4:4.9, 5:5.9, 6:7.1,  7:8.4} },
-  { minKg:300, maxKg:500,  zones:{1:2.2, 2:2.7, 3:3.5, 4:4.1, 5:5.0, 6:6.0,  7:7.0} },
-  { minKg:500, maxKg:1000, zones:{1:1.9, 2:2.3, 3:2.9, 4:3.4, 5:4.2, 6:5.1,  7:5.9} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.6,2:1.9,3:2.4,4:2.9,5:3.5,6:4.2,7:4.9} },
+  { minKg:0,   maxKg:45,   zones:{1:4.9, 2:5.8, 3:7.4, 4:8.8, 5:10.5, 6:12.5, 7:14.8} },
+  { minKg:45,  maxKg:100,  zones:{1:4.1, 2:4.9, 3:6.3, 4:7.4, 5:8.9,  6:10.6, 7:12.5} },
+  { minKg:100, maxKg:300,  zones:{1:3.4, 2:4.1, 3:5.3, 4:6.1, 5:7.4,  6:8.9,  7:10.5} },
+  { minKg:300, maxKg:500,  zones:{1:2.8, 2:3.4, 3:4.4, 4:5.1, 5:6.3,  6:7.5,  7:8.8} },
+  { minKg:500, maxKg:1000, zones:{1:2.4, 2:2.9, 3:3.6, 4:4.3, 5:5.3,  6:6.4,  7:7.4} },
+  { minKg:1000,maxKg:Infinity,zones:{1:2.0,2:2.4,3:3.0,4:3.6,5:4.4,6:5.3,7:6.1} },
 ]
 
 const CV_STANDARD_RATES: AirWeightBand[] = CV_PRIORITY_RATES.map(b => ({
@@ -122,12 +122,12 @@ const T_OA_PRIORITY: Record<number,string> = { 1:'1 day', 2:'1–2 days', 3:'2�
 const T_OA_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'2–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'6–8 days', 7:'7–11 days' }
 
 const OA_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.3, 2:4.0, 3:5.1, 4:6.1, 5:7.4, 6:8.8, 7:10.4} },
-  { minKg:45,  maxKg:100,  zones:{1:2.8, 2:3.4, 3:4.3, 4:5.1, 5:6.2, 6:7.5, 7:8.8} },
-  { minKg:100, maxKg:300,  zones:{1:2.3, 2:2.9, 3:3.6, 4:4.3, 5:5.2, 6:6.3, 7:7.4} },
-  { minKg:300, maxKg:500,  zones:{1:1.9, 2:2.4, 3:3.0, 4:3.6, 5:4.3, 6:5.2, 7:6.1} },
-  { minKg:500, maxKg:1000, zones:{1:1.6, 2:2.0, 3:2.5, 4:3.0, 5:3.7, 6:4.4, 7:5.1} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.3,2:1.7,3:2.1,4:2.5,5:3.1,6:3.7,7:4.3} },
+  { minKg:0,   maxKg:45,   zones:{1:3.8, 2:4.6, 3:5.9, 4:7.0, 5:8.5, 6:10.1, 7:12.0} },
+  { minKg:45,  maxKg:100,  zones:{1:3.2, 2:3.9, 3:4.9, 4:5.9, 5:7.1, 6:8.6,  7:10.1} },
+  { minKg:100, maxKg:300,  zones:{1:2.6, 2:3.3, 3:4.1, 4:4.9, 5:6.0, 6:7.2,  7:8.5} },
+  { minKg:300, maxKg:500,  zones:{1:2.2, 2:2.8, 3:3.5, 4:4.1, 5:4.9, 6:6.0,  7:7.0} },
+  { minKg:500, maxKg:1000, zones:{1:1.8, 2:2.3, 3:2.9, 4:3.5, 5:4.3, 6:5.1,  7:5.9} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.5,2:2.0,3:2.4,4:2.9,5:3.6,6:4.3,7:4.9} },
 ]
 
 const OA_STANDARD_RATES: AirWeightBand[] = OA_PRIORITY_RATES.map(b => ({
@@ -139,12 +139,12 @@ const T_DG_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3
 const T_DG_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'3–5 days', 3:'4–6 days', 4:'5–7 days', 5:'5–8 days', 6:'7–10 days', 7:'8–12 days' }
 
 const DG_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:4.1, 2:4.9, 3:6.2, 4:7.4, 5:8.9, 6:10.6, 7:12.5} },
-  { minKg:45,  maxKg:100,  zones:{1:3.5, 2:4.1, 3:5.3, 4:6.3, 5:7.5, 6:9.0,  7:10.6} },
-  { minKg:100, maxKg:300,  zones:{1:2.9, 2:3.5, 3:4.4, 4:5.3, 5:6.3, 6:7.5,  7:8.9} },
-  { minKg:300, maxKg:500,  zones:{1:2.4, 2:2.9, 3:3.7, 4:4.4, 5:5.3, 6:6.3,  7:7.4} },
-  { minKg:500, maxKg:1000, zones:{1:2.0, 2:2.5, 3:3.1, 4:3.7, 5:4.4, 6:5.3,  7:6.2} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.7,2:2.1,3:2.6,4:3.1,5:3.7,6:4.4,7:5.2} },
+  { minKg:0,   maxKg:45,   zones:{1:6.2, 2:7.4, 3:9.3, 4:11.1, 5:13.4, 6:15.9, 7:18.8} },
+  { minKg:45,  maxKg:100,  zones:{1:5.3, 2:6.2, 3:8.0, 4:9.5,  5:11.3, 6:13.5, 7:15.9} },
+  { minKg:100, maxKg:300,  zones:{1:4.4, 2:5.3, 3:6.6, 4:8.0,  5:9.5,  6:11.3, 7:13.4} },
+  { minKg:300, maxKg:500,  zones:{1:3.6, 2:4.4, 3:5.6, 4:6.6,  5:8.0,  6:9.5,  7:11.1} },
+  { minKg:500, maxKg:1000, zones:{1:3.0, 2:3.8, 3:4.7, 4:5.6,  5:6.6,  6:8.0,  7:9.3} },
+  { minKg:1000,maxKg:Infinity,zones:{1:2.6,2:3.2,3:3.9,4:4.7,5:5.6,6:6.6,7:7.8} },
 ]
 
 const DG_STANDARD_RATES: AirWeightBand[] = DG_PRIORITY_RATES.map(b => ({
@@ -156,12 +156,12 @@ const T_FX_PRIORITY: Record<number,string> = { 1:'1–2 days', 2:'2–3 days', 3
 const T_FX_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'3–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'6–9 days', 7:'7–10 days' }
 
 const FX_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:4.2, 2:5.0, 3:6.3, 4:7.5, 5:9.0, 6:10.7, 7:12.6} },
-  { minKg:45,  maxKg:100,  zones:{1:3.5, 2:4.2, 3:5.4, 4:6.4, 5:7.6, 6:9.1,  7:10.7} },
-  { minKg:100, maxKg:300,  zones:{1:2.9, 2:3.6, 3:4.5, 4:5.4, 5:6.4, 6:7.7,  7:9.0} },
-  { minKg:300, maxKg:500,  zones:{1:2.4, 2:3.0, 3:3.8, 4:4.5, 5:5.4, 6:6.4,  7:7.5} },
-  { minKg:500, maxKg:1000, zones:{1:2.1, 2:2.5, 3:3.2, 4:3.8, 5:4.5, 6:5.4,  7:6.3} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.7,2:2.1,3:2.7,4:3.2,5:3.8,6:4.5,7:5.3} },
+  { minKg:0,   maxKg:45,   zones:{1:6.5, 2:7.8, 3:9.8, 4:11.6, 5:14.0, 6:16.6, 7:19.5} },
+  { minKg:45,  maxKg:100,  zones:{1:5.4, 2:6.5, 3:8.4, 4:9.9,  5:11.8, 6:14.1, 7:16.6} },
+  { minKg:100, maxKg:300,  zones:{1:4.5, 2:5.6, 3:7.0, 4:8.4,  5:9.9,  6:11.9, 7:14.0} },
+  { minKg:300, maxKg:500,  zones:{1:3.7, 2:4.7, 3:5.9, 4:7.0,  5:8.4,  6:9.9,  7:11.6} },
+  { minKg:500, maxKg:1000, zones:{1:3.3, 2:3.9, 3:5.0, 4:5.9,  5:7.0,  6:8.4,  7:9.8} },
+  { minKg:1000,maxKg:Infinity,zones:{1:2.6,2:3.3,3:4.2,4:5.0,5:5.9,6:7.0,7:8.2} },
 ]
 
 const FX_STANDARD_RATES: AirWeightBand[] = FX_PRIORITY_RATES.map(b => ({
@@ -173,12 +173,12 @@ const T_ME_PRIORITY: Record<number,string> = { 1:'1 day', 2:'1–2 days', 3:'2�
 const T_ME_STANDARD: Record<number,string> = { 1:'2–3 days', 2:'2–4 days', 3:'3–5 days', 4:'4–6 days', 5:'5–7 days', 6:'6–8 days', 7:'7–11 days' }
 
 const ME_PRIORITY_RATES: AirWeightBand[] = [
-  { minKg:0,   maxKg:45,   zones:{1:3.4, 2:4.1, 3:5.2, 4:6.2, 5:7.5, 6:9.0, 7:10.6} },
-  { minKg:45,  maxKg:100,  zones:{1:2.9, 2:3.5, 3:4.4, 4:5.2, 5:6.3, 6:7.6, 7:8.9} },
-  { minKg:100, maxKg:300,  zones:{1:2.4, 2:2.9, 3:3.7, 4:4.4, 5:5.3, 6:6.4, 7:7.5} },
-  { minKg:300, maxKg:500,  zones:{1:2.0, 2:2.4, 3:3.1, 4:3.7, 5:4.4, 6:5.3, 7:6.2} },
-  { minKg:500, maxKg:1000, zones:{1:1.7, 2:2.0, 3:2.6, 4:3.1, 5:3.7, 6:4.5, 7:5.2} },
-  { minKg:1000,maxKg:Infinity,zones:{1:1.4,2:1.7,3:2.2,4:2.6,5:3.1,6:3.7,7:4.4} },
+  { minKg:0,   maxKg:45,   zones:{1:3.9, 2:4.7, 3:6.0, 4:7.1, 5:8.6, 6:10.4, 7:12.2} },
+  { minKg:45,  maxKg:100,  zones:{1:3.3, 2:4.0, 3:5.1, 4:6.0, 5:7.2, 6:8.7,  7:10.2} },
+  { minKg:100, maxKg:300,  zones:{1:2.8, 2:3.3, 3:4.3, 4:5.1, 5:6.1, 6:7.4,  7:8.6} },
+  { minKg:300, maxKg:500,  zones:{1:2.3, 2:2.8, 3:3.6, 4:4.3, 5:5.1, 6:6.1,  7:7.1} },
+  { minKg:500, maxKg:1000, zones:{1:2.0, 2:2.3, 3:3.0, 4:3.6, 5:4.3, 6:5.2,  7:6.0} },
+  { minKg:1000,maxKg:Infinity,zones:{1:1.6,2:2.0,3:2.5,4:3.0,5:3.6,6:4.3,7:5.1} },
 ]
 
 const ME_STANDARD_RATES: AirWeightBand[] = ME_PRIORITY_RATES.map(b => ({
