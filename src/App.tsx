@@ -8,6 +8,7 @@ import Terms from './pages/Terms'
 import About from './pages/About'
 import HowItWorks from './pages/HowItWorks'
 import CarrierPage from './pages/CarrierPage'
+import FreightLandingPage from './pages/FreightLandingPage'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import FAQ from './pages/FAQ'
@@ -49,6 +50,11 @@ export default function App() {
             <Routes>
               <Route path="/"                   element={<Home />} />
               <Route path="/track"              element={<Track />} />
+              <Route path="/track/bill-of-lading" element={<FreightLandingPage pageKey="bol" />} />
+              <Route path="/track/container"      element={<FreightLandingPage pageKey="container" />} />
+              <Route path="/track/sea-freight"    element={<FreightLandingPage pageKey="sea-freight" />} />
+              <Route path="/track/ocean-freight"  element={<FreightLandingPage pageKey="ocean-freight" />} />
+              <Route path="/track/dhl"            element={<FreightLandingPage pageKey="dhl" />} />
               <Route path="/track/:trackingId"  element={<Track />} />
               <Route path="/dashboard"          element={<Dashboard />} />
               <Route path="/privacy"            element={<Privacy />} />
