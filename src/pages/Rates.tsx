@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship, Plus, X } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
@@ -120,7 +120,83 @@ function SearchSelect({
   )
 }
 
-// ── Carrier logo ──────────────────────────────────────────────────────────────
+// ── City combobox — dropdown suggestions + free-text input ────────────────────
+function CityCombobox({
+  value, onChange, options, placeholder = 'City / airport (optional)',
+}: {
+  value: string
+  onChange: (v: string) => void
+  options: SelectOption[]
+  placeholder?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const [inputVal, setInputVal] = useState(value)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  // Keep inputVal in sync when value changes externally (e.g. postal auto-fill)
+  useEffect(() => { setInputVal(value) }, [value])
+
+  const filtered = useMemo(() =>
+    inputVal.trim()
+      ? options.filter(o => o.label.toLowerCase().includes(inputVal.toLowerCase())).slice(0, 60)
+      : options.slice(0, 60),
+    [options, inputVal]
+  )
+
+  useEffect(() => {
+    if (!open) return
+    function handler(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  function handleInput(v: string) {
+    setInputVal(v)
+    onChange(v)
+    setOpen(true)
+  }
+
+  function pick(opt: SelectOption) {
+    const label = opt.label.split(' (')[0] // strip "(IATA)" suffix for display
+    setInputVal(label)
+    onChange(label)
+    setOpen(false)
+  }
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <input
+        type="text"
+        value={inputVal}
+        onChange={e => handleInput(e.target.value)}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        style={{ ...INPUT_STYLE, paddingRight: '14px' }}
+        autoComplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', zIndex: 200, top: 'calc(100% + 6px)', left: 0, right: 0,
+          background: '#0f1629', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.7)', maxHeight: '220px', overflowY: 'auto',
+        }}>
+          {filtered.map(o => (
+            <div key={o.value} onMouseDown={() => pick(o)} style={{
+              padding: '9px 14px', cursor: 'pointer', fontSize: '13px', color: '#f8fafc',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.15)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >{o.label}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 function CarrierLogo({ carrier, size = 36 }: { carrier: CarrierKey; size?: number }) {
   const [ok, setOk] = useState(true)
   const meta = CARRIER_META[carrier]
@@ -485,10 +561,11 @@ function LocationField({
           if (!match && cities.length > 0) match = cities[0]
 
           if (match) {
-            onCity(match.code)
             const cityDisplay = match.label.split(' (')[0]
-            setHint(place === cityDisplay ? place : `${place} → ${cityDisplay}`)
+            onCity(cityDisplay)
+            setHint(place.toLowerCase() === cityDisplay.toLowerCase() ? place : `${place} → ${cityDisplay}`)
           } else {
+            onCity(place)
             setHint(place)
           }
         }
@@ -508,13 +585,12 @@ function LocationField({
           placeholder="Select country…"
           searchPlaceholder="Search country…"
         />
-        {country && cities.length > 0 && (
-          <SearchSelect
+        {country && (
+          <CityCombobox
             value={city}
             onChange={onCity}
             options={cities.map(c => ({ value: c.code, label: c.label }))}
-            placeholder="Select city / airport (optional)"
-            searchPlaceholder="Search city…"
+            placeholder="City / airport (optional)"
           />
         )}
         {country && (
