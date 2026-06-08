@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship, Plus, X } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
@@ -605,32 +605,53 @@ export default function Rates() {
   const { user } = useAuth()
   const { remaining, isLimited, isPro, consume } = useRateQuota()
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null)
-  const [freightTab, setFreightTab] = useState<'express' | 'air'>('express')
+
+  // ── Restore form from localStorage cache ──────────────────────────────────
+  const CACHE_KEY = 'trackora_rates_v1'
+  function loadCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') } catch { return {} }
+  }
+  const _c = loadCache()
+
+  const [freightTab, setFreightTab] = useState<'express' | 'air'>(_c.freightTab ?? 'express')
 
   // Express courier state
-  const [originCountry, setOriginCountry] = useState('')
-  const [originCity,    setOriginCity]    = useState('')
-  const [destCountry,   setDestCountry]   = useState('')
-  const [destCity,      setDestCity]      = useState('')
-  const [unit,          setUnit]          = useState<'kg' | 'lbs'>('kg')
-  const [pkgs,          setPkgs]          = useState<PkgItem[]>([newPkg()])
-  const [carriers,      setCarriers]      = useState<CarrierKey[]>(['DHL', 'FedEx', 'UPS', 'Aramex'])
+  const [originCountry, setOriginCountry] = useState<string>(_c.originCountry ?? '')
+  const [originCity,    setOriginCity]    = useState<string>(_c.originCity    ?? '')
+  const [destCountry,   setDestCountry]   = useState<string>(_c.destCountry   ?? '')
+  const [destCity,      setDestCity]      = useState<string>(_c.destCity      ?? '')
+  const [unit,          setUnit]          = useState<'kg' | 'lbs'>(_c.unit    ?? 'kg')
+  const [pkgs,          setPkgs]          = useState<PkgItem[]>(_c.pkgs?.length ? _c.pkgs : [newPkg()])
+  const [carriers,      setCarriers]      = useState<CarrierKey[]>(_c.carriers ?? ['DHL', 'FedEx', 'UPS', 'Aramex'])
   const [results,       setResults]       = useState<RateResult[] | null>(null)
   const [error,         setError]         = useState('')
   const [loading,       setLoading]       = useState(false)
 
   // Air freight state
-  const [airOriginCountry, setAirOriginCountry] = useState('')
-  const [airOriginCity,    setAirOriginCity]    = useState('')
-  const [airDestCountry,   setAirDestCountry]   = useState('')
-  const [airDestCity,      setAirDestCity]      = useState('')
-  const [airUnit,          setAirUnit]          = useState<'kg' | 'lbs'>('kg')
-  const [airPkgs,          setAirPkgs]          = useState<PkgItem[]>([newPkg()])
-  const [commodity,        setCommodity]        = useState<CommodityType>('general')
-  const [airCarriers,      setAirCarriers]      = useState<AirCarrier[]>(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'OmanAir', 'MEA', 'DHLGlobal', 'FedExCargo'])
+  const [airOriginCountry, setAirOriginCountry] = useState<string>(_c.airOriginCountry ?? '')
+  const [airOriginCity,    setAirOriginCity]    = useState<string>(_c.airOriginCity    ?? '')
+  const [airDestCountry,   setAirDestCountry]   = useState<string>(_c.airDestCountry   ?? '')
+  const [airDestCity,      setAirDestCity]      = useState<string>(_c.airDestCity      ?? '')
+  const [airUnit,          setAirUnit]          = useState<'kg' | 'lbs'>(_c.airUnit    ?? 'kg')
+  const [airPkgs,          setAirPkgs]          = useState<PkgItem[]>(_c.airPkgs?.length ? _c.airPkgs : [newPkg()])
+  const [commodity,        setCommodity]        = useState<CommodityType>(_c.commodity  ?? 'general')
+  const [airCarriers,      setAirCarriers]      = useState<AirCarrier[]>(_c.airCarriers ?? ['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'OmanAir', 'MEA', 'DHLGlobal', 'FedExCargo'])
   const [airResults,       setAirResults]       = useState<AirRateResult[] | null>(null)
   const [airError,         setAirError]         = useState('')
   const [airLoading,       setAirLoading]       = useState(false)
+
+  // ── Persist form to localStorage whenever inputs change ───────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        freightTab,
+        originCountry, originCity, destCountry, destCity, unit, pkgs, carriers,
+        airOriginCountry, airOriginCity, airDestCountry, airDestCity,
+        airUnit, airPkgs, commodity, airCarriers,
+      }))
+    } catch { /* storage full or private mode */ }
+  }, [freightTab, originCountry, originCity, destCountry, destCity, unit, pkgs, carriers,
+      airOriginCountry, airOriginCity, airDestCountry, airDestCity, airUnit, airPkgs, commodity, airCarriers])
 
   const airOriginCities = useMemo(() => getCities(airOriginCountry), [airOriginCountry])
   const airDestCities   = useMemo(() => getCities(airDestCountry),   [airDestCountry])
