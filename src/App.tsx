@@ -23,6 +23,9 @@ const Rates = lazy(() => import('./pages/Rates'))
 const CustomsDuty = lazy(() => import('./pages/CustomsDuty'))
 const DetentionCalc = lazy(() => import('./pages/DetentionCalc'))
 const ProfitCalc = lazy(() => import('./pages/ProfitCalc'))
+const PortLandingPage = lazy(() => import('./pages/PortLandingPage'))
+const DocumentGenerator = lazy(() => import('./pages/DocumentGenerator'))
+const Tools = lazy(() => import('./pages/Tools'))
 
 // Scrolls to #features / #pricing anchors (React Router doesn't do this on its own),
 // and scrolls to top on normal route changes.
@@ -53,6 +56,18 @@ export default function App() {
             <Routes>
               <Route path="/"                   element={<Home />} />
               <Route path="/track"              element={<Track />} />
+              <Route path="/tools"               element={<Tools />} />
+              <Route path="/document-generator"  element={<DocumentGenerator />} />
+              <Route path="/ports/jebel-ali-dubai"   element={<PortLandingPage type="port" slug="jebel-ali-dubai" />} />
+              <Route path="/ports/rotterdam"         element={<PortLandingPage type="port" slug="rotterdam" />} />
+              <Route path="/ports/singapore"         element={<PortLandingPage type="port" slug="singapore" />} />
+              <Route path="/ports/shanghai"          element={<PortLandingPage type="port" slug="shanghai" />} />
+              <Route path="/ports/antwerp-bruges"    element={<PortLandingPage type="port" slug="antwerp-bruges" />} />
+              <Route path="/airports/dubai-dxb"      element={<PortLandingPage type="airport" slug="dubai-dxb" />} />
+              <Route path="/airports/frankfurt-fra"  element={<PortLandingPage type="airport" slug="frankfurt-fra" />} />
+              <Route path="/airports/london-heathrow" element={<PortLandingPage type="airport" slug="london-heathrow" />} />
+              <Route path="/airports/singapore-sin"  element={<PortLandingPage type="airport" slug="singapore-sin" />} />
+              <Route path="/airports/hong-kong-hkg"  element={<PortLandingPage type="airport" slug="hong-kong-hkg" />} />
               <Route path="/track/bill-of-lading" element={<FreightLandingPage pageKey="bol" />} />
               <Route path="/track/container"      element={<FreightLandingPage pageKey="container" />} />
               <Route path="/track/sea-freight"    element={<FreightLandingPage pageKey="sea-freight" />} />
