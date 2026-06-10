@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { FileText, Package, ClipboardList, Plus, Trash2, Printer, Copy, Upload, Lock } from 'lucide-react'
 import { useProfile } from '../contexts/ProfileContext'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useSEO } from '../hooks/useSEO'
 
 // ── Style constants ────────────────────────────────────────────────────────
 
@@ -662,10 +663,22 @@ export default function DocumentGenerator() {
   const [packing, setPacking] = useState<PackingState>(DEFAULT_PACKING)
   const [shipping, setShipping] = useState<ShippingState>(DEFAULT_SHIPPING)
 
-  // SEO
-  useEffect(() => {
-    document.title = 'Logistics Document Generator — Commercial Invoice & Packing List | Trackora'
-  }, [])
+  useSEO({
+    title: 'Logistics Document Generator — Commercial Invoice & Packing List | Trackora',
+    description: 'Generate professional trade documents online: commercial invoices, packing lists, and shipping instructions. Live preview, print to PDF, and clipboard export. Pro feature.',
+    canonical: 'https://www.track-ora.com/document-generator',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      'name': 'Logistics Document Generator',
+      'applicationCategory': 'BusinessApplication',
+      'url': 'https://www.track-ora.com/document-generator',
+      'description': 'Generate professional trade documents: commercial invoices, packing lists, and shipping instructions with live preview and PDF export.',
+      'offers': { '@type': 'Offer', 'price': '9.99', 'priceCurrency': 'USD', 'name': 'Pro Plan' },
+      'featureList': ['Commercial Invoice generator', 'Packing List generator', 'Shipping Instructions generator', 'Live document preview', 'Print / Download PDF', 'Company logo upload', 'LocalStorage auto-save'],
+      'publisher': { '@type': 'Organization', 'name': 'Trackora', 'url': 'https://www.track-ora.com' },
+    },
+  })
 
   // Persist shared to localStorage
   const setShared = useCallback((s: SharedParty) => {

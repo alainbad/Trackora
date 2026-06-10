@@ -53,6 +53,21 @@ export default function Tools() {
     title: 'Free & Pro Logistics Tools — Rate Calculator, Duty Estimator & More | Trackora',
     description: 'Access free and pro logistics tools: freight rate calculator, customs duty estimator, detention calculator, profit calculator, and document generator.',
     canonical: 'https://www.track-ora.com/tools',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      'name': 'Trackora Logistics Tools',
+      'description': 'Free and pro logistics tools for freight forwarders, importers, and logistics professionals.',
+      'url': 'https://www.track-ora.com/tools',
+      'numberOfItems': 5,
+      'itemListElement': [
+        { '@type': 'ListItem', 'position': 1, 'name': 'Freight Rate Calculator', 'url': 'https://www.track-ora.com/rates', 'description': 'Compare air and express courier rates across top carriers' },
+        { '@type': 'ListItem', 'position': 2, 'name': 'Customs Duty Estimator', 'url': 'https://www.track-ora.com/customs-duty', 'description': 'Estimate import duties and VAT for 15 countries' },
+        { '@type': 'ListItem', 'position': 3, 'name': 'Container Detention Calculator', 'url': 'https://www.track-ora.com/detention-calculator', 'description': 'Calculate container detention charges by carrier and region' },
+        { '@type': 'ListItem', 'position': 4, 'name': 'Freight Profit Calculator', 'url': 'https://www.track-ora.com/profit-calculator', 'description': 'Calculate freight profit margins and cost breakdowns' },
+        { '@type': 'ListItem', 'position': 5, 'name': 'Logistics Document Generator', 'url': 'https://www.track-ora.com/document-generator', 'description': 'Generate commercial invoices, packing lists, and shipping instructions' },
+      ],
+    },
   })
 
   return (

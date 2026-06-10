@@ -84,6 +84,40 @@ export default function ProfitCalc() {
     title: 'Freight Profit Margin Calculator — Logistics Profitability Tool | Trackora',
     description: 'Calculate your freight profit margin instantly. Enter buy rate, sell rate and additional costs to see gross profit, margin %, and cost breakdown. Free tool for freight forwarders.',
     canonical: 'https://www.track-ora.com/profit-calculator',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        'name': 'Freight Profit Margin Calculator',
+        'applicationCategory': 'BusinessApplication',
+        'url': 'https://www.track-ora.com/profit-calculator',
+        'description': 'Calculate freight profit margins in real time. Enter buy rate, sell rate, and additional costs to see gross profit, margin %, and a visual cost breakdown.',
+        'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' },
+        'featureList': ['Live margin calculation', 'Multi-currency support', 'Additional cost breakdown', 'Visual profit bar', 'Air/Sea/Express/Road modes'],
+        'publisher': { '@type': 'Organization', 'name': 'Trackora', 'url': 'https://www.track-ora.com' },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': [
+          {
+            '@type': 'Question',
+            'name': 'What is a good freight profit margin?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'A healthy freight forwarding margin is typically 15-25% of the sell rate. Margins below 10% are considered thin and risky, while margins above 25% are strong. Air freight tends to have higher margins than sea freight due to lower competition on niche routes.' },
+          },
+          {
+            '@type': 'Question',
+            'name': 'How is freight margin calculated?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Freight margin is calculated as: (Sell Rate − Total Costs) / Sell Rate × 100. For example, if you charge $700 and your total costs (buy rate + handling + insurance) are $550, your margin is ($700 − $550) / $700 × 100 = 21.4%.' },
+          },
+          {
+            '@type': 'Question',
+            'name': 'What costs should be included in freight margin calculation?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Besides the buy rate (what you pay the carrier), include: customs clearance fees, port handling charges, documentation fees, insurance, storage/warehouse fees, local transport, and any surcharges. Omitting these can significantly overstate your actual margin.' },
+          },
+        ],
+      },
+    ],
   })
 
   const isMobile = useIsMobile()

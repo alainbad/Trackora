@@ -19,10 +19,36 @@ export default function PortLandingPage({ type, slug }: Props) {
   const [trackingValue, setTrackingValue] = useState('')
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
+  const pageUrl = config ? `https://www.track-ora.com/${type === 'port' ? 'ports' : 'airports'}/${slug}` : undefined
+
   useSEO({
     title: config ? config.seoTitle : 'Page Not Found | Trackora',
     description: config ? config.seoDescription : '',
-    canonical: config ? `https://www.track-ora.com/${type === 'port' ? 'ports' : 'airports'}/${slug}` : undefined,
+    canonical: pageUrl,
+    jsonLd: config ? [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': config.faqs.map(faq => ({
+          '@type': 'Question',
+          'name': faq.q,
+          'acceptedAnswer': { '@type': 'Answer', 'text': faq.a },
+        })),
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        'name': `How to Track Cargo Through ${config.shortName}`,
+        'description': config.subtitle,
+        'url': pageUrl,
+        'step': config.howSteps.map((step, i) => ({
+          '@type': 'HowToStep',
+          'position': i + 1,
+          'name': step.title,
+          'text': step.body,
+        })),
+      },
+    ] : undefined,
   })
 
   if (!config) {

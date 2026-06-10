@@ -67,6 +67,40 @@ export default function DetentionCalc() {
     title: 'Container Detention Calculator — Demurrage & Detention Costs | Trackora',
     description: 'Calculate container detention and demurrage charges for Maersk, MSC, CMA CGM, Hapag-Lloyd, COSCO, Evergreen, ONE, Yang Ming and ZIM. Free tool for freight forwarders and importers.',
     canonical: 'https://www.track-ora.com/detention-calculator',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        'name': 'Container Detention Calculator',
+        'applicationCategory': 'BusinessApplication',
+        'url': 'https://www.track-ora.com/detention-calculator',
+        'description': 'Calculate container detention and demurrage charges by shipping line, container type, and region. Covers Maersk, MSC, CMA CGM, Hapag-Lloyd, COSCO, Evergreen, ONE, Yang Ming and ZIM.',
+        'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' },
+        'featureList': ['9 major shipping lines', '5 container types', '6 global regions', 'Tiered daily rate calculation', 'Free days tracking'],
+        'publisher': { '@type': 'Organization', 'name': 'Trackora', 'url': 'https://www.track-ora.com' },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': [
+          {
+            '@type': 'Question',
+            'name': 'What is container detention?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Container detention is a charge levied by shipping lines when a container (full or empty) is kept by the shipper/consignee outside the port or depot beyond the agreed free days. It applies to containers that have been picked up from the terminal but not yet returned.' },
+          },
+          {
+            '@type': 'Question',
+            'name': 'What is the difference between demurrage and detention?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Demurrage is charged when a full container sits inside the terminal beyond the free days. Detention applies outside the terminal — when the container has been picked up but not yet returned empty. Both have tiered daily rates that increase the longer the container is held.' },
+          },
+          {
+            '@type': 'Question',
+            'name': 'How many free days do shipping lines typically give?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Free days vary by carrier and region. Maersk typically gives 4-7 free days depending on the trade lane. ZIM tends to give fewer free days (3-5) while carriers like COSCO and Evergreen often give 5-6. Free days can also be negotiated in volume contracts.' },
+          },
+        ],
+      },
+    ],
   })
 
   const isMobile = useIsMobile()

@@ -60,6 +60,45 @@ export default function CustomsDuty() {
     title: 'Customs Duty Calculator — Estimate Import Duties & Taxes | Trackora',
     description: 'Free customs duty calculator for 15 countries. Estimate import duties, VAT, and total landed cost for 20 product categories including UAE, Saudi Arabia, EU, USA, UK and more.',
     canonical: 'https://www.track-ora.com/customs-duty',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        'name': 'Customs Duty Calculator',
+        'applicationCategory': 'BusinessApplication',
+        'url': 'https://www.track-ora.com/customs-duty',
+        'description': 'Free customs duty calculator for 15 countries. Estimate import duties, VAT, and total landed cost for 20 product categories.',
+        'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' },
+        'featureList': ['Import duty estimation', 'VAT calculation', '15 countries covered', '20 product categories', 'Total landed cost'],
+        'publisher': { '@type': 'Organization', 'name': 'Trackora', 'url': 'https://www.track-ora.com' },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'mainEntity': [
+          {
+            '@type': 'Question',
+            'name': 'How is customs duty calculated?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Customs duty is calculated as a percentage of the CIF value (Cost + Insurance + Freight) of the imported goods. The duty rate depends on the product category (HS code) and the importing country. For example, the UAE charges 5% import duty on most goods.' },
+          },
+          {
+            '@type': 'Question',
+            'name': 'What is CIF value for customs purposes?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'CIF stands for Cost, Insurance, and Freight. It is the total value of goods including the purchase price, insurance premium, and freight charges to the port of entry. Most countries use CIF as the customs valuation basis.' },
+          },
+          {
+            '@type': 'Question',
+            'name': 'Does the UAE charge VAT on imports?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'Yes. The UAE charges 5% VAT on most imported goods. This is applied on top of the import duty. Medical devices and most food items are exempt from both import duty and VAT.' },
+          },
+          {
+            '@type': 'Question',
+            'name': 'Which countries are covered by the customs duty calculator?',
+            'acceptedAnswer': { '@type': 'Answer', 'text': 'The calculator covers 15 countries: UAE, Saudi Arabia, Bahrain, Kuwait, Qatar, Oman, Germany (EU proxy), USA, UK, Lebanon, India, Australia, Canada, Turkey, and Singapore.' },
+          },
+        ],
+      },
+    ],
   })
 
   const isMobile = useIsMobile()
