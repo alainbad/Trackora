@@ -38,6 +38,7 @@ export default function Navbar() {
     { label: 'Track',     href: '/track' },
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Features',  href: '/#features' },
+    { label: 'Tools',     href: '/tools' },
     { label: 'Plans',     href: '/plans' },
     { label: 'Rates',     href: '/rates' },
   ]
