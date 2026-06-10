@@ -4,8 +4,8 @@ import type { ReactNode } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
-const IDLE_MS  = 5 * 60 * 1000   // 5 minutes → sign out
-const WARN_MS  = 30 * 1000        // warn 30 s before
+const IDLE_MS  = 3 * 60 * 60 * 1000   // 3 hours → sign out
+const WARN_MS  = 60 * 1000             // warn 60 s before
 
 // ── Types ──────────────────────────────────────────────────────────────────
 interface AuthContextType {
@@ -55,7 +55,7 @@ function IdleWarning({ secondsLeft, onStay }: { secondsLeft: number; onStay: () 
         </span>
       </div>
       <p style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', marginBottom: '14px', lineHeight: 1.5 }}>
-        You've been inactive for 5 minutes. You'll be signed out automatically.
+        You've been inactive for 3 hours. You'll be signed out automatically.
       </p>
       <button
         onClick={onStay}

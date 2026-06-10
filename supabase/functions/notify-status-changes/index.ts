@@ -176,7 +176,44 @@ serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     })
 
-    // 1. Fetch all shipments with email_notify = true
+    // 1a. Fetch ALL shipments stale for >2 hours — re-track + update status silently
+    //     (no email unless email_notify = true)
+    const staleThreshold = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    const { data: staleRows } = await supabase
+      .from('shipments')
+      .select('user_id, tracking_number, status, updated_at')
+      .eq('email_notify', false)
+      .lt('updated_at', staleThreshold)
+      .not('status', 'eq', 'delivered')   // skip already-delivered — they won't change
+      .limit(30)                           // cap to avoid rate limits
+
+    if (staleRows && staleRows.length > 0) {
+      for (const stale of staleRows) {
+        try {
+          const r = await fetch(TRACK_FN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_SERVICE_KEY },
+            body: JSON.stringify({ trackingNumber: stale.tracking_number }),
+          })
+          if (r.ok) {
+            const { data } = await r.json() as { data?: Record<string, unknown> }
+            if (data?.status) {
+              const o = data.origin      as Record<string, string> | undefined
+              const d = data.destination as Record<string, string> | undefined
+              await supabase.from('shipments').update({
+                status:       data.status as string,
+                est_delivery: (data.estimatedDelivery as string) ?? null,
+                origin_city:  o?.city ?? null,
+                dest_city:    d?.city ?? null,
+                updated_at:   new Date().toISOString(),
+              }).eq('user_id', stale.user_id).eq('tracking_number', stale.tracking_number)
+            }
+          }
+        } catch { /* skip on error */ }
+      }
+    }
+
+    // 1b. Fetch all shipments with email_notify = true for email alerts
     const { data: rows, error: fetchErr } = await supabase
       .from('shipments')
       .select('user_id, tracking_number, carrier_name, status, last_notified_status, origin_city, dest_city, est_delivery')
@@ -185,7 +222,7 @@ serve(async (req) => {
     if (fetchErr) throw fetchErr
 
     if (!rows || rows.length === 0) {
-      return new Response(JSON.stringify({ message: 'No subscribed shipments.', checked: 0 }), {
+      return new Response(JSON.stringify({ message: 'No email-subscribed shipments.', checked: 0, stale_synced: staleRows?.length ?? 0 }), {
         headers: { ...CORS, 'Content-Type': 'application/json' },
       })
     }
@@ -287,7 +324,7 @@ serve(async (req) => {
 
     const notified = results.filter(r => r.action === 'notified').length
     return new Response(
-      JSON.stringify({ checked: rows.length, notified, results }),
+      JSON.stringify({ checked: rows.length, notified, stale_synced: staleRows?.length ?? 0, results }),
       { headers: { ...CORS, 'Content-Type': 'application/json' } },
     )
   } catch (err) {

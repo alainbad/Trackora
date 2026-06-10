@@ -15,7 +15,7 @@ export default function Footer() {
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr 1.4fr',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr 1fr',
           gap: isMobile ? '32px' : '48px',
           marginBottom: isMobile ? '36px' : '48px',
         }}>
@@ -65,7 +65,10 @@ export default function Footer() {
                 { label: 'Dashboard',       href: '/dashboard' },
                 { label: 'How It Works',    href: '/how-it-works' },
                 { label: 'Features',        href: '/#features' },
-                { label: 'Pricing Plans',   href: '/#pricing' },
+                { label: 'Pricing Plans',   href: '/plans' },
+                { label: 'FAQ',             href: '/faq' },
+                { label: 'Contact Us',      href: '/contact' },
+                { label: 'Rate Calculator', href: '/rates' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
@@ -100,21 +103,48 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* ── Tools ── */}
+          {/* ── Top Carriers ── */}
           <div>
             <h4 style={{
               fontSize: '12px', fontWeight: 600, color: 'rgba(248,250,252,0.4)',
               textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px',
             }}>
-              Tools
+              Top Carriers
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {[
-                { label: 'Rate Calculator',      href: '/rates' },
-                { label: 'Customs Duty',         href: '/customs-duty' },
-                { label: 'Detention Calculator', href: '/detention-calculator' },
-                { label: 'Profit Calculator',    href: '/profit-calculator' },
-                { label: 'Document Generator',   href: '/document-generator' },
+                { label: 'FedEx',          href: '/carriers/fedex' },
+                { label: 'DHL Express',    href: '/carriers/dhl' },
+                { label: 'UPS',            href: '/carriers/ups' },
+                { label: 'Maersk',         href: '/carriers/maersk' },
+                { label: 'Aramex',         href: '/carriers/aramex' },
+                { label: 'Emirates Cargo', href: '/carriers/lufthansa-cargo' },
+              ].map(l => (
+                <li key={l.label}>
+                  <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Resources ── */}
+          <div>
+            <h4 style={{
+              fontSize: '12px', fontWeight: 600, color: 'rgba(248,250,252,0.4)',
+              textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px',
+            }}>
+              Resources
+            </h4>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { label: 'Blog',                href: '/blog' },
+                { label: 'Track DHL',           href: '/blog/how-to-track-dhl-shipment' },
+                { label: 'Track FedEx',         href: '/blog/how-to-track-fedex-shipment' },
+                { label: 'Track UPS',           href: '/blog/how-to-track-ups-shipment' },
+                { label: 'Track Aramex',        href: '/blog/how-to-track-aramex-shipment' },
+                { label: 'What Is a B/L?',      href: '/blog/what-is-a-bill-of-lading' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
@@ -172,6 +202,8 @@ export default function Footer() {
             <Link to="/privacy" style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Privacy Policy</Link>
             <Link to="/terms"   style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Terms of Service</Link>
             <Link to="/about"   style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>About</Link>
+            <Link to="/faq"     style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>FAQ</Link>
+            <Link to="/contact" style={{ fontSize: '13px', color: 'rgba(248,250,252,0.35)', textDecoration: 'none' }}>Contact</Link>
           </div>
         </div>
       </div>

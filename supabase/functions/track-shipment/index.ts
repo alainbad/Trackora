@@ -422,12 +422,20 @@ async function getFedexToken(): Promise<string | null> {
 }
 
 const FEDEX_STATUS: Record<string, string> = {
-  PU: 'picked_up', OC: 'picked_up', IP: 'picked_up',
-  AR: 'in_transit', DP: 'in_transit', IT: 'in_transit', AF: 'in_transit', HP: 'in_transit',
-  OD: 'out_for_delivery', HL: 'out_for_delivery',
-  DL: 'delivered',
+  // Picked up / label created
+  PU: 'picked_up', OC: 'picked_up', IP: 'picked_up', SH: 'picked_up',
+  // In transit
+  AR: 'in_transit', DP: 'in_transit', IT: 'in_transit', AF: 'in_transit',
+  HP: 'in_transit', TR: 'in_transit', AO: 'in_transit', SF: 'in_transit',
+  // Out for delivery
+  OD: 'out_for_delivery', HL: 'out_for_delivery', OF: 'out_for_delivery',
+  // Delivered — all known FedEx delivered codes
+  DL: 'delivered', SW: 'delivered', FD: 'delivered', OA: 'delivered',
+  // Delayed / exception
   DE: 'delayed', DY: 'delayed', CA: 'delayed', SE: 'delayed', RS: 'delayed',
-  CH: 'customs', CC: 'customs',
+  TD: 'delayed', BA: 'delayed', OX: 'delayed',
+  // Customs
+  CH: 'customs', CC: 'customs', HD: 'customs',
 }
 
 async function fetchFedEx(tn: string): Promise<Record<string, unknown> | null> {
@@ -1034,8 +1042,18 @@ function normaliseAfterShip(t: Record<string, unknown>) {
   // as not found so the frontend shows the redirect card or "not found" state.
   if (!slug || carrierTitle.toLowerCase() === 'unrecognized') return null
 
-  const originISO   = toISO2((t.origin_country_region      as string) || '')
-  const destISO     = toISO2((t.destination_country_region as string) || '')
+  // AfterShip uses origin_country_iso3 / destination_country_iso3 (ISO-3166-1 alpha-3).
+  // origin_country_region is not a real AfterShip field — keep as fallback for safety.
+  const originISO   = toISO2(
+    (t.origin_country_iso3      as string) ||
+    (t.origin_country_region    as string) ||
+    (t.origin_country           as string) || ''
+  )
+  const destISO     = toISO2(
+    (t.destination_country_iso3    as string) ||
+    (t.destination_country_region  as string) ||
+    (t.destination_country         as string) || ''
+  )
   const originCoord = coord(originISO)
   const destCoord   = coord(destISO)
   const checkpoints = (t.checkpoints as Record<string, unknown>[]) || []
@@ -1088,7 +1106,13 @@ function normaliseAfterShip(t: Record<string, unknown>) {
                       ? carrierTitle
                       : slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ') : 'Unknown',
     freightType:    ft,
-    status:         AFTERSHIP_TAG_MAP[t.tag as string] || 'in_transit',
+    // Prefer the most-recent checkpoint tag — AfterShip's top-level t.tag
+    // can lag behind the actual checkpoint data (e.g. stays "InTransit"
+    // even when the last checkpoint is "Delivered").
+    status: (() => {
+      const lastCpTag = (lastCp?.tag as string) || ''
+      return AFTERSHIP_TAG_MAP[lastCpTag] || AFTERSHIP_TAG_MAP[t.tag as string] || 'in_transit'
+    })(),
     origin: {
       city:    (t.origin_city as string) || COUNTRY_NAME[originISO] || originISO || '',
       country: originISO,

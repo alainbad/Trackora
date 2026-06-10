@@ -112,6 +112,23 @@ export function findCandidates(text: string): Candidate[] {
     add(`${m[1]}-${m[2]}`, 'mawb', 'Air Waybill (MAWB)')
   }
 
+  // 2b. DHL Express / generic 10-digit waybill.
+  //     Strategy: find qualified AWB keyword (must be followed by No/Number/Tracking/#
+  //     to avoid matching bare "WAYBILL DOC" headers), then scan up to 250 chars ahead
+  //     for a 10-digit number. Handles DHL's two-column PDF layout where the label and
+  //     value land on separate text lines in the pdfjs stream.
+  //     e.g. "Waybill Number: … 4631248775"  or  "Waybill Tracking Number 4631248775"
+  const awbKwRe = /\b(?:air\s*waybill|airwaybill|waybill\s+(?:no\.?|number|tracking|#)|AWB\s*(?:no\.?|number|#)?|MAWB\s*(?:no\.?|number|#)?)\b/gi
+  for (const km of T.matchAll(awbKwRe)) {
+    const start = (km.index ?? 0) + km[0].length
+    const ahead = T.slice(start, start + 250)
+    const numMatch = /\b(\d{10})\b/.exec(ahead)
+    if (numMatch) {
+      add(numMatch[1], 'reference', 'Air Waybill (10-digit)')
+      break
+    }
+  }
+
   // 3. Express courier labels — tracking number printed as grouped digits near barcode.
   //    FedEx Express, DHL Express, TNT all use 4+4+4 = 12-digit format on shipping labels
   //    e.g. "8720 7000 1520" → "872070001520". The number often appears far from any
@@ -157,6 +174,16 @@ export function findCandidates(text: string): Candidate[] {
     if (isValidContainer(normalised)) { add(normalised, 'container', 'Container (ISO 6346)'); continue }
     if (/^\d{3}-\d{8}$/.test(normalised)) { add(normalised, 'mawb', 'Air Waybill (MAWB)'); continue }
     add(normalised, 'reference', 'Shipment reference')
+  }
+
+  // Remove consecutive-sequence 12-digit piece barcodes (DHL multi-piece shipments
+  // print one barcode per package; they appear as N, N+1, N+2… and are not the AWB).
+  const refs12 = [...found.values()].filter(c => c.type === 'reference' && /^\d{12}$/.test(c.value))
+  if (refs12.length >= 2) {
+    const nums = refs12.map(c => BigInt(c.value)).sort((a, b) => (a < b ? -1 : 1))
+    let seqCount = 1
+    for (let i = 1; i < nums.length; i++) if (nums[i] - nums[i - 1] === 1n) seqCount++
+    if (seqCount >= 2) refs12.forEach(c => found.delete(`reference:${c.value}`))
   }
 
   // Order: containers first, then MAWBs, then references

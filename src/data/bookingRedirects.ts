@@ -53,7 +53,7 @@ export const BOOKING_CARRIERS: BookingCarrier[] = [
   {
     name: 'Evergreen',    slug: 'evergreen-line', category: 'sea',
     accentColor: '#00693E',
-    bookingUrl: 'https://www.evergreen-line.com/service/cargo_tracking_detail.aspx?cn={booking}',
+    bookingUrl: 'https://www.evergreen-line.com/service/cargo_tracking_detail.aspx?bl={booking}',
     supportsDeepLink: true,
     hint: 'Booking reference or B/L',
   },
@@ -135,6 +135,13 @@ export const BOOKING_CARRIERS: BookingCarrier[] = [
     bookingUrl: 'https://www.iagcargo.com/en/track-and-trace',
     supportsDeepLink: false,
     hint: 'Booking reference',
+  },
+  {
+    name: 'Oman Air Cargo',  slug: 'oman-air',                 category: 'air',
+    accentColor: '#B8232F',
+    bookingUrl: 'https://www.omanair.com/en/cargo/track-shipment?awb={booking}',
+    supportsDeepLink: true,
+    hint: 'AWB number (e.g. 910-18547012)',
   },
 ]
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, ArrowLeft, Share2, Bell, RefreshCw, ScanLine, Plus, X, Check, BellOff, Upload, FileText, Loader2, Mail } from 'lucide-react'
+import { Search, ArrowLeft, Share2, Bell, RefreshCw, ScanLine, Plus, X, Check, BellOff, Upload, FileText, Loader2, Mail, Zap } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useSEO } from '../hooks/useSEO'
 import type { Shipment } from '../data/mockShipments'
@@ -94,6 +95,9 @@ export default function Track() {
   const [emailAlertsSaving, setEmailAlertsSaving] = useState(false)
   const [airlineRedirect,   setAirlineRedirect]   = useState<AirlineRedirect | null>(null)
   const [containerRedirect, setContainerRedirect] = useState<ContainerRedirect | null>(null)
+  const [showSavePrompt,    setShowSavePrompt]    = useState(true)
+  const [showStickyNudge,   setShowStickyNudge]   = useState(true)
+  const [showSignupModal,   setShowSignupModal]   = useState(false)
 
   // Document upload (AWB / BOL) → extract tracking numbers
   const [extracting, setExtracting] = useState(false)
@@ -243,6 +247,23 @@ export default function Track() {
       // be able to open the official carrier page
       setShipment(result)
       setNotFound(false)
+
+      // Sync the latest status back to the DB if this shipment is saved
+      if (user && supabase) {
+        supabase
+          .from('shipments')
+          .update({
+            status:      result.status,
+            carrier_name: result.carrier,
+            est_delivery: result.estimatedDelivery ?? null,
+            origin_city:  result.origin?.city ?? null,
+            dest_city:    result.destination?.city ?? null,
+            updated_at:  new Date().toISOString(),
+          })
+          .eq('user_id', user.id)
+          .eq('tracking_number', result.trackingNumber)
+          .then(() => {})  // fire-and-forget
+      }
     } else {
       // Booking mode fallback → show redirect card
       if (mode === 'booking' && bookingCarrier) {
@@ -309,6 +330,13 @@ export default function Track() {
     localStorage.setItem(GUEST_USES_KEY, String(uses + 1))
     return true
   }
+
+  useEffect(() => {
+    if (shipment) {
+      setShowSavePrompt(true)
+      setShowStickyNudge(true)
+    }
+  }, [shipment?.trackingNumber])
 
   // Load persisted alert state whenever the tracked shipment changes
   useEffect(() => {
@@ -379,14 +407,35 @@ export default function Track() {
   async function handleToggleEmailAlerts() {
     if (!shipment || !user || !supabase) return
     const next = !emailAlertsEnabled
-    setEmailAlertsEnabled(next)
+    setEmailAlertsEnabled(next)   // optimistic UI
     setEmailAlertsSaving(true)
     try {
-      await supabase
+      // UPSERT: create the row if it doesn't exist yet, update if it does.
+      // A plain UPDATE silently fails when the shipment hasn't been saved to DB.
+      const { error } = await supabase
         .from('shipments')
-        .update({ email_notify: next })
-        .eq('user_id', user.id)
-        .eq('tracking_number', shipment.trackingNumber)
+        .upsert({
+          user_id:         user.id,
+          tracking_number: shipment.trackingNumber,
+          carrier_name:    shipment.carrier ?? null,
+          status:          shipment.status  ?? null,
+          freight_type:    shipment.freightType ?? 'express',
+          origin_city:     shipment.origin?.city ?? null,
+          origin_country:  shipment.origin?.country ?? null,
+          dest_city:       shipment.destination?.city ?? null,
+          dest_country:    shipment.destination?.country ?? null,
+          est_delivery:    shipment.estimatedDelivery ?? null,
+          email_notify:    next,
+        }, { onConflict: 'user_id,tracking_number' })
+
+      if (error) {
+        // Revert optimistic UI on failure
+        setEmailAlertsEnabled(!next)
+        console.error('[Trackora] email alert toggle failed:', error.message)
+      }
+    } catch (e) {
+      setEmailAlertsEnabled(!next)
+      console.error('[Trackora] email alert toggle error:', e)
     } finally {
       setEmailAlertsSaving(false)
     }
@@ -951,6 +1000,45 @@ export default function Track() {
               )
             })()}
 
+            {!user && showSavePrompt && (
+              <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                gap: '16px', padding: '16px 20px', marginBottom: '20px',
+                borderRadius: '14px', borderLeft: '4px solid #6366f1',
+                background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                  <Zap size={16} color="#818cf8" style={{ flexShrink: 0 }} />
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
+                      Save this shipment &amp; get status alerts
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.5)', marginTop: '2px' }}>
+                      Free account · takes 10 seconds
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  <button
+                    onClick={() => setShowSignupModal(true)}
+                    style={{
+                      padding: '11px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
+                      background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none',
+                      color: 'white', cursor: 'pointer',
+                    }}
+                  >
+                    Sign Up Free
+                  </button>
+                  <button
+                    onClick={() => setShowSavePrompt(false)}
+                    style={{ background: 'none', border: 'none', color: 'rgba(248,250,252,0.4)', cursor: 'pointer', padding: '4px' }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Header */}
             <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between', marginBottom: isMobile ? '16px' : '24px', gap: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1001,8 +1089,26 @@ export default function Track() {
                     {alertsEnabled ? 'Alerts On' : 'Alerts'}
                   </button>
 
+                  {/* Mobile backdrop */}
+                  {showAlerts && isMobile && (
+                    <div
+                      onClick={() => setShowAlerts(false)}
+                      style={{ position: 'fixed', inset: 0, zIndex: 199, background: 'rgba(0,0,0,0.5)' }}
+                    />
+                  )}
+
                   {showAlerts && (
-                    <div style={{
+                    <div style={isMobile ? {
+                      // Mobile: full-width bottom sheet fixed to viewport
+                      position: 'fixed', bottom: 0, left: 0, right: 0,
+                      borderRadius: '20px 20px 0 0', zIndex: 200,
+                      background: 'rgba(15,20,40,0.99)', backdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderBottom: 'none',
+                      boxShadow: '0 -8px 40px rgba(0,0,0,0.6)',
+                      padding: '20px 20px 36px',
+                    } : {
+                      // Desktop: dropdown anchored right of button
                       position: 'absolute', top: 'calc(100% + 8px)', right: 0,
                       width: '300px', borderRadius: '16px', zIndex: 100,
                       background: 'rgba(15,20,40,0.97)', backdropFilter: 'blur(16px)',
@@ -1010,8 +1116,19 @@ export default function Track() {
                       boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
                       padding: '20px',
                     }}>
-                      <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc', marginBottom: '6px' }}>
-                        Status Alerts
+                      {/* Mobile drag handle */}
+                      {isMobile && (
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                          <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.2)' }} />
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
+                          Status Alerts
+                        </div>
+                        {isMobile && (
+                          <button onClick={() => setShowAlerts(false)} style={{ background: 'none', border: 'none', color: 'rgba(248,250,252,0.4)', cursor: 'pointer', fontSize: '20px', lineHeight: 1, padding: '0 4px' }}>×</button>
+                        )}
                       </div>
                       <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.45)', marginBottom: '16px', lineHeight: 1.5 }}>
                         Get notified whenever this shipment's status changes.
@@ -1128,16 +1245,16 @@ export default function Track() {
                 {/* Map */}
                 <div style={{
                   borderRadius: '16px', overflow: 'hidden',
-                  background: 'rgba(255,255,255,0.03)',
+                  background: 'rgba(10,15,30,0.9)',
                   border: '1px solid rgba(255,255,255,0.08)', height: '240px', position: 'relative',
                 }}>
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,15,30,0.8), rgba(15,22,41,0.6))' }} />
                   {(() => {
                     const hasCoords =
                       (shipment.origin.lat !== 0 || shipment.origin.lng !== 0) &&
                       (shipment.destination.lat !== 0 || shipment.destination.lng !== 0)
                     return (
                       <WorldMap
+                        animated={!hasCoords}
                         freightType={shipment.freightType}
                         route={hasCoords
                           ? { from: [shipment.origin.lat, shipment.origin.lng], to: [shipment.destination.lat, shipment.destination.lng] }
@@ -1176,16 +1293,16 @@ export default function Track() {
                   {/* Map */}
                   <div style={{
                     borderRadius: '20px', overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.03)',
+                    background: 'rgba(10,15,30,0.9)',
                     border: '1px solid rgba(255,255,255,0.08)', height: '380px', position: 'relative',
                   }}>
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(10,15,30,0.8), rgba(15,22,41,0.6))' }} />
                     {(() => {
                       const hasCoords =
                         (shipment.origin.lat !== 0 || shipment.origin.lng !== 0) &&
                         (shipment.destination.lat !== 0 || shipment.destination.lng !== 0)
                       return (
                         <WorldMap
+                          animated={!hasCoords}
                           freightType={shipment.freightType}
                           route={hasCoords
                             ? { from: [shipment.origin.lat, shipment.origin.lng], to: [shipment.destination.lat, shipment.destination.lng] }
@@ -1242,6 +1359,43 @@ export default function Track() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .spin { animation: spin 0.8s linear infinite; }
       `}</style>
+
+      {!user && shipment && showStickyNudge && createPortal(
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200,
+          background: 'rgba(10,15,30,0.97)', backdropFilter: 'blur(16px)',
+          borderTop: '1px solid rgba(99,102,241,0.3)',
+          padding: '12px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span style={{ fontSize: '14px', color: 'rgba(248,250,252,0.8)' }}>
+            🔔 Get notified when <strong style={{ color: '#f8fafc' }}>{shipment.trackingNumber}</strong> updates —
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => setShowSignupModal(true)}
+              style={{
+                padding: '7px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
+                background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none',
+                color: 'white', cursor: 'pointer',
+              }}
+            >
+              Sign in free →
+            </button>
+            <button
+              onClick={() => setShowStickyNudge(false)}
+              style={{ background: 'none', border: 'none', color: 'rgba(248,250,252,0.4)', cursor: 'pointer', padding: '4px' }}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showSignupModal && (
+        <AuthModal initialMode="signup" onClose={() => setShowSignupModal(false)} />
+      )}
 
       {/* Guest limit wall — requires sign-up after 3 free tracks */}
       {showAuthWall && (

@@ -15,11 +15,6 @@ export interface AirlineRedirect {
 interface AirlineInfo {
   name: string
   logoSlug: string
-  // Placeholders replaced at runtime:
-  //   {awb}   → "XXX-XXXXXXXX" (URL-encoded)
-  //   {prefix} → "XXX"
-  //   {serial} → "XXXXXXXX"
-  //   {nosep}  → "XXXXXXXXXXXXXXXXX" (prefix+serial, no dash — used by some portals)
   trackUrl: string
   supportsDeepLink: boolean
 }
@@ -55,6 +50,7 @@ const AIRLINE_MAP: Record<string, AirlineInfo> = {
   '618': { name: 'Singapore Airlines Cargo',  logoSlug: 'singapore-airlines-cargo',  trackUrl: 'https://www.siacargo.com/e-services/quicksearch_public/',                                          supportsDeepLink: false },
   '724': { name: 'Swiss WorldCargo',          logoSlug: 'swiss-worldcargo',          trackUrl: 'https://www.swissworldcargo.com/en/track_n_trace',                                                 supportsDeepLink: false },
   '988': { name: 'Asiana Cargo',              logoSlug: 'asiana-cargo',              trackUrl: 'https://www.asianacargo.com/tracking/viewTraceAirWaybill.do?lang=en&awbNumber={nosep}',            supportsDeepLink: true  },
+  '910': { name: 'Oman Air Cargo',            logoSlug: 'oman-air',                  trackUrl: 'https://www.track-trace.com/aircargo?number={awb}',                                                   supportsDeepLink: true  },
 }
 
 // These prefixes are handled well by AfterShip already — no redirect needed
@@ -78,7 +74,7 @@ export function getAirlineRedirect(trackingNumber: string): AirlineRedirect | nu
     .replace('{awb}',    encodeURIComponent(awb))
     .replace('{prefix}', prefix)
     .replace('{serial}', serial)
-    .replace('{nosep}',  prefix + serial)   // no-dash format, e.g. Asiana
+    .replace('{nosep}',  prefix + serial)
 
   return {
     trackingNumber: awb,

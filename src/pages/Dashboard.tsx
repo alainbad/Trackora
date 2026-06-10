@@ -4,10 +4,12 @@ import { useSEO } from '../hooks/useSEO'
 import {
   Plus, Search, Plane, Ship, Truck, Package, Brain,
   TrendingUp, AlertTriangle, CheckCircle2, Clock,
-  BarChart3, Zap, PackageSearch, Trash2, ChevronDown,
+  BarChart3, Zap, PackageSearch, Trash2, ChevronDown, FileBarChart2, Lock,
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import AuthModal from '../components/auth/AuthModal'
+import ReportModal from '../components/dashboard/ReportModal'
 import { useIsMobile } from '../hooks/useIsMobile'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -274,12 +276,13 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
 
-  const [shipments,  setShipments]  = useState<DashboardShipment[]>([])
-  const [loading,    setLoading]    = useState(true)
-  const [filter,     setFilter]     = useState('all')
-  const [search,     setSearch]     = useState('')
-  const [sort,       setSort]       = useState<SortKey>('newest')
-  const [sortOpen,   setSortOpen]   = useState(false)
+  const [shipments,   setShipments]  = useState<DashboardShipment[]>([])
+  const [loading,     setLoading]    = useState(true)
+  const [filter,      setFilter]     = useState('all')
+  const [search,      setSearch]     = useState('')
+  const [sort,        setSort]       = useState<SortKey>('newest')
+  const [sortOpen,    setSortOpen]   = useState(false)
+  const [showReport,  setShowReport] = useState(false)
   const sortRef = useRef<HTMLDivElement>(null)
 
   // ── Fetch from Supabase ───────────────────────────────────────────────────
@@ -375,29 +378,83 @@ export default function Dashboard() {
   if (!insights.length && !shipments.length) insights.push('Track your first shipment to start seeing insights here.')
 
   // ── Logged-out state ──────────────────────────────────────────────────────
+  const [guestAuthModal, setGuestAuthModal] = useState<'signin' | 'signup' | null>(null)
+
   if (!user) {
+    const fakeRows = [
+      { tn: '1Z999AA10123456784', carrier: 'UPS', status: 'In Transit', from: 'Los Angeles', to: 'New York', eta: 'Jun 7' },
+      { tn: 'MAD3456789',         carrier: 'Maersk', status: 'In Transit', from: 'Shanghai', to: 'Rotterdam', eta: 'Jun 20' },
+      { tn: 'MAWB001-12345678',   carrier: 'Lufthansa Cargo', status: 'Delivered', from: 'Frankfurt', to: 'Dubai', eta: 'Jun 4' },
+    ]
     return (
-      <div style={{ minHeight: '100vh', paddingTop: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', padding: '48px 24px', maxWidth: '420px' }}>
-          <div style={{ fontSize: '56px', marginBottom: '20px' }}>🔒</div>
-          <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#f8fafc', marginBottom: '10px', letterSpacing: '-0.5px' }}>
-            Sign in to view your dashboard
-          </h2>
-          <p style={{ color: 'rgba(248,250,252,0.5)', lineHeight: 1.6, marginBottom: '28px' }}>
-            Track, save, and monitor all your shipments in one place. Your data syncs automatically whenever you track a number.
-          </p>
-          <button
-            onClick={() => navigate('/track')}
-            style={{
-              padding: '12px 28px', borderRadius: '12px',
-              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
-              cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-            }}
-          >
-            Track a shipment →
-          </button>
+      <div style={{ minHeight: '100vh', paddingTop: '72px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ filter: 'blur(4px)', pointerEvents: 'none', userSelect: 'none', opacity: 0.4 }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08))', borderBottom: '1px solid rgba(99,102,241,0.2)', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+            <Zap size={14} color="#818cf8" />
+            <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>You're on the <strong style={{ color: '#818cf8' }}>Free plan</strong>. Upgrade to Pro for unlimited shipments.</span>
+          </div>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#f8fafc', marginBottom: '24px' }}>Shipment Dashboard</h1>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+              {[{ label: 'Active Shipments', value: '3' }, { label: 'Delivered', value: '1' }, { label: 'On-Time Rate', value: '85%' }, { label: 'Delay Alerts', value: '0' }].map(s => (
+                <div key={s.label} style={{ padding: '20px', borderRadius: '16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: '#f8fafc', marginBottom: '4px' }}>{s.value}</div>
+                  <div style={{ fontSize: '13px', color: 'rgba(248,250,252,0.45)' }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {fakeRows.map(r => (
+                <div key={r.tn} style={{ padding: '16px 20px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(99,102,241,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Package size={18} color="#818cf8" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc', fontFamily: 'monospace', marginBottom: '4px' }}>{r.tn}</div>
+                    <div style={{ fontSize: '12px', color: 'rgba(248,250,252,0.45)' }}>{r.carrier} · {r.from} → {r.to}</div>
+                  </div>
+                  <div style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '100px', background: 'rgba(99,102,241,0.12)', color: '#818cf8', fontWeight: 600 }}>{r.status}</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#f8fafc' }}>{r.eta}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ padding: '40px 36px', borderRadius: '24px', background: 'rgba(10,15,30,0.95)', border: '1px solid rgba(99,102,241,0.3)', boxShadow: '0 24px 80px rgba(0,0,0,0.7)', textAlign: 'center', maxWidth: '400px', width: '100%', backdropFilter: 'blur(20px)' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <Lock size={32} color="#6366f1" />
+            </div>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#f8fafc', marginBottom: '10px', letterSpacing: '-0.5px' }}>
+              Your shipment dashboard
+            </h2>
+            <p style={{ color: 'rgba(248,250,252,0.55)', lineHeight: 1.6, marginBottom: '24px', fontSize: '14px' }}>
+              Save shipments, track status changes, and get email alerts — all in one place.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px', textAlign: 'left' }}>
+              {['Up to 10 saved shipments free', 'Email status alerts', 'Advanced analytics (Pro)'].map(b => (
+                <div key={b} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>
+                  <span style={{ color: '#34d399', fontWeight: 700 }}>✓</span> {b}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setGuestAuthModal('signup')}
+              style={{ width: '100%', padding: '13px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', border: 'none', color: 'white', fontSize: '15px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)', marginBottom: '12px' }}
+            >
+              Create Free Account
+            </button>
+            <button
+              onClick={() => setGuestAuthModal('signin')}
+              style={{ background: 'none', border: 'none', color: '#818cf8', fontSize: '14px', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+
+        {guestAuthModal && <AuthModal initialMode={guestAuthModal} onClose={() => setGuestAuthModal(null)} />}
       </div>
     )
   }
@@ -607,6 +664,24 @@ export default function Dashboard() {
                 ))}
               </div>
 
+              {/* Generate Report button */}
+              {shipments.length > 0 && (
+                <button
+                  onClick={() => setShowReport(true)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    padding: '6px 14px', borderRadius: '8px', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.2))',
+                    border: '1px solid rgba(99,102,241,0.4)',
+                    color: '#818cf8', fontSize: '12px', fontWeight: 600,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <FileBarChart2 size={14} />
+                  {!isMobile && 'Analysis Report'}
+                </button>
+              )}
+
               {/* Sort dropdown */}
               <div ref={sortRef} style={{ position: 'relative' }}>
                 <button
@@ -720,6 +795,11 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Analysis Report Modal */}
+      {showReport && (
+        <ReportModal shipments={shipments} onClose={() => setShowReport(false)} />
+      )}
     </div>
   )
 }

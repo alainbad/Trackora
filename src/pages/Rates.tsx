@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship, Plus, X } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
@@ -120,7 +120,83 @@ function SearchSelect({
   )
 }
 
-// ── Carrier logo ──────────────────────────────────────────────────────────────
+// ── City combobox — dropdown suggestions + free-text input ────────────────────
+function CityCombobox({
+  value, onChange, options, placeholder = 'City / airport (optional)',
+}: {
+  value: string
+  onChange: (v: string) => void
+  options: SelectOption[]
+  placeholder?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const [inputVal, setInputVal] = useState(value)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  // Keep inputVal in sync when value changes externally (e.g. postal auto-fill)
+  useEffect(() => { setInputVal(value) }, [value])
+
+  const filtered = useMemo(() =>
+    inputVal.trim()
+      ? options.filter(o => o.label.toLowerCase().includes(inputVal.toLowerCase())).slice(0, 60)
+      : options.slice(0, 60),
+    [options, inputVal]
+  )
+
+  useEffect(() => {
+    if (!open) return
+    function handler(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  function handleInput(v: string) {
+    setInputVal(v)
+    onChange(v)
+    setOpen(true)
+  }
+
+  function pick(opt: SelectOption) {
+    const label = opt.label.split(' (')[0] // strip "(IATA)" suffix for display
+    setInputVal(label)
+    onChange(label)
+    setOpen(false)
+  }
+
+  return (
+    <div ref={containerRef} style={{ position: 'relative' }}>
+      <input
+        type="text"
+        value={inputVal}
+        onChange={e => handleInput(e.target.value)}
+        onFocus={() => setOpen(true)}
+        placeholder={placeholder}
+        style={{ ...INPUT_STYLE, paddingRight: '14px' }}
+        autoComplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', zIndex: 200, top: 'calc(100% + 6px)', left: 0, right: 0,
+          background: '#0f1629', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '12px',
+          boxShadow: '0 12px 40px rgba(0,0,0,0.7)', maxHeight: '220px', overflowY: 'auto',
+        }}>
+          {filtered.map(o => (
+            <div key={o.value} onMouseDown={() => pick(o)} style={{
+              padding: '9px 14px', cursor: 'pointer', fontSize: '13px', color: '#f8fafc',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.15)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >{o.label}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+
 function CarrierLogo({ carrier, size = 36 }: { carrier: CarrierKey; size?: number }) {
   const [ok, setOk] = useState(true)
   const meta = CARRIER_META[carrier]
@@ -195,54 +271,72 @@ function CarrierGroup({ carrier, services }: { carrier: CarrierKey; services: Ra
   )
 }
 
-// ── Air carrier brand badges — inline, no external requests ──────────────────
-const AIR_BRAND: Record<AirCarrier, { bg: string; fg: string; stripe?: string; abbr: string; label: string }> = {
-  Emirates:   { bg: '#C8102E', fg: '#FFFFFF', stripe: '#D4AF37', abbr: 'EK',  label: 'Emirates' },
-  Lufthansa:  { bg: '#05164D', fg: '#FFAD00', stripe: '#FFAD00',abbr: 'LH',  label: 'Lufthansa' },
-  Qatar:      { bg: '#5C0632', fg: '#FFFFFF', stripe: '#C8A84B', abbr: 'QR',  label: 'Qatar' },
-  Turkish:    { bg: '#C8102E', fg: '#FFFFFF', stripe: '#FFFFFF', abbr: 'TK',  label: 'Turkish' },
-  Etihad:     { bg: '#1A1A2E', fg: '#C6A84B', stripe: '#C6A84B',abbr: 'EY',  label: 'Etihad' },
-  Cargolux:   { bg: '#D31245', fg: '#FFFFFF', stripe: '#FFD700', abbr: 'CV',  label: 'Cargolux' },
-  OmanAir:    { bg: '#990000', fg: '#FFFFFF', stripe: '#C8A84B', abbr: 'WY',  label: 'Oman Air' },
-  MEA:        { bg: '#006633', fg: '#FFFFFF', stripe: '#CE1126', abbr: 'ME',  label: 'MEA' },
-  DHLGlobal:  { bg: '#FFCC00', fg: '#D40511', stripe: '#D40511', abbr: 'DHL', label: 'DHL' },
-  FedExCargo: { bg: '#4D148C', fg: '#FF6200', stripe: '#FF6200', abbr: 'FDX', label: 'FedEx' },
+// ── Air carrier logos ─────────────────────────────────────────────────────────
+// AfterShip slug for carriers that have one; others fall back to favicon chain
+const AIR_AFTERSHIP_SLUG: Partial<Record<AirCarrier, string>> = {
+  DHLGlobal:  'dhl',
+  FedExCargo: 'fedex',
+}
+const AIR_LOGO_DOMAIN: Partial<Record<AirCarrier, string>> = {
+  Emirates:  'emirates.com',
+  Lufthansa: 'lufthansa.com',
+  Qatar:     'qatarairways.com',
+  Turkish:   'turkishairlines.com',
+  Etihad:    'etihad.com',
+  Cargolux:  'cargolux.com',
+  OmanAir:   'omanair.com',
+}
+const AIR_LOGO_ABBR: Record<AirCarrier, string> = {
+  Emirates:'EK', Lufthansa:'LH', Qatar:'QR', Turkish:'TK', Etihad:'EY',
+  Cargolux:'CV', OmanAir:'WY', MEA:'ME', DHLGlobal:'DHL', FedExCargo:'FDX',
 }
 
-// MEA has a real SVG logo we self-host
-const MEA_SVG_URL = '/logos/mea.svg'
+const LOGO_STYLE = (size: number): React.CSSProperties => ({
+  width: size, height: size, objectFit: 'contain', borderRadius: '0',
+  background: 'rgba(255,255,255,0.06)', padding: '0', boxSizing: 'border-box', flexShrink: 0,
+})
 
 function AirCarrierLogo({ carrier, size = 36 }: { carrier: AirCarrier; size?: number }) {
-  const brand = AIR_BRAND[carrier]
-  const [meaFailed, setMeaFailed] = useState(false)
-  const isMEA = carrier === 'MEA'
-  const radius = Math.round(size * 0.22)
-  const fontSize = size <= 28 ? Math.round(size * 0.33) : Math.round(size * 0.3)
-  const abbrFontSize = brand.abbr.length > 2 ? Math.round(fontSize * 0.78) : fontSize
+  const meta = AIR_CARRIER_META[carrier]
+  const [idx, setIdx] = useState(0)
+  const [failed, setFailed] = useState(false)
 
-  if (isMEA && !meaFailed) {
-    return (
-      <img src={MEA_SVG_URL} alt="MEA" onError={() => setMeaFailed(true)}
-        style={{ width: size, height: size, objectFit: 'contain', borderRadius: radius,
-          background: 'white', padding: Math.round(size * 0.08), boxSizing: 'border-box', flexShrink: 0 }}
-      />
-    )
+
+  const slug = AIR_AFTERSHIP_SLUG[carrier]
+  const domain = AIR_LOGO_DOMAIN[carrier]
+
+  const sources: string[] = slug
+    ? [`${LOGO_BASE}/${slug}.svg`]
+    : carrier === 'MEA'
+      ? ['/logos/mea.svg']
+      : domain
+        ? [
+            `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+            `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+          ]
+        : []
+
+  function handleError() {
+    if (idx < sources.length - 1) setIdx(i => i + 1)
+    else setFailed(true)
+  }
+  function handleLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    if (e.currentTarget.naturalWidth < 12) handleError()
   }
 
-  // Inline branded badge — always renders, no network request
+  if (failed || sources.length === 0) return (
+    <div style={{
+      width: size, height: size, borderRadius: '0', flexShrink: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: meta.bg, border: `1px solid ${meta.border}`,
+      fontSize: size <= 28 ? '9px' : '11px', fontWeight: 800, color: meta.primary,
+    }}>{AIR_LOGO_ABBR[carrier]}</div>
+  )
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" style={{ flexShrink: 0, display: 'block' }}
-      aria-label={carrier} role="img">
-      <rect width="40" height="40" rx={radius * (40 / size)} fill={brand.bg} />
-      {brand.stripe && (
-        <rect x="0" y="30" width="40" height="10" rx="0" fill={brand.stripe} opacity="0.35" />
-      )}
-      <text x="20" y="24" textAnchor="middle" dominantBaseline="middle"
-        fill={brand.fg} fontSize={abbrFontSize * (40 / size)}
-        fontFamily="system-ui, -apple-system, sans-serif" fontWeight="800" letterSpacing="-0.5">
-        {brand.abbr}
-      </text>
-    </svg>
+    <img key={sources[idx]} src={sources[idx]} alt={carrier}
+      onError={handleError} onLoad={handleLoad}
+      style={LOGO_STYLE(size)}
+    />
   )
 }
 
@@ -467,10 +561,11 @@ function LocationField({
           if (!match && cities.length > 0) match = cities[0]
 
           if (match) {
-            onCity(match.code)
             const cityDisplay = match.label.split(' (')[0]
-            setHint(place === cityDisplay ? place : `${place} → ${cityDisplay}`)
+            onCity(cityDisplay)
+            setHint(place.toLowerCase() === cityDisplay.toLowerCase() ? place : `${place} → ${cityDisplay}`)
           } else {
+            onCity(place)
             setHint(place)
           }
         }
@@ -490,13 +585,12 @@ function LocationField({
           placeholder="Select country…"
           searchPlaceholder="Search country…"
         />
-        {country && cities.length > 0 && (
-          <SearchSelect
+        {country && (
+          <CityCombobox
             value={city}
             onChange={onCity}
             options={cities.map(c => ({ value: c.code, label: c.label }))}
-            placeholder="Select city / airport (optional)"
-            searchPlaceholder="Search city…"
+            placeholder="City / airport (optional)"
           />
         )}
         {country && (
@@ -587,32 +681,53 @@ export default function Rates() {
   const { user } = useAuth()
   const { remaining, isLimited, isPro, consume } = useRateQuota()
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null)
-  const [freightTab, setFreightTab] = useState<'express' | 'air'>('express')
+
+  // ── Restore form from localStorage cache ──────────────────────────────────
+  const CACHE_KEY = 'trackora_rates_v1'
+  function loadCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') } catch { return {} }
+  }
+  const _c = loadCache()
+
+  const [freightTab, setFreightTab] = useState<'express' | 'air'>(_c.freightTab ?? 'express')
 
   // Express courier state
-  const [originCountry, setOriginCountry] = useState('')
-  const [originCity,    setOriginCity]    = useState('')
-  const [destCountry,   setDestCountry]   = useState('')
-  const [destCity,      setDestCity]      = useState('')
-  const [unit,          setUnit]          = useState<'kg' | 'lbs'>('kg')
-  const [pkgs,          setPkgs]          = useState<PkgItem[]>([newPkg()])
-  const [carriers,      setCarriers]      = useState<CarrierKey[]>(['DHL', 'FedEx', 'UPS', 'Aramex'])
+  const [originCountry, setOriginCountry] = useState<string>(_c.originCountry ?? '')
+  const [originCity,    setOriginCity]    = useState<string>(_c.originCity    ?? '')
+  const [destCountry,   setDestCountry]   = useState<string>(_c.destCountry   ?? '')
+  const [destCity,      setDestCity]      = useState<string>(_c.destCity      ?? '')
+  const [unit,          setUnit]          = useState<'kg' | 'lbs'>(_c.unit    ?? 'kg')
+  const [pkgs,          setPkgs]          = useState<PkgItem[]>(_c.pkgs?.length ? _c.pkgs : [newPkg()])
+  const [carriers,      setCarriers]      = useState<CarrierKey[]>(_c.carriers ?? ['DHL', 'FedEx', 'UPS', 'Aramex'])
   const [results,       setResults]       = useState<RateResult[] | null>(null)
   const [error,         setError]         = useState('')
   const [loading,       setLoading]       = useState(false)
 
   // Air freight state
-  const [airOriginCountry, setAirOriginCountry] = useState('')
-  const [airOriginCity,    setAirOriginCity]    = useState('')
-  const [airDestCountry,   setAirDestCountry]   = useState('')
-  const [airDestCity,      setAirDestCity]      = useState('')
-  const [airUnit,          setAirUnit]          = useState<'kg' | 'lbs'>('kg')
-  const [airPkgs,          setAirPkgs]          = useState<PkgItem[]>([newPkg()])
-  const [commodity,        setCommodity]        = useState<CommodityType>('general')
-  const [airCarriers,      setAirCarriers]      = useState<AirCarrier[]>(['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'OmanAir', 'MEA', 'DHLGlobal', 'FedExCargo'])
+  const [airOriginCountry, setAirOriginCountry] = useState<string>(_c.airOriginCountry ?? '')
+  const [airOriginCity,    setAirOriginCity]    = useState<string>(_c.airOriginCity    ?? '')
+  const [airDestCountry,   setAirDestCountry]   = useState<string>(_c.airDestCountry   ?? '')
+  const [airDestCity,      setAirDestCity]      = useState<string>(_c.airDestCity      ?? '')
+  const [airUnit,          setAirUnit]          = useState<'kg' | 'lbs'>(_c.airUnit    ?? 'kg')
+  const [airPkgs,          setAirPkgs]          = useState<PkgItem[]>(_c.airPkgs?.length ? _c.airPkgs : [newPkg()])
+  const [commodity,        setCommodity]        = useState<CommodityType>(_c.commodity  ?? 'general')
+  const [airCarriers,      setAirCarriers]      = useState<AirCarrier[]>(_c.airCarriers ?? ['Emirates', 'Lufthansa', 'Qatar', 'Turkish', 'Etihad', 'Cargolux', 'OmanAir', 'MEA', 'DHLGlobal', 'FedExCargo'])
   const [airResults,       setAirResults]       = useState<AirRateResult[] | null>(null)
   const [airError,         setAirError]         = useState('')
   const [airLoading,       setAirLoading]       = useState(false)
+
+  // ── Persist form to localStorage whenever inputs change ───────────────────
+  useEffect(() => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        freightTab,
+        originCountry, originCity, destCountry, destCity, unit, pkgs, carriers,
+        airOriginCountry, airOriginCity, airDestCountry, airDestCity,
+        airUnit, airPkgs, commodity, airCarriers,
+      }))
+    } catch { /* storage full or private mode */ }
+  }, [freightTab, originCountry, originCity, destCountry, destCity, unit, pkgs, carriers,
+      airOriginCountry, airOriginCity, airDestCountry, airDestCity, airUnit, airPkgs, commodity, airCarriers])
 
   const airOriginCities = useMemo(() => getCities(airOriginCountry), [airOriginCountry])
   const airDestCities   = useMemo(() => getCities(airDestCountry),   [airDestCountry])

@@ -4,39 +4,150 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
           http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Homepage — highest priority -->
   <url>
     <loc>https://www.track-ora.com/</loc>
-    <lastmod>2026-05-28</lastmod>
+    <lastmod>2026-05-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-
-  <!-- Track page — core product, crawled daily -->
   <url>
     <loc>https://www.track-ora.com/track</loc>
-    <lastmod>2026-05-28</lastmod>
+    <lastmod>2026-05-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
-
-  <!-- How It Works — content/SEO page -->
   <url>
-    <loc>https://www.track-ora.com/how-it-works</loc>
+    <loc>https://www.track-ora.com/rates</loc>
+    <lastmod>2026-06-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-ups-shipment</loc>
     <lastmod>2026-05-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
-
-  <!-- About -->
+  <url>
+    <loc>https://www.track-ora.com/blog/what-is-a-bill-of-lading</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-aramex-shipment</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-usps-package</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/what-is-an-air-waybill</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-dhl-shipment</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-fedex-shipment</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/what-is-a-container-number</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/mawb-vs-hawb</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-sea-freight</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-royal-mail-parcel</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/how-to-track-evergreen-container</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/what-is-a-booking-reference</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/maersk-container-tracking-guide</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/blog/dhl-vs-fedex-vs-ups</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/how-it-works</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/plans</loc>
+    <lastmod>2026-06-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/faq</loc>
+    <lastmod>2026-06-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://www.track-ora.com/contact</loc>
+    <lastmod>2026-06-04</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.55</priority>
+  </url>
   <url>
     <loc>https://www.track-ora.com/about</loc>
     <lastmod>2026-05-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
-
-  <!-- Legal pages -->
   <url>
     <loc>https://www.track-ora.com/privacy</loc>
     <lastmod>2026-05-30</lastmod>
@@ -50,61 +161,53 @@
     <priority>0.3</priority>
   </url>
 
-  <!-- Carrier landing pages -->
-  <url>
-    <loc>https://www.track-ora.com/carriers/fedex</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/dhl</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/ups</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/usps</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/amazon</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/maersk</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/msc</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/cma-cgm</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>
-  <url>
-    <loc>https://www.track-ora.com/carriers/hapag-lloyd</loc>
-    <lastmod>2026-05-30</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>
+  <!-- Freight landing pages -->
+  <url><loc>https://www.track-ora.com/track/bill-of-lading</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.track-ora.com/track/container</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.track-ora.com/track/sea-freight</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.track-ora.com/track/ocean-freight</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://www.track-ora.com/track/dhl</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
+  <!-- Marketplace / platform pages -->
+  <url><loc>https://www.track-ora.com/carriers/shopify</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
+  <!-- Express carrier pages -->
+  <url><loc>https://www.track-ora.com/carriers/fedex</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/dhl</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/ups</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/usps</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/amazon</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/aramex</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/tnt</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/dpd</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/gls</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/hermes</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/postnl</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/royal-mail</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/australia-post</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/canada-post</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/japan-post</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Air freight carrier pages -->
+  <url><loc>https://www.track-ora.com/carriers/lufthansa-cargo</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/qatar-cargo</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/cargolux</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/air-france-cargo</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/turkish-cargo</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Sea freight carrier pages -->
+  <url><loc>https://www.track-ora.com/carriers/maersk</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/msc</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/cma-cgm</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/hapag-lloyd</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/evergreen</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/cosco</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/one</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/yang-ming</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/carriers/zim</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Land freight -->
+  <url><loc>https://www.track-ora.com/carriers/db-schenker</loc><lastmod>2026-05-30</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
 
   <!-- Tools pages -->
   <url><loc>https://www.track-ora.com/tools</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
