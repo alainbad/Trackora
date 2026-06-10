@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { TrendingUp, TrendingDown, Plus, X, DollarSign } from 'lucide-react'
+import { TrendingUp, Plus, X, DollarSign } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import AdUnit from '../components/ui/AdUnit'
