@@ -491,7 +491,7 @@ export default function Dashboard() {
           </span>
         </div>
         <button
-          onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
+          onClick={() => window.open('https://badranalain.gumroad.com/l/impejho?offer_code=LAUNCH', '_blank')}
           style={{
             padding: '5px 16px', borderRadius: '100px',
             background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
@@ -774,7 +774,7 @@ export default function Dashboard() {
               Carrier performance, on-time rates, cost analysis &amp; CO₂ trends. Unlock with Pro.
             </p>
             <button
-              onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
+              onClick={() => window.open('https://badranalain.gumroad.com/l/impejho?offer_code=LAUNCH', '_blank')}
               style={{
                 padding: '12px 28px', borderRadius: '12px',
                 background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
