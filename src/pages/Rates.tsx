@@ -541,36 +541,58 @@ function LocationField({
     setHint('')
     if (!country || code.replace(/\s/g, '').length < 3) return
     setLooking(true)
+
+    let place = ''
+    let state = ''
+
     try {
+      // Primary: zippopotam.us
       const res = await fetch(`https://api.zippopotam.us/${country.toLowerCase()}/${encodeURIComponent(code.trim())}`)
       if (res.ok) {
         const data = await res.json()
-        const place: string = data.places?.[0]?.['place name'] ?? ''
-        const state: string = data.places?.[0]?.['state'] ?? ''
-        if (place) {
-          const placeLower = place.toLowerCase()
-          // 1. Try matching detected place name against city labels
-          let match = cities.find(c => {
-            const cityName = c.label.toLowerCase().split(' (')[0]
-            return c.label.toLowerCase().includes(placeLower.split(' ')[0]) ||
-                   placeLower.includes(cityName)
-          })
-          // 2. State/region → airport lookup table
-          if (!match && state) match = lookupStateAirport(country, state, cities) ?? undefined
-          // 3. Final fallback: country's first city (main hub)
-          if (!match && cities.length > 0) match = cities[0]
-
-          if (match) {
-            const cityDisplay = match.label.split(' (')[0]
-            onCity(cityDisplay)
-            setHint(place.toLowerCase() === cityDisplay.toLowerCase() ? place : `${place} → ${cityDisplay}`)
-          } else {
-            onCity(place)
-            setHint(place)
-          }
-        }
+        place = data.places?.[0]?.['place name'] ?? ''
+        state = data.places?.[0]?.['state'] ?? ''
       }
     } catch { /* ignore */ }
+
+    // Fallback: OpenStreetMap Nominatim (broader country coverage)
+    if (!place) {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(code.trim())}&country=${encodeURIComponent(country)}&format=json&limit=1&addressdetails=1`,
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        if (res.ok) {
+          const data = await res.json()
+          if (data?.[0]) {
+            const addr = data[0].address ?? {}
+            place = addr.city || addr.town || addr.village || addr.county || data[0].display_name?.split(',')[0] || ''
+            state = addr.state || addr.region || ''
+          }
+        }
+      } catch { /* ignore */ }
+    }
+
+    if (place) {
+      const placeLower = place.toLowerCase()
+      let match = cities.find(c => {
+        const cityName = c.label.toLowerCase().split(' (')[0]
+        return c.label.toLowerCase().includes(placeLower.split(' ')[0]) ||
+               placeLower.includes(cityName)
+      })
+      if (!match && state) match = lookupStateAirport(country, state, cities) ?? undefined
+      if (!match && cities.length > 0) match = cities[0]
+
+      if (match) {
+        const cityDisplay = match.label.split(' (')[0]
+        onCity(cityDisplay)
+        setHint(place.toLowerCase() === cityDisplay.toLowerCase() ? place : `${place} → ${cityDisplay}`)
+      } else {
+        onCity(place)
+        setHint(place)
+      }
+    }
+
     setLooking(false)
   }
 
