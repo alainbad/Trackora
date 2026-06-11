@@ -544,10 +544,11 @@ function LocationField({
 
     let place = ''
     let state = ''
+    const cc = country.toLowerCase()
 
     try {
-      // Primary: zippopotam.us
-      const res = await fetch(`https://api.zippopotam.us/${country.toLowerCase()}/${encodeURIComponent(code.trim())}`)
+      // Primary: zippopotam.us (good for US, UK, DE, CA, etc.)
+      const res = await fetch(`https://api.zippopotam.us/${cc}/${encodeURIComponent(code.trim())}`)
       if (res.ok) {
         const data = await res.json()
         place = data.places?.[0]?.['place name'] ?? ''
@@ -555,23 +556,25 @@ function LocationField({
       }
     } catch { /* ignore */ }
 
-    // Fallback: OpenStreetMap Nominatim (broader country coverage)
+    // Fallback: photon.komoot.io (OpenStreetMap-based, CORS-friendly, no auth needed)
     if (!place) {
       try {
-        const countryCode = country.toLowerCase()
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(code.trim())}&countrycodes=${countryCode}&format=json&limit=1&addressdetails=1`
+          `https://photon.komoot.io/api/?q=${encodeURIComponent(code.trim())}&limit=5&lang=en`
         )
         if (res.ok) {
           const data = await res.json()
-          if (Array.isArray(data) && data.length > 0) {
-            const addr = data[0].address ?? {}
-            place = addr.city || addr.town || addr.village || addr.municipality || addr.county || ''
-            state = addr.state || addr.region || addr['state_district'] || ''
-            // If place is still empty, parse from display_name
-            if (!place && data[0].display_name) {
-              place = data[0].display_name.split(',')[0].trim()
-            }
+          const features: any[] = data.features ?? []
+          // Find first feature matching our country
+          const match = features.find(f => {
+            const props = f.properties ?? {}
+            return props.country_code?.toLowerCase() === cc ||
+                   props.countrycode?.toLowerCase() === cc
+          }) ?? features[0]
+          if (match) {
+            const props = match.properties ?? {}
+            place = props.city || props.town || props.village || props.name || ''
+            state = props.state || props.county || ''
           }
         }
       } catch { /* ignore */ }
