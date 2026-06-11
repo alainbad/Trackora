@@ -18,6 +18,12 @@ const INPUT_STYLE: React.CSSProperties = {
   boxSizing: 'border-box',
 }
 
+const SELECT_STYLE: React.CSSProperties = {
+  ...INPUT_STYLE,
+  background: '#0f1629',
+  colorScheme: 'dark',
+}
+
 const LABEL_STYLE: React.CSSProperties = {
   fontSize: '11px',
   color: 'rgba(248,250,252,0.45)',
@@ -177,11 +183,11 @@ export default function CustomsDuty() {
                 <select
                   value={importCountry}
                   onChange={e => setImportCountry(e.target.value)}
-                  style={INPUT_STYLE}
+                  style={SELECT_STYLE}
                 >
-                  <option value="">Select country...</option>
+                  <option value="" style={{ background: '#0f1629', color: '#f8fafc' }}>Select country...</option>
                   {SUPPORTED_IMPORT_COUNTRIES.map(c => (
-                    <option key={c.iso} value={c.iso}>{c.name}</option>
+                    <option key={c.iso} value={c.iso} style={{ background: '#0f1629', color: '#f8fafc' }}>{c.name}</option>
                   ))}
                 </select>
               </div>
@@ -192,11 +198,11 @@ export default function CustomsDuty() {
                 <select
                   value={exportCountry}
                   onChange={e => setExportCountry(e.target.value)}
-                  style={INPUT_STYLE}
+                  style={SELECT_STYLE}
                 >
-                  <option value="">Select country...</option>
+                  <option value="" style={{ background: '#0f1629', color: '#f8fafc' }}>Select country...</option>
                   {COUNTRIES.map(c => (
-                    <option key={c.iso} value={c.iso}>{c.name}</option>
+                    <option key={c.iso} value={c.iso} style={{ background: '#0f1629', color: '#f8fafc' }}>{c.name}</option>
                   ))}
                 </select>
               </div>
@@ -207,11 +213,11 @@ export default function CustomsDuty() {
                 <select
                   value={category}
                   onChange={e => setCategory(e.target.value as CustomsCategory | '')}
-                  style={INPUT_STYLE}
+                  style={SELECT_STYLE}
                 >
-                  <option value="">Select category...</option>
+                  <option value="" style={{ background: '#0f1629', color: '#f8fafc' }}>Select category...</option>
                   {(Object.entries(CATEGORY_LABELS) as [CustomsCategory, string][]).map(([key, label]) => (
-                    <option key={key} value={key}>{label}</option>
+                    <option key={key} value={key} style={{ background: '#0f1629', color: '#f8fafc' }}>{label}</option>
                   ))}
                 </select>
               </div>
