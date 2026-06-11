@@ -560,8 +560,7 @@ function LocationField({
       try {
         const countryCode = country.toLowerCase()
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(code.trim())}&countrycodes=${countryCode}&format=json&limit=1&addressdetails=1`,
-          { headers: { 'Accept-Language': 'en', 'User-Agent': 'Trackora/1.0 (track-ora.com)' } }
+          `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(code.trim())}&countrycodes=${countryCode}&format=json&limit=1&addressdetails=1`
         )
         if (res.ok) {
           const data = await res.json()
