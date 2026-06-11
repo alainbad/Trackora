@@ -170,10 +170,10 @@ export default function DetentionCalc() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: '80px', paddingBottom: '80px' }}>
-      <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 24px' }}>
+    <div style={{ paddingTop: '80px', paddingBottom: '60px' }}>
+      <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '24px 20px' : '40px 24px' }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{ ...BADGE_STYLE, margin: '0 auto 16px' }}>
             <Ship size={12} />
             Free Detention Calculator
