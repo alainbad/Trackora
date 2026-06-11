@@ -395,14 +395,14 @@ function PackagesInput({
             <input
               type="number" min="0.1" step="0.1" value={p.weight}
               onChange={e => update(p.id, 'weight', e.target.value)}
-              placeholder={`Wt (${unit})`}
+              placeholder={`Wt (${unit})`} autoComplete="off"
               style={{ ...INPUT_STYLE, flex: '1.4', width: 'auto', minWidth: 0 }}
             />
             {(['dimL', 'dimW', 'dimH'] as const).map((f, fi) => (
               <input
                 key={f} type="number" min="0" step="1" value={p[f]}
                 onChange={e => update(p.id, f, e.target.value)}
-                placeholder={['L', 'W', 'H'][fi]}
+                placeholder={['L', 'W', 'H'][fi]} autoComplete="off"
                 style={{ ...INPUT_STYLE, flex: 1, width: 'auto', minWidth: 0, textAlign: 'center', padding: '10px 4px', fontSize: '13px' }}
               />
             ))}
