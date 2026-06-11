@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship, Plus, X } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
@@ -535,12 +535,19 @@ function LocationField({
   const [postal, setPostal] = useState('')
   const [looking, setLooking] = useState(false)
   const [hint, setHint] = useState('')
+  const lookupRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function handlePostal(code: string) {
     setPostal(code)
     setHint('')
-    if (!country || code.replace(/\s/g, '').length < 3) return
+    if (lookupRef.current) clearTimeout(lookupRef.current)
+    if (!country || code.replace(/\s/g, '').length < 4) return
     setLooking(true)
+    // Debounce: wait 600ms after user stops typing
+    lookupRef.current = setTimeout(() => doLookup(code), 600)
+  }
+
+  async function doLookup(code: string) {
 
     let place = ''
     let state = ''
@@ -601,7 +608,8 @@ function LocationField({
     }
 
     setLooking(false)
-  }
+  }  // end doLookup
+
 
   return (
     <div>
