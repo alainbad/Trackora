@@ -38,7 +38,7 @@ const PLANS = [
       { text: 'Priority email support', included: true },
     ],
     cta: 'Claim Offer', ctaStyle: 'filled' as const,
-    gumroadUrl: 'https://badranalain.gumroad.com/l/impejho',
+    gumroadUrl: 'https://badranalain.gumroad.com/l/impejho?offer_code=LAUNCH',
   },
   {
     icon: Building2, name: 'Business', price: '$9.99', period: 'per month',
