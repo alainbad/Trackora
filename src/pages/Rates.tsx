@@ -558,16 +558,21 @@ function LocationField({
     // Fallback: OpenStreetMap Nominatim (broader country coverage)
     if (!place) {
       try {
+        const countryCode = country.toLowerCase()
         const res = await fetch(
-          `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(code.trim())}&country=${encodeURIComponent(country)}&format=json&limit=1&addressdetails=1`,
-          { headers: { 'Accept-Language': 'en' } }
+          `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(code.trim())}&countrycodes=${countryCode}&format=json&limit=1&addressdetails=1`,
+          { headers: { 'Accept-Language': 'en', 'User-Agent': 'Trackora/1.0 (track-ora.com)' } }
         )
         if (res.ok) {
           const data = await res.json()
-          if (data?.[0]) {
+          if (Array.isArray(data) && data.length > 0) {
             const addr = data[0].address ?? {}
-            place = addr.city || addr.town || addr.village || addr.county || data[0].display_name?.split(',')[0] || ''
-            state = addr.state || addr.region || ''
+            place = addr.city || addr.town || addr.village || addr.municipality || addr.county || ''
+            state = addr.state || addr.region || addr['state_district'] || ''
+            // If place is still empty, parse from display_name
+            if (!place && data[0].display_name) {
+              place = data[0].display_name.split(',')[0].trim()
+            }
           }
         }
       } catch { /* ignore */ }
@@ -707,7 +712,13 @@ export default function Rates() {
   // ── Restore form from localStorage cache ──────────────────────────────────
   const CACHE_KEY = 'trackora_rates_v1'
   function loadCache() {
-    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') } catch { return {} }
+    try {
+      const c = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}')
+      // Re-assign fresh IDs to cached packages so they don't collide with _pkgId counter
+      if (c.pkgs?.length)    c.pkgs    = c.pkgs.map((p: PkgItem)    => ({ ...p, id: ++_pkgId }))
+      if (c.airPkgs?.length) c.airPkgs = c.airPkgs.map((p: PkgItem) => ({ ...p, id: ++_pkgId }))
+      return c
+    } catch { return {} }
   }
   const _c = loadCache()
 
