@@ -186,8 +186,6 @@ export default function DetentionCalc() {
           </p>
         </div>
 
-        <AdUnit slot="5988077434" style={{ marginBottom: '32px' }} />
-
         {/* Two-column layout */}
         <div style={{
           display: 'grid',
