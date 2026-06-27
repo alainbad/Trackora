@@ -137,6 +137,73 @@ const SHIPMENTS: Record<string, Shipment> = {
       { lat: 25.2532, lng: 55.3657, label: 'Dubai' },
     ],
   },
+  'MSKU7620114': {
+    id: 'MSKU7620114',
+    trackingNumber: 'MSKU7620114',
+    carrier: 'MSC',
+    freightType: 'sea',
+    status: 'in_transit',
+    statusLabel: 'In Transit',
+    origin: { city: 'Jebel Ali', country: 'UAE', code: 'AEJEA', lat: 24.9857, lng: 55.0272 },
+    destination: { city: 'Felixstowe', country: 'UK', code: 'GBFXT', lat: 51.9576, lng: 1.3513 },
+    currentLocation: { city: 'Mediterranean Sea', country: 'At Sea', lat: 36.5, lng: 15.0 },
+    estimatedDelivery: 'Jul 14, 2026',
+    aiEta: 'Jul 14, 2026 • On schedule',
+    etaConfidence: 88,
+    weight: '21,800 kg',
+    dimensions: '40ft HC Container × 1',
+    pieces: 1,
+    service: 'MSC Standard FCL',
+    carbonKg: 1620,
+    delayRisk: 'low',
+    timeline: [
+      { date: 'Jun 20', time: '07:00', status: 'Gate In', location: 'Jebel Ali Port, UAE', description: 'Container received at terminal', type: 'completed' },
+      { date: 'Jun 23', time: '16:00', status: 'Vessel Departed', location: 'Jebel Ali, UAE', description: 'Departed on MSC Beatrice', type: 'completed' },
+      { date: 'Jun 28', time: '11:00', status: 'Port Call', location: 'Port Said, Egypt', description: 'Port call and Suez transit completed', type: 'completed' },
+      { date: 'Jul 2', time: '—', status: 'At Sea', location: 'Mediterranean Sea', description: 'Vessel cruising at 18 knots', type: 'current' },
+      { date: 'Jul 8', time: '08:00', status: 'Port Call', location: 'Algeciras, Spain', description: 'Expected transshipment hub', type: 'upcoming' },
+      { date: 'Jul 14', time: '06:00', status: 'Port Arrival', location: 'Felixstowe, UK', description: 'Expected terminal arrival', type: 'upcoming' },
+    ],
+    waypoints: [
+      { lat: 24.9857, lng: 55.0272, label: 'Jebel Ali' },
+      { lat: 30.0, lng: 32.5, label: 'Suez' },
+      { lat: 36.5, lng: 15.0, label: 'Mediterranean' },
+      { lat: 36.1408, lng: -5.4536, label: 'Algeciras' },
+      { lat: 51.9576, lng: 1.3513, label: 'Felixstowe' },
+    ],
+  },
+  '17622536813': {
+    id: '17622536813',
+    trackingNumber: '176-22536813',
+    carrier: 'Emirates SkyCargo',
+    freightType: 'air',
+    status: 'in_transit',
+    statusLabel: 'In Transit',
+    origin: { city: 'Dubai', country: 'UAE', code: 'DXB', lat: 25.2532, lng: 55.3657 },
+    destination: { city: 'Chicago', country: 'USA', code: 'ORD', lat: 41.9742, lng: -87.9073 },
+    currentLocation: { city: 'London Heathrow Hub', country: 'UK', lat: 51.4700, lng: -0.4543 },
+    estimatedDelivery: 'Jun 28, 2026',
+    aiEta: 'Jun 28, 2026 • 09:15 CDT',
+    etaConfidence: 94,
+    weight: '312 kg',
+    dimensions: 'Multiple pieces',
+    pieces: 5,
+    service: 'Emirates SkyCargo Priority',
+    carbonKg: 312,
+    delayRisk: 'low',
+    timeline: [
+      { date: 'Jun 26', time: '14:00', status: 'Accepted', location: 'Dubai Airport (DXB)', description: 'Shipment accepted by Emirates SkyCargo', type: 'completed' },
+      { date: 'Jun 26', time: '22:30', status: 'Departed', location: 'Dubai Airport (DXB)', description: 'Departed on EK201', type: 'completed' },
+      { date: 'Jun 27', time: '04:15', status: 'Transit Hub', location: 'London Heathrow (LHR)', description: 'Transiting through Heathrow hub', type: 'current' },
+      { date: 'Jun 27', time: '09:00', status: 'Departed', location: 'London Heathrow (LHR)', description: 'Expected departure to Chicago', type: 'upcoming' },
+      { date: 'Jun 28', time: '09:15', status: 'Arrived', location: "Chicago O'Hare (ORD)", description: 'Expected arrival + customs clearance', type: 'upcoming' },
+    ],
+    waypoints: [
+      { lat: 25.2532, lng: 55.3657, label: 'Dubai' },
+      { lat: 51.4700, lng: -0.4543, label: 'London' },
+      { lat: 41.9742, lng: -87.9073, label: 'Chicago' },
+    ],
+  },
   'CNTR8872341': {
     id: 'CNTR8872341',
     trackingNumber: 'CNTR8872341',
@@ -175,8 +242,13 @@ export function getShipment(id: string): Shipment | null {
   const normalized = id.trim().toUpperCase()
   // Try exact match first
   if (SHIPMENTS[id]) return SHIPMENTS[id]
-  // Try normalized
-  const found = Object.values(SHIPMENTS).find(s => s.trackingNumber.toUpperCase() === normalized)
+  // Try normalized (strip dashes for AWB-style numbers like 176-22536813)
+  const stripped = normalized.replace(/-/g, '')
+  if (SHIPMENTS[stripped]) return SHIPMENTS[stripped]
+  // Try matching trackingNumber field
+  const found = Object.values(SHIPMENTS).find(
+    s => s.trackingNumber.toUpperCase() === normalized || s.trackingNumber.replace(/-/g, '').toUpperCase() === stripped
+  )
   return found || null
 }
 
