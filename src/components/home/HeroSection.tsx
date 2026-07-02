@@ -168,12 +168,12 @@ export default function HeroSection() {
           letterSpacing: isMobile ? '-1.5px' : '-2.5px',
           color: '#f8fafc', margin: '0 0 22px',
         }}>
-          Track every<br />shipment.<br />
+          The AI-powered logistics<br />intelligence platform<br />
           <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>
             <span style={{
               background: 'linear-gradient(135deg, #22d3ee, #6366f1)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>In real time.</span>
+            }}>for global visibility.</span>
           </span>
         </h1>
 
@@ -182,8 +182,7 @@ export default function HeroSection() {
           color: 'rgba(248,250,252,0.6)', lineHeight: 1.6,
           maxWidth: '520px', margin: isMobile ? '0 auto 32px' : '0 0 34px',
         }}>
-          One place for air, sea, land freight &amp; express couriers. Paste any tracking
-          number, AWB, B/L or container ID — we find it in seconds.
+          Track, predict, analyze, and optimize shipments across hundreds of carriers in one place.
         </p>
 
         {/* Search */}
