@@ -173,6 +173,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) return { error: 'Auth not configured — add Supabase env vars to .env.local', needsConfirmation: false }
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) return { error: friendlyAuthError(error.message), needsConfirmation: false }
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      ;(window as any).gtag('event', 'sign_up', { method: 'email' })
+    }
     return { error: null, needsConfirmation: !data.session }
   }
 
