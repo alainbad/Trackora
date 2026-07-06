@@ -211,6 +211,9 @@
 
   <!-- Tools pages -->
   <url><loc>https://www.track-ora.com/tools</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/customs-duty</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://www.track-ora.com/detention-calculator</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://www.track-ora.com/profit-calculator</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://www.track-ora.com/document-generator</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
 
   <!-- Port landing pages -->
