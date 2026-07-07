@@ -209,11 +209,11 @@ const PAGE_CONFIGS: Record<PageKey, PageConfig> = {
   },
 
   'ocean-freight': {
-    title: 'Sea Freight Tracking — Track Ocean Shipments in Real Time | Trackora',
+    title: 'Ocean Freight Tracking — Track Ocean Cargo by Container & B/L | Trackora',
     description:
-      'Track sea freight and ocean shipments by container number, B/L number, or booking reference. Covers all major shipping lines including Maersk, MSC, CMA CGM, Hapag-Lloyd and COSCO.',
+      'Track ocean freight shipments in real time by container number, bill of lading, or booking reference. Supports Maersk, MSC, CMA CGM, Evergreen, COSCO, ONE and 50+ ocean carriers.',
     canonical: 'https://www.track-ora.com/track/ocean-freight',
-    h1: 'Sea Freight Tracking',
+    h1: 'Ocean Freight Tracking',
     subtitle:
       'Track any ocean shipment by container number, bill of lading, or booking reference — across all major shipping lines in one place.',
     badge: 'OCEAN FREIGHT TRACKING',

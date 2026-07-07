@@ -68,6 +68,27 @@
   <url><loc>https://www.track-ora.com/blog/container-types-explained</loc><lastmod>2026-06-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
   <url><loc>https://www.track-ora.com/blog/how-to-read-commercial-invoice-import-export</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
 
+  <!-- Tools pages -->
+  <url><loc>https://www.track-ora.com/tools</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/customs-duty</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://www.track-ora.com/detention-calculator</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.78</priority></url>
+  <url><loc>https://www.track-ora.com/profit-calculator</loc><lastmod>2026-07-06</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <url><loc>https://www.track-ora.com/document-generator</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+
+  <!-- Port landing pages -->
+  <url><loc>https://www.track-ora.com/ports/jebel-ali-dubai</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/ports/rotterdam</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/ports/singapore</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/ports/shanghai</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/ports/antwerp-bruges</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+
+  <!-- Airport landing pages -->
+  <url><loc>https://www.track-ora.com/airports/dubai-dxb</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/airports/frankfurt-fra</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/airports/london-heathrow</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/airports/singapore-sin</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://www.track-ora.com/airports/hong-kong-hkg</loc><lastmod>2026-06-10</lastmod><changefreq>weekly</changefreq><priority>0.80</priority></url>
+
   <!-- Carrier pages -->
   <url><loc>https://www.track-ora.com/carriers/dhl</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
   <url><loc>https://www.track-ora.com/carriers/fedex</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>

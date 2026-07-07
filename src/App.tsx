@@ -14,6 +14,7 @@ import BlogPost from './pages/BlogPost'
 import FAQ from './pages/FAQ'
 import Plans from './pages/Plans'
 import Contact from './pages/Contact'
+import NotFound from './pages/NotFound'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import { AuthProvider } from './contexts/AuthContext'
@@ -87,6 +88,7 @@ export default function App() {
               <Route path="/customs-duty"       element={<CustomsDuty />} />
               <Route path="/detention-calculator" element={<DetentionCalc />} />
               <Route path="/profit-calculator"  element={<ProfitCalc />} />
+              <Route path="*"                   element={<NotFound />} />
             </Routes>
           </Suspense>
           <Footer />

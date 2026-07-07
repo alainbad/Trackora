@@ -1,4 +1,5 @@
 import { X, Zap, Check, Lock } from 'lucide-react'
+import { useIsNativeApp } from '../../hooks/useIsNativeApp'
 
 interface UpgradeModalProps {
   feature: 'air' | 'sea' | 'analytics' | 'alerts' | 'saved'
@@ -52,6 +53,7 @@ const PRO_FEATURES = [
 
 export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeModalProps) {
   const copy = FEATURE_COPY[feature]
+  const isNative = useIsNativeApp()
 
   function handleUpgrade() {
     if (onUpgrade) onUpgrade()
@@ -133,29 +135,44 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           ))}
         </ul>
 
-        {/* Pricing note */}
-        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-          <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}>
-            Starting at{' '}
-          </span>
-          <span style={{ fontSize: '20px', fontWeight: 800, color: '#f8fafc' }}>$2.49</span>
-          <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}> first month · then $4.99/mo</span>
-        </div>
+        {isNative ? (
+          <div style={{
+            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: '12px', padding: '16px', textAlign: 'center', marginBottom: '16px',
+          }}>
+            <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.7)', lineHeight: 1.6, margin: 0 }}>
+              Visit{' '}
+              <span style={{ color: '#818cf8', fontWeight: 600 }}>track-ora.com/plans</span>{' '}
+              in your browser to subscribe to Pro or Business.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Pricing note */}
+            <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+              <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}>
+                Starting at{' '}
+              </span>
+              <span style={{ fontSize: '20px', fontWeight: 800, color: '#f8fafc' }}>$2.49</span>
+              <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}> first month · then $4.99/mo</span>
+            </div>
 
-        {/* CTA */}
-        <button
-          onClick={handleUpgrade}
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            width: '100%', padding: '14px', borderRadius: '14px', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
-            boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-          }}
-        >
-          <Zap size={16} />
-          Upgrade to Pro — Claim Offer
-        </button>
+            {/* CTA */}
+            <button
+              onClick={handleUpgrade}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                width: '100%', padding: '14px', borderRadius: '14px', cursor: 'pointer',
+                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
+                boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
+              }}
+            >
+              <Zap size={16} />
+              Upgrade to Pro — Claim Offer
+            </button>
+          </>
+        )}
 
         <button
           onClick={onClose}

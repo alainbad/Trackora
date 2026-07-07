@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Check, X, Zap, Building2, Globe2 } from 'lucide-react'
 import AuthModal from '../auth/AuthModal'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { useIsNativeApp } from '../../hooks/useIsNativeApp'
 
 const PLANS = [
   {
@@ -85,7 +86,44 @@ function useCountdown(deadline: Date) {
 export default function PricingSection() {
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null)
   const isMobile = useIsMobile()
+  const isNative = useIsNativeApp()
   const countdown = useCountdown(OFFER_DEADLINE)
+
+  const visiblePlans = isNative ? PLANS.filter(p => p.name === 'Free') : PLANS
+
+  if (isNative) {
+    return (
+      <section id="pricing" style={{ padding: isMobile ? '72px 20px' : '100px 24px', background: 'rgba(5,8,20,0.4)' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '5px 14px', borderRadius: '100px',
+            background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
+            marginBottom: '20px', fontSize: '12px', color: '#818cf8',
+            fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase',
+          }}>
+            Pricing
+          </div>
+          <h2 style={{ fontSize: isMobile ? '28px' : '40px', fontWeight: 800, letterSpacing: '-1.5px', color: '#f8fafc', marginBottom: '16px', lineHeight: 1.1 }}>
+            Want Pro or Business?
+          </h2>
+          <p style={{ fontSize: '16px', color: 'rgba(248,250,252,0.6)', lineHeight: 1.7, marginBottom: '32px' }}>
+            Upgrade plans are available on our website. Visit{' '}
+            <span style={{ color: '#818cf8', fontWeight: 600 }}>track-ora.com/plans</span>{' '}
+            in your browser to view Pro and Business pricing and subscribe.
+          </p>
+          <div style={{
+            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: '16px', padding: '20px 24px',
+            fontSize: '14px', color: 'rgba(248,250,252,0.55)', lineHeight: 1.6,
+          }}>
+            Pro starts at $2.49 for the first month — then $4.99/mo.
+            Business is $9.99/mo. No hidden fees, cancel anytime.
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <>
@@ -121,7 +159,7 @@ export default function PricingSection() {
             gap: isMobile ? '20px' : '24px',
             alignItems: 'start',
           }}>
-            {PLANS.map((plan, i) => {
+            {visiblePlans.map((plan, i) => {
               const Icon = plan.icon
               const btnStyle = BADGE_STYLES[plan.ctaStyle]
               return (
