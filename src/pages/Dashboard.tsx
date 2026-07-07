@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext'
 import AuthModal from '../components/auth/AuthModal'
 import ReportModal from '../components/dashboard/ReportModal'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useIsNativeApp } from '../hooks/useIsNativeApp'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface DashboardShipment {
@@ -275,6 +276,7 @@ export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
+  const isNative = useIsNativeApp()
 
   const [shipments,   setShipments]  = useState<DashboardShipment[]>([])
   const [loading,     setLoading]    = useState(true)
@@ -474,33 +476,35 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: '72px' }}>
-      {/* ── Pro Banner ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08))',
-        borderBottom: '1px solid rgba(99,102,241,0.2)',
-        padding: isMobile ? '12px 20px' : '12px 24px',
-        display: 'flex', flexDirection: isMobile ? 'column' : 'row',
-        alignItems: 'center', justifyContent: 'center',
-        gap: isMobile ? '8px' : '12px', textAlign: 'center',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-          <Zap size={14} color="#818cf8" />
-          <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>
-            You're on the <strong style={{ color: '#818cf8' }}>Free plan</strong>.{' '}
-            {!isMobile && 'Upgrade to Pro for unlimited shipments & advanced analytics.'}
-          </span>
+      {/* ── Pro Banner — hidden in native app ── */}
+      {!isNative && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08))',
+          borderBottom: '1px solid rgba(99,102,241,0.2)',
+          padding: isMobile ? '12px 20px' : '12px 24px',
+          display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+          alignItems: 'center', justifyContent: 'center',
+          gap: isMobile ? '8px' : '12px', textAlign: 'center',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+            <Zap size={14} color="#818cf8" />
+            <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>
+              You're on the <strong style={{ color: '#818cf8' }}>Free plan</strong>.{' '}
+              {!isMobile && 'Upgrade to Pro for unlimited shipments & advanced analytics.'}
+            </span>
+          </div>
+          <button
+            onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
+            style={{
+              padding: '5px 16px', borderRadius: '100px',
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              border: 'none', color: 'white', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            Upgrade to Pro →
+          </button>
         </div>
-        <button
-          onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
-          style={{
-            padding: '5px 16px', borderRadius: '100px',
-            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            border: 'none', color: 'white', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-          }}
-        >
-          Upgrade to Pro →
-        </button>
-      </div>
+      )}
 
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: isMobile ? '24px 16px' : '32px 24px' }}>
         {/* ── Header ── */}
@@ -773,19 +777,25 @@ export default function Dashboard() {
             <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.5)', maxWidth: '360px', marginBottom: '20px', lineHeight: 1.6 }}>
               Carrier performance, on-time rates, cost analysis &amp; CO₂ trends. Unlock with Pro.
             </p>
-            <button
-              onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
-              style={{
-                padding: '12px 28px', borderRadius: '12px',
-                background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-                border: 'none', color: 'white', fontSize: '14px', fontWeight: 700,
-                cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-                display: 'flex', alignItems: 'center', gap: '8px',
-              }}
-            >
-              <Zap size={16} />
-              Upgrade to Pro — $4.99/mo
-            </button>
+            {isNative ? (
+              <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', margin: 0 }}>
+                Visit <span style={{ color: '#818cf8', fontWeight: 600 }}>track-ora.com/plans</span> to upgrade
+              </p>
+            ) : (
+              <button
+                onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
+                style={{
+                  padding: '12px 28px', borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                  border: 'none', color: 'white', fontSize: '14px', fontWeight: 700,
+                  cursor: 'pointer', boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                }}
+              >
+                <Zap size={16} />
+                Upgrade to Pro — $4.99/mo
+              </button>
+            )}
           </div>
           {/* Blurred chart mockup */}
           <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', height: '120px', filter: 'blur(4px)' }}>

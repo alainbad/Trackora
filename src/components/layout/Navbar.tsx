@@ -7,6 +7,7 @@ import ProfileModal from '../auth/ProfileModal'
 import { useAuth } from '../../contexts/AuthContext'
 import { useProfile } from '../../contexts/ProfileContext'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { useIsNativeApp } from '../../hooks/useIsNativeApp'
 
 export default function Navbar() {
   const [scrolled,    setScrolled]    = useState(false)
@@ -18,6 +19,7 @@ export default function Navbar() {
   const { user, signOut } = useAuth()
   const { profile }       = useProfile()
   const isMobile = useIsMobile()
+  const isNative = useIsNativeApp()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -38,7 +40,7 @@ export default function Navbar() {
     { label: 'Track',     href: '/track' },
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Features',  href: '/#features' },
-    { label: 'Plans',     href: '/plans' },
+    ...(!isNative ? [{ label: 'Plans', href: '/plans' }] : []),
     { label: 'Rates',     href: '/rates' },
   ]
 
