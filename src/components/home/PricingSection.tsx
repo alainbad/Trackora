@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, X, Zap, Building2, Globe2 } from 'lucide-react'
 import AuthModal from '../auth/AuthModal'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -39,7 +39,7 @@ const PLANS = [
       { text: 'Priority email support', included: true },
     ],
     cta: 'Claim Offer', ctaStyle: 'filled' as const,
-    gumroadUrl: 'https://badranalain.gumroad.com/l/impejho',
+    gumroadUrl: 'https://badranalain.gumroad.com/l/impejho?offer_code=LAUNCH',
   },
   {
     icon: Building2, name: 'Business', price: '$9.99', period: 'per month',
@@ -63,10 +63,31 @@ const BADGE_STYLES = {
   gold:    { background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: 'white', border: 'none', boxShadow: '0 4px 20px rgba(245,158,11,0.35)' },
 }
 
+const OFFER_DEADLINE = new Date('2026-06-18T23:59:59Z')
+
+function useCountdown(deadline: Date) {
+  const calc = () => {
+    const diff = Math.max(0, deadline.getTime() - Date.now())
+    return {
+      hours:   Math.floor(diff / 3_600_000),
+      minutes: Math.floor((diff % 3_600_000) / 60_000),
+      seconds: Math.floor((diff % 60_000) / 1_000),
+      expired: diff === 0,
+    }
+  }
+  const [time, setTime] = useState(calc)
+  useEffect(() => {
+    const id = setInterval(() => setTime(calc()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  return time
+}
+
 export default function PricingSection() {
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null)
   const isMobile = useIsMobile()
   const isNative = useIsNativeApp()
+  const countdown = useCountdown(OFFER_DEADLINE)
 
   const visiblePlans = isNative ? PLANS.filter(p => p.name === 'Free') : PLANS
 
@@ -212,6 +233,28 @@ export default function PricingSection() {
                         <p style={{ fontSize: '12px', color: '#f87171', marginTop: '5px', fontWeight: 500 }}>
                           {plan.offerNote} — then {plan.price}/mo
                         </p>
+                        {!countdown.expired && (
+                          <div style={{
+                            display: 'flex', gap: '6px', marginTop: '12px', alignItems: 'center',
+                          }}>
+                            <span style={{ fontSize: '11px', color: 'rgba(248,250,252,0.4)', marginRight: '2px' }}>Offer ends in</span>
+                            {[
+                              { val: countdown.hours,   label: 'h' },
+                              { val: countdown.minutes, label: 'm' },
+                              { val: countdown.seconds, label: 's' },
+                            ].map(({ val, label }) => (
+                              <div key={label} style={{
+                                background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)',
+                                borderRadius: '6px', padding: '3px 7px', minWidth: '34px', textAlign: 'center',
+                              }}>
+                                <span style={{ fontSize: '14px', fontWeight: 700, color: '#f87171', fontVariantNumeric: 'tabular-nums' }}>
+                                  {String(val).padStart(2, '0')}
+                                </span>
+                                <span style={{ fontSize: '10px', color: 'rgba(248,250,252,0.35)', marginLeft: '2px' }}>{label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>

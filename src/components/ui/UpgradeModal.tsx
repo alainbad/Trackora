@@ -57,7 +57,7 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
 
   function handleUpgrade() {
     if (onUpgrade) onUpgrade()
-    window.open('https://badranalain.gumroad.com/l/impejho', '_blank')
+    window.open('https://badranalain.gumroad.com/l/impejho?offer_code=LAUNCH', '_blank')
   }
 
   return (

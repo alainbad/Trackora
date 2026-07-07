@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, ChevronRight, Upload } from 'lucide-react'
 import { useIsMobile } from '../../hooks/useIsMobile'
@@ -102,6 +102,17 @@ export default function HeroSection() {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
 
+  // Animated live counter — ticks ±1–3 every 4–8s to feel real
+  const [shipCount, setShipCount] = useState(2418)
+  useEffect(() => {
+    const tick = () => {
+      setShipCount(n => n + Math.floor(Math.random() * 5) - 2)
+      setTimeout(tick, 4000 + Math.random() * 4000)
+    }
+    const id = setTimeout(tick, 5000)
+    return () => clearTimeout(id)
+  }, [])
+
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault()
     if (query.trim()) navigate(`/track/${encodeURIComponent(query.trim())}`)
@@ -146,7 +157,7 @@ export default function HeroSection() {
             <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#34d399' }} />
             <span style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', border: '1px solid #34d399', opacity: 0.5 }} />
           </span>
-          <b style={{ fontWeight: 700, color: '#34d399' }}>2,418</b>
+          <b style={{ fontWeight: 700, color: '#34d399' }}>{shipCount.toLocaleString()}</b>
           <span style={{ opacity: 0.85 }}>shipments moving right now</span>
         </div>
 

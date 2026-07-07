@@ -167,10 +167,10 @@ export default function ProfitCalc() {
   const barProfitPct = calc.sell > 0 ? Math.max(0, ((calc.grossProfit) / calc.sell) * 100) : 0
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: '80px', paddingBottom: '80px' }}>
-      <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 24px' }}>
+    <div style={{ paddingTop: '80px', paddingBottom: '60px' }}>
+      <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '24px 20px' : '40px 24px' }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{ ...BADGE_STYLE, margin: '0 auto 16px' }}>
             <TrendingUp size={12} />
             Free Margin Calculator
@@ -182,8 +182,6 @@ export default function ProfitCalc() {
             Instantly calculate gross profit, margin percentage and cost breakdown for any freight shipment.
           </p>
         </div>
-
-        <AdUnit slot="5988077434" style={{ marginBottom: '32px' }} />
 
         {/* Two-column layout */}
         <div style={{

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship, Plus, X } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
@@ -395,14 +395,14 @@ function PackagesInput({
             <input
               type="number" min="0.1" step="0.1" value={p.weight}
               onChange={e => update(p.id, 'weight', e.target.value)}
-              placeholder={`Wt (${unit})`}
+              placeholder={`Wt (${unit})`} autoComplete="off"
               style={{ ...INPUT_STYLE, flex: '1.4', width: 'auto', minWidth: 0 }}
             />
             {(['dimL', 'dimW', 'dimH'] as const).map((f, fi) => (
               <input
                 key={f} type="number" min="0" step="1" value={p[f]}
                 onChange={e => update(p.id, f, e.target.value)}
-                placeholder={['L', 'W', 'H'][fi]}
+                placeholder={['L', 'W', 'H'][fi]} autoComplete="off"
                 style={{ ...INPUT_STYLE, flex: 1, width: 'auto', minWidth: 0, textAlign: 'center', padding: '10px 4px', fontSize: '13px' }}
               />
             ))}
@@ -439,6 +439,99 @@ function PackagesInput({
       </p>
     </div>
   )
+}
+
+// ── Offline postal-prefix → airport code (no API needed) ─────────────────────
+// Maps first 1-3 digits of postal code to an airport code per country
+const POSTAL_PREFIX_AIRPORT: Record<string, (postal: string) => string | null> = {
+  IT: (p) => {
+    const d = parseInt(p[0])
+    return ['FCO','TRN','MXP','VCE','BLQ','FLR','FCO','BRI','NAP','CTA'][d] ?? null
+  },
+  DE: (p) => {
+    const n = parseInt(p.slice(0,2))
+    if (n<=19) return 'BER'; if (n<=29) return 'HAM'; if (n<=39) return 'BER'
+    if (n<=49) return 'DUS'; if (n<=59) return 'CGN'; if (n<=69) return 'FRA'
+    if (n<=79) return 'STR'; if (n<=89) return 'MUC'; return 'MUC'
+  },
+  FR: (p) => {
+    const n = parseInt(p.slice(0,2))
+    if (n<=19) return 'CDG'; if (n<=29) return 'RNS'; if (n<=39) return 'NTE'
+    if (n<=49) return 'NTE'; if (n<=59) return 'LIL'; if (n<=69) return 'LYS'
+    if (n<=79) return 'BOD'; if (n<=89) return 'SXB'; return 'MRS'
+  },
+  ES: (p) => {
+    const n = parseInt(p.slice(0,2))
+    if (n<=19) return 'BCN'; if (n<=29) return 'BCN'; if (n<=39) return 'MAD'
+    if (n<=49) return 'MAD'; if (n<=59) return 'MAD'; if (n<=69) return 'AGP'
+    return 'MAD'
+  },
+  GB: (p) => {
+    const pre = p.slice(0,2).toUpperCase()
+    const map: Record<string,string> = {
+      'SW':'LHR','SE':'LHR','EC':'LHR','WC':'LHR','W1':'LHR','E1':'LHR','N1':'LHR',
+      'BS':'BRS','M1':'MAN','LS':'LBA','B1':'BHX','EH':'EDI','G1':'GLA','CF':'CWL',
+      'BT':'BHD','NE':'NCL','L1':'LPL','NG':'EMA','OX':'LHR','CB':'STN',
+    }
+    return map[pre] ?? 'LHR'
+  },
+  NL: (p) => {
+    const n = parseInt(p.slice(0,2))
+    if (n<=29) return 'AMS'; if (n<=49) return 'AMS'; return 'AMS'
+  },
+  BE: () => 'BRU',
+  CH: (p) => {
+    const n = parseInt(p[0])
+    if (n<=3) return 'GVA'; if (n<=5) return 'ZRH'; if (n<=9) return 'ZRH'; return 'ZRH'
+  },
+  AT: (p) => { const n = parseInt(p[0]); return n<=2 ? 'VIE' : n<=5 ? 'SZG' : 'VIE' },
+  US: (p) => {
+    const n = parseInt(p.slice(0,3))
+    if (n<=199) return 'BOS'; if (n<=299) return 'JFK'; if (n<=399) return 'IAD'
+    if (n<=499) return 'ATL'; if (n<=599) return 'ORD'; if (n<=699) return 'DFW'
+    if (n<=799) return 'DEN'; if (n<=899) return 'LAX'; return 'SEA'
+  },
+  CA: (p) => {
+    const l = p[0].toUpperCase()
+    const map: Record<string,string> = {
+      'A':'YYT','B':'YHZ','C':'YYG','E':'YQM','G':'YUL','H':'YUL','J':'YUL',
+      'K':'YOW','L':'YYZ','M':'YYZ','N':'YYZ','P':'YYZ','R':'YWG',
+      'S':'YQR','T':'YYC','V':'YVR','X':'YZF','Y':'YXY',
+    }
+    return map[l] ?? 'YYZ'
+  },
+  AU: (p) => {
+    const n = parseInt(p[0])
+    return [null,'SYD','MEL','MEL','ADL','PER','PER','BNE','CBR','DRW'][n] ?? 'SYD'
+  },
+  IN: (p) => {
+    const n = parseInt(p[0])
+    const map: Record<number,string> = {1:'DEL',2:'DEL',3:'JAI',4:'BOM',5:'HYD',6:'MAA',7:'CCU',8:'BLR',9:'BLR'}
+    return map[n] ?? 'DEL'
+  },
+  TR: (p) => {
+    const n = parseInt(p.slice(0,2))
+    if (n<=19) return 'IST'; if (n<=29) return 'IST'; if (n<=39) return 'ESB'
+    if (n<=49) return 'ADB'; if (n<=59) return 'ADA'; return 'IST'
+  },
+  SA: (p) => {
+    const n = parseInt(p.slice(0,2))
+    if (n<=19) return 'RUH'; if (n<=29) return 'JED'; if (n<=39) return 'RUH'
+    if (n<=49) return 'DMM'; return 'RUH'
+  },
+  AE: () => 'DXB',
+  SG: () => 'SIN',
+  JP: (p) => {
+    const n = parseInt(p.slice(0,3))
+    if (n<=199) return 'NRT'; if (n<=299) return 'HND'; if (n<=399) return 'NGO'
+    if (n<=599) return 'ITM'; if (n<=699) return 'HIJ'; return 'FUK'
+  },
+  CN: (p) => {
+    const n = parseInt(p.slice(0,3))
+    if (n<=199) return 'PEK'; if (n<=299) return 'TSN'; if (n<=399) return 'SHE'
+    if (n<=499) return 'SHA'; if (n<=599) return 'CAN'; if (n<=699) return 'CTU'
+    return 'PEK'
+  },
 }
 
 // ── State / region → primary airport fallback for postal code lookup ─────────
@@ -535,44 +628,67 @@ function LocationField({
   const [postal, setPostal] = useState('')
   const [looking, setLooking] = useState(false)
   const [hint, setHint] = useState('')
+  const lookupRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   async function handlePostal(code: string) {
     setPostal(code)
     setHint('')
-    if (!country || code.replace(/\s/g, '').length < 3) return
+    if (lookupRef.current) clearTimeout(lookupRef.current)
+    if (!country || code.replace(/\s/g, '').length < 4) return
     setLooking(true)
+    // Debounce: wait 600ms after user stops typing
+    lookupRef.current = setTimeout(() => doLookup(code), 600)
+  }
+
+  async function doLookup(code: string) {
+    const cc = country.toUpperCase()
+    const trimmed = code.trim()
+
+    // 1. Offline prefix lookup — instant, no network needed
+    const offlineAirport = POSTAL_PREFIX_AIRPORT[cc]?.(trimmed)
+    if (offlineAirport) {
+      const match = cities.find(c => c.code === offlineAirport)
+      if (match) {
+        onCity(match.label.split(' (')[0])
+        setHint(`${trimmed} → ${match.label.split(' (')[0]}`)
+        setLooking(false)
+        return
+      }
+    }
+
+    // 2. Online fallback: zippopotam.us
+    let place = ''
+    let state = ''
     try {
-      const res = await fetch(`https://api.zippopotam.us/${country.toLowerCase()}/${encodeURIComponent(code.trim())}`)
+      const res = await fetch(`https://api.zippopotam.us/${cc.toLowerCase()}/${encodeURIComponent(trimmed)}`)
       if (res.ok) {
         const data = await res.json()
-        const place: string = data.places?.[0]?.['place name'] ?? ''
-        const state: string = data.places?.[0]?.['state'] ?? ''
-        if (place) {
-          const placeLower = place.toLowerCase()
-          // 1. Try matching detected place name against city labels
-          let match = cities.find(c => {
-            const cityName = c.label.toLowerCase().split(' (')[0]
-            return c.label.toLowerCase().includes(placeLower.split(' ')[0]) ||
-                   placeLower.includes(cityName)
-          })
-          // 2. State/region → airport lookup table
-          if (!match && state) match = lookupStateAirport(country, state, cities) ?? undefined
-          // 3. Final fallback: country's first city (main hub)
-          if (!match && cities.length > 0) match = cities[0]
-
-          if (match) {
-            const cityDisplay = match.label.split(' (')[0]
-            onCity(cityDisplay)
-            setHint(place.toLowerCase() === cityDisplay.toLowerCase() ? place : `${place} → ${cityDisplay}`)
-          } else {
-            onCity(place)
-            setHint(place)
-          }
-        }
+        place = data.places?.[0]?.['place name'] ?? ''
+        state = data.places?.[0]?.['state'] ?? ''
       }
     } catch { /* ignore */ }
+
+    if (place) {
+      const placeLower = place.toLowerCase()
+      let match = cities.find(c => {
+        const cityName = c.label.toLowerCase().split(' (')[0]
+        return c.label.toLowerCase().includes(placeLower.split(' ')[0]) ||
+               placeLower.includes(cityName)
+      })
+      if (!match && state) match = lookupStateAirport(country, state, cities) ?? undefined
+      if (!match && cities.length > 0) match = cities[0]
+      if (match) {
+        onCity(match.label.split(' (')[0])
+        setHint(place.toLowerCase() === match.label.split(' (')[0].toLowerCase() ? place : `${place} → ${match.label.split(' (')[0]}`)
+      } else {
+        onCity(place)
+        setHint(place)
+      }
+    }
+
     setLooking(false)
-  }
+  }  // end doLookup
+
 
   return (
     <div>
@@ -685,7 +801,13 @@ export default function Rates() {
   // ── Restore form from localStorage cache ──────────────────────────────────
   const CACHE_KEY = 'trackora_rates_v1'
   function loadCache() {
-    try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}') } catch { return {} }
+    try {
+      const c = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}')
+      // Re-assign fresh IDs to cached packages so they don't collide with _pkgId counter
+      if (c.pkgs?.length)    c.pkgs    = c.pkgs.map((p: PkgItem)    => ({ ...p, id: ++_pkgId }))
+      if (c.airPkgs?.length) c.airPkgs = c.airPkgs.map((p: PkgItem) => ({ ...p, id: ++_pkgId }))
+      return c
+    } catch { return {} }
   }
   const _c = loadCache()
 

@@ -46,6 +46,21 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       .eq('id', user.id)
       .single()
     setProfile(data ?? null)
+
+    // Apply any pending Gumroad upgrade (paid before signing up)
+    if (user.email) {
+      const { data: pending } = await supabase
+        .from('pending_plan_upgrades')
+        .select('plan_tier')
+        .eq('email', user.email.toLowerCase())
+        .maybeSingle()
+      if (pending?.plan_tier) {
+        await supabase.from('profiles').upsert({ id: user.id, plan_tier: pending.plan_tier })
+        await supabase.from('pending_plan_upgrades').delete().eq('email', user.email.toLowerCase())
+        setProfile(prev => prev ? { ...prev, plan_tier: pending.plan_tier } : prev)
+      }
+    }
+
     setLoading(false)
   }
 

@@ -15,7 +15,7 @@ export default function Footer() {
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr 1fr',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr 1fr 1.2fr',
           gap: isMobile ? '32px' : '48px',
           marginBottom: isMobile ? '36px' : '48px',
         }}>
@@ -145,6 +145,31 @@ export default function Footer() {
                 { label: 'Track UPS',           href: '/blog/how-to-track-ups-shipment' },
                 { label: 'Track Aramex',        href: '/blog/how-to-track-aramex-shipment' },
                 { label: 'What Is a B/L?',      href: '/blog/what-is-a-bill-of-lading' },
+              ].map(l => (
+                <li key={l.label}>
+                  <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Tools ── */}
+          <div>
+            <h4 style={{
+              fontSize: '12px', fontWeight: 600, color: 'rgba(248,250,252,0.4)',
+              textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px',
+            }}>
+              Tools
+            </h4>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { label: 'Rate Calculator',       href: '/rates' },
+                { label: 'Customs Duty',          href: '/customs-duty' },
+                { label: 'Detention Calculator',  href: '/detention-calculator' },
+                { label: 'Profit Calculator',     href: '/profit-calculator' },
+                { label: 'Document Generator',    href: '/document-generator' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.href} style={{ fontSize: '14px', color: 'rgba(248,250,252,0.6)', textDecoration: 'none' }}>

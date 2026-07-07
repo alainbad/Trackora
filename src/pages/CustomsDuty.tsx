@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Calculator, Package, AlertCircle, CheckCircle } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import AdUnit from '../components/ui/AdUnit'
+import SearchSelect from '../components/ui/SearchSelect'
 import { DUTY_RATES, CATEGORY_LABELS, SUPPORTED_IMPORT_COUNTRIES, type CustomsCategory } from '../data/customsRates'
 import { COUNTRIES } from '../data/shippingRates'
 
@@ -17,6 +18,7 @@ const INPUT_STYLE: React.CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
 }
+
 
 const LABEL_STYLE: React.CSSProperties = {
   fontSize: '11px',
@@ -106,6 +108,10 @@ export default function CustomsDuty() {
   const [importCountry, setImportCountry] = useState('')
   const [exportCountry, setExportCountry] = useState('')
   const [category, setCategory] = useState<CustomsCategory | ''>('')
+
+  const importOptions = useMemo(() => SUPPORTED_IMPORT_COUNTRIES.map(c => ({ value: c.iso, label: c.name })), [])
+  const exportOptions = useMemo(() => [{ value: '', label: 'Any / Not specified' }, ...COUNTRIES.map(c => ({ value: c.iso, label: c.name }))], [])
+  const categoryOptions = useMemo(() => (Object.entries(CATEGORY_LABELS) as [CustomsCategory, string][]).map(([k, v]) => ({ value: k, label: v })), [])
   const [cifValue, setCifValue] = useState('')
   const [includeVat, setIncludeVat] = useState(true)
   const [result, setResult] = useState<{
@@ -141,10 +147,10 @@ export default function CustomsDuty() {
   ]
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: '80px', paddingBottom: '80px' }}>
-      <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 24px' }}>
+    <div style={{ paddingTop: '80px', paddingBottom: '60px' }}>
+      <div style={{ maxWidth: '1020px', margin: '0 auto', padding: isMobile ? '24px 20px' : '40px 24px' }}>
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={{ ...BADGE_STYLE, margin: '0 auto 16px' }}>
             <Calculator size={12} />
             Free Customs Calculator
@@ -156,8 +162,6 @@ export default function CustomsDuty() {
             Estimate import duties, VAT and total landed cost for 15 countries across 20 product categories.
           </p>
         </div>
-
-        <AdUnit slot="5988077434" style={{ marginBottom: '32px' }} />
 
         {/* Two-column layout */}
         <div style={{
@@ -176,46 +180,37 @@ export default function CustomsDuty() {
               {/* Import Country */}
               <div>
                 <label style={LABEL_STYLE}>Import Country (Destination)</label>
-                <select
+                <SearchSelect
                   value={importCountry}
-                  onChange={e => setImportCountry(e.target.value)}
-                  style={INPUT_STYLE}
-                >
-                  <option value="">Select country...</option>
-                  {SUPPORTED_IMPORT_COUNTRIES.map(c => (
-                    <option key={c.iso} value={c.iso}>{c.name}</option>
-                  ))}
-                </select>
+                  onChange={setImportCountry}
+                  options={importOptions}
+                  placeholder="Select country…"
+                  searchPlaceholder="Search country…"
+                />
               </div>
 
               {/* Export Country */}
               <div>
                 <label style={LABEL_STYLE}>Export Country (Origin, optional)</label>
-                <select
+                <SearchSelect
                   value={exportCountry}
-                  onChange={e => setExportCountry(e.target.value)}
-                  style={INPUT_STYLE}
-                >
-                  <option value="">Select country...</option>
-                  {COUNTRIES.map(c => (
-                    <option key={c.iso} value={c.iso}>{c.name}</option>
-                  ))}
-                </select>
+                  onChange={setExportCountry}
+                  options={exportOptions}
+                  placeholder="Select country…"
+                  searchPlaceholder="Search country…"
+                />
               </div>
 
               {/* Product Category */}
               <div>
                 <label style={LABEL_STYLE}>Product Category</label>
-                <select
+                <SearchSelect
                   value={category}
-                  onChange={e => setCategory(e.target.value as CustomsCategory | '')}
-                  style={INPUT_STYLE}
-                >
-                  <option value="">Select category...</option>
-                  {(Object.entries(CATEGORY_LABELS) as [CustomsCategory, string][]).map(([key, label]) => (
-                    <option key={key} value={key}>{label}</option>
-                  ))}
-                </select>
+                  onChange={v => setCategory(v as CustomsCategory | '')}
+                  options={categoryOptions}
+                  placeholder="Select category…"
+                  searchPlaceholder="Search category…"
+                />
               </div>
 
               {/* CIF Value */}
