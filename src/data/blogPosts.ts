@@ -969,5 +969,241 @@ export const BLOG_POSTS: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: 'how-to-import-goods-from-china',
+    title: 'How to Import Goods from China: The Complete Step-by-Step Guide (2026)',
+    date: '2026-07-01',
+    readTime: '18 min read',
+    excerpt: 'Importing from China can cut your costs dramatically — but it comes with real complexity. This guide walks you through every step: finding suppliers, negotiating, shipping, customs clearance, and avoiding the most common (and expensive) mistakes.',
+    seo: {
+      title: 'How to Import Goods from China: Complete Guide (2026) | Trackora',
+      description: 'Step-by-step guide to importing goods from China in 2026. Learn how to find suppliers, negotiate prices, handle customs, choose the right shipping method, and avoid costly mistakes.',
+    },
+    sections: [
+      {
+        heading: 'Why Import from China?',
+        body: "China remains the world\'s manufacturing hub, accounting for roughly 14% of global exports. For importers, that means access to almost any product category at prices that are difficult to match anywhere else. Electronics, apparel, furniture, machinery, toys, auto parts, packaging materials — Chinese factories produce them all, often at 30–70% lower cost than comparable domestic production.\n\nBut importing from China is not simply about placing an order online and waiting for a container to arrive. There are supplier vetting processes, payment terms to negotiate, shipping modes to evaluate, customs duties to calculate, and compliance requirements to meet. Done right, importing from China can transform your margins. Done wrong, it can cost you time, money, and customers.",
+      },
+      {
+        heading: 'Step 1: Research Your Product and Market',
+        body: "Before you contact a single supplier, answer three questions clearly:\n\n**Is the product legal to import in your country?** Certain categories — food, pharmaceuticals, electronics, toys, cosmetics — face strict import regulations. Research the applicable standards (CE marking in Europe, FCC in the US, TGA in Australia, for example) before you commit to a product category.\n\n**What are the applicable customs duties?** Use your country\'s customs tariff database (the HTS in the US, the UK Global Tariff, the EU TARIC) to find the duty rate for your product\'s HS code. Factor this into your cost model from the start.\n\n**Is there genuine demand at the landed cost?** Landed cost = product price + freight + customs duties + import VAT + local handling. If you cannot sell profitably at landed cost, the low factory price means nothing.",
+      },
+      {
+        heading: 'Step 2: Find Reliable Suppliers',
+        body: "The major sourcing platforms are Alibaba, Made-in-China.com, and Global Sources. Each lists thousands of Chinese manufacturers and trading companies. Here is how to separate serious suppliers from risky ones:\n\n**Trade Assurance and Gold Supplier status** (Alibaba) give some baseline assurance, but they are not guarantees. Read supplier reviews carefully, noting negative feedback about quality and communication.\n\n**Request samples before any bulk order.** A sample order reveals real quality, not catalog photos. Budget for sample costs and shipping — typically $50–200 per sample via DHL or FedEx express.\n\n**Verify the factory directly.** Ask for a business license, factory photos or video, and production capacity documentation. Serious suppliers provide these without hesitation. For high-value orders, consider hiring a third-party inspection company (SGS, Bureau Veritas, QIMA) to audit the factory in person.\n\n**Communicate in clear, simple English.** Avoid idioms, sarcasm, or ambiguous phrasing. Misunderstandings about specifications are one of the top causes of bad imports.",
+      },
+      {
+        heading: 'Step 3: Negotiate Price and Payment Terms',
+        body: "Chinese suppliers expect negotiation. Accepting the first quoted price almost always leaves money on the table.\n\n**Minimum order quantities (MOQ)** are negotiable, especially for first orders. Suppliers set MOQs to ensure profitability, but many will reduce them for new customers who show genuine purchase intent.\n\n**Payment terms** for new relationships typically involve 30% deposit before production and 70% balance before shipment. As trust builds, you can negotiate net-30 or letter of credit terms. Never pay 100% upfront to a new supplier.\n\n**Use Alibaba Trade Assurance or a letter of credit** for protection on large orders. These mechanisms hold payment in escrow until you confirm receipt and quality, reducing your risk if the supplier fails to deliver as agreed.",
+      },
+      {
+        heading: 'Step 4: Choose Your Shipping Method',
+        body: "Shipping method is one of the most consequential decisions in the import process, affecting cost, speed, and risk.\n\n**Express courier (DHL, FedEx, UPS):** Best for samples and small shipments under 50 kg. Fast (3–7 days), fully tracked, door-to-door. Expensive per kg — typically $5–15/kg for China to Europe or North America.\n\n**Air freight:** Suitable for 50–500 kg shipments where speed matters. Typically 5–10 days transit. Cost: $3–7 per kg depending on route and volume. Customs clearance is your responsibility (or your freight forwarder\'s).\n\n**LCL sea freight (Less than Container Load):** Your cargo shares a container with other shippers\' cargo. Economical for 1–10 CBM (cubic meters). Transit time: 20–35 days from major Chinese ports. Cost: $50–200 per CBM plus destination handling.\n\n**FCL sea freight (Full Container Load):** You fill an entire container. Economical for large volumes — typically a 20-foot container holds 25–28 CBM. Cheapest per kg of all options. Transit time same as LCL.",
+      },
+      {
+        heading: 'Step 5: Work with a Freight Forwarder',
+        body: "For most importers, working with a licensed freight forwarder is essential, at least for early shipments. A forwarder handles:\n\n- Booking cargo space with carriers\n- Preparing shipping documents (bill of lading, packing list, commercial invoice)\n- Coordinating pickup from the factory\n- Arranging customs clearance at destination\n- Delivering to your warehouse or specified address\n\nGet quotes from at least three forwarders. Compare total landed cost quotes, not just freight rates. Hidden charges — destination handling, customs brokerage, chassis fees for containers — can add 20–30% to an initially attractive quote.\n\nWhen comparing, ask each forwarder to give you an all-inclusive quote to your door under DDP (Delivered Duty Paid) Incoterms, which shifts all costs and responsibilities to them. This makes comparison straightforward.",
+      },
+      {
+        heading: 'Step 6: Prepare Your Shipping Documents',
+        body: "Customs authorities at your destination require specific documentation for every shipment. Missing or incorrect documents cause delays, fines, and sometimes confiscation.\n\n**Commercial Invoice:** Must show seller and buyer details, detailed product description, HS code, quantity, unit price, total value, and Incoterms. Undervaluing is illegal and risky — customs increasingly use risk profiling to flag low declared values.\n\n**Packing List:** Details the contents, dimensions, and weight of each carton or pallet. Must match the commercial invoice.\n\n**Bill of Lading (sea) or Air Waybill (air):** The transport contract between shipper and carrier. The bill of lading is also a document of title — guard the original carefully.\n\n**Certificate of Origin:** Required for preferential duty rates under trade agreements (e.g., ASEAN–Australia FTA). Your supplier obtains this from their local chamber of commerce.\n\n**Specific product certificates:** Electronics may need CE or FCC. Toys need EN71 or ASTM F963. Food needs health certificates. Research your product category\'s requirements before production begins.",
+      },
+      {
+        heading: 'Step 7: Clear Customs',
+        body: "Unless your forwarder handles customs under DDP terms, you or your customs broker must file an import entry with your country\'s customs authority.\n\nIn the United States, shipments valued over $2,500 require a formal entry filed through ACE (Automated Commercial Environment). A licensed customs broker handles this for $150–300 per shipment.\n\nIn the European Union, you need an EORI number and your broker files via your country\'s national customs system (CDS in the UK, CHIEF/CDS, AES in Germany, etc.).\n\nCustoms will assess your duties based on the HS code and declared value. They may physically examine the cargo, especially for first-time importers or flagged categories. Factor in potential examination fees (demurrage, examination handling) when budgeting.",
+      },
+      {
+        heading: 'Common Mistakes and How to Avoid Them',
+        body: "**Skipping product compliance research:** A container of non-compliant products can be turned away at the border or destroyed at your cost. Verify standards before production.\n\n**Paying 100% upfront to a new supplier:** Always use a deposit/balance structure or Trade Assurance until you have a reliable relationship.\n\n**Ignoring landed cost:** The factory price is just the starting point. Add freight, duties, VAT, brokerage, and local delivery. Build a complete cost model before committing.\n\n**Under-declaring customs value:** Customs authorities are experienced at detecting undervaluation. The penalties and reputational cost far exceed any duty savings.\n\n**Choosing the cheapest forwarder without checking inclusions:** Compare all-in quotes, not headline freight rates.",
+      },
+      {
+        heading: 'How Trackora Helps',
+        body: "Once your goods are shipped, Trackora lets you track your shipment in real time whether it\'s moving by air, sea, or express courier. Enter your Master Air Waybill (MAWB) number, container number, or express tracking number and see a live timeline of events, current location on a map, and estimated arrival.\n\nPro users get email alerts when shipment status changes — useful when you\'re waiting on a critical delivery or need to coordinate customs clearance timing with your broker. The Advanced Analytics dashboard also helps you monitor your supply chain across multiple active shipments simultaneously.",
+      },
+    ],
+  },
+  {
+    slug: 'sea-freight-vs-air-freight',
+    title: 'Sea Freight vs Air Freight: How to Choose the Right Shipping Method',
+    date: '2026-07-02',
+    readTime: '14 min read',
+    excerpt: 'Sea freight is cheaper. Air freight is faster. But the real decision is more nuanced than that — it depends on cargo weight, urgency, value density, incoterms, and lead time flexibility. This guide breaks down everything you need to know to make the right call.',
+    seo: {
+      title: 'Sea Freight vs Air Freight: How to Choose (2026 Guide) | Trackora',
+      description: 'Compare sea freight and air freight across cost, speed, reliability, and cargo suitability. Learn when to use each mode and how to calculate which is right for your shipment.',
+    },
+    sections: [
+      {
+        heading: 'The Core Trade-off',
+        body: "Sea freight typically costs 4–6 times less than air freight per kilogram, but it takes 3–5 times longer. That simple trade-off — cost versus speed — drives most mode decisions. But the full picture involves several other factors: cargo volume, value density, perishability, seasonality, supply chain buffer stock, and the cost of capital tied up in transit.",
+      },
+      {
+        heading: 'Cost Comparison',
+        body: "**Air freight costs** typically range from $2–8 per kilogram for general cargo on major trade lanes (China–Europe, China–USA). Rate includes a volume conversion — volumetric weight is calculated as (L×W×H in cm) / 6000, and you\'re charged whichever is higher, actual or volumetric weight. This makes air freight disproportionately expensive for large, lightweight goods.\n\n**Sea freight costs** are quoted per TEU (Twenty-foot Equivalent Unit, one standard 20-foot container) or per CBM (cubic meter) for LCL shipments. Spot rates fluctuate significantly — during 2021–2022, rates from China to Europe exceeded $15,000 per 40-foot container; by 2023–2024 they had normalized to $1,000–3,000. LCL rates typically run $50–250 per CBM depending on route and market conditions.\n\nFor a 500 kg, 3 CBM shipment from Shanghai to Rotterdam:\n- Air freight: ~$2,500–4,000 total\n- LCL sea freight: ~$300–600 total\n\nFor low-value bulk goods, sea freight wins decisively on cost. For high-value, compact goods, air freight\'s premium may be worth paying.",
+      },
+      {
+        heading: 'Transit Time Comparison',
+        body: "**Air freight transit times** from major Chinese airports (PVG, PEK, CAN) to North America and Europe typically run 3–7 days, including customs clearance. Express courier services (DHL, FedEx, UPS) for smaller shipments run 2–5 days.\n\n**Sea freight transit times** on major routes:\n- Shanghai to Los Angeles: 14–18 days\n- Shanghai to Rotterdam: 28–35 days\n- Shenzhen to Sydney: 18–22 days\n- Shanghai to Dubai: 12–16 days\n\nAdd 5–10 days for local port congestion, customs delays, and inland delivery, and the effective door-to-door time is often 25–45 days for sea freight.\n\nThis difference has major supply chain implications. Sea freight requires longer demand forecasting horizons and larger safety stock. Air freight allows leaner inventory but at higher logistics cost.",
+      },
+      {
+        heading: 'Cargo Suitability',
+        body: "**Air freight is best for:**\n- High-value, low-weight goods (electronics, jewelry, pharmaceuticals, medical devices)\n- Time-sensitive shipments (seasonal products, just-in-time manufacturing components)\n- Perishable goods (fresh produce, flowers, seafood) — though reefer containers are increasingly competitive for sea\n- Emergency replenishment to avoid stockouts\n- Samples and small test orders\n\n**Sea freight is best for:**\n- Bulk goods with lower value density (furniture, machinery, textiles, chemicals)\n- Large-volume regular shipments\n- Hazardous goods (many hazmat classes are restricted from air)\n- Heavy cargo (sea freight has no weight penalty — air charges volumetric weight)\n- Products with long, predictable lead times",
+      },
+      {
+        heading: 'Reliability and Risk',
+        body: "Air freight is generally more reliable for schedule adherence — airlines operate on fixed timetables and delays are usually measured in hours rather than days. Cargo tracking is also more granular, with scan events at each handling point.\n\nSea freight is more susceptible to disruptions: port congestion (as seen dramatically in 2021–2022), weather delays, labor strikes, canal closures (Suez Canal, Panama Canal capacity constraints), and vessel schedule reliability issues. The Drewry Carrier On-Time Performance index showed schedule reliability dipping below 35% during peak disruption periods.\n\nFor sea freight, build schedule buffer into your planning. The advertised transit time is an estimate, not a guarantee.",
+      },
+      {
+        heading: 'Environmental Impact',
+        body: "Sea freight has a significantly lower carbon footprint per tonne-kilometer than air freight. The IMO (International Maritime Organization) estimates maritime shipping emits approximately 10–40 grams of CO₂ per tonne-km, while ICAO data puts air freight at 500–1,100 grams per tonne-km — roughly 20–50 times higher.\n\nAs sustainability reporting requirements grow (EU CBAM, Scope 3 emissions reporting), the carbon intensity of your shipping mode increasingly affects your supply chain\'s environmental profile. Choosing sea freight where feasible reduces your Scope 3 logistics emissions substantially.",
+      },
+      {
+        heading: 'When to Split Shipments',
+        body: "A practical strategy for many importers: **air freight a portion, sea freight the bulk.**\n\nExample: You have a seasonal order of 5,000 units due for a product launch. You air freight 500 units to ensure launch inventory is available on time, and sea freight the remaining 4,500 units to arrive 3–4 weeks later. This hedges the risk of a late sea shipment while limiting the premium you pay for air.\n\nThis split strategy is especially useful for new product launches, seasonal peaks (Black Friday, Christmas), or when demand forecasting is uncertain.",
+      },
+      {
+        heading: 'Tracking Your Sea or Air Shipment with Trackora',
+        body: "Whether you choose air or sea, Trackora tracks both modes in real time. For air freight, enter your Master Air Waybill (MAWB) number to see flight-level tracking with departure and arrival events. For sea freight, enter your container number (e.g., MSCU1234567) or bill of lading number to see vessel position, port call schedule, and estimated arrival.\n\nPro plan users receive email alerts when shipment status changes — particularly useful when you\'re coordinating customs clearance timing or warehouse receiving schedules with your team.",
+      },
+    ],
+  },
+  {
+    slug: 'what-is-freight-forwarding',
+    title: 'What Is Freight Forwarding? A Complete Guide for Importers and Exporters',
+    date: '2026-07-03',
+    readTime: '12 min read',
+    excerpt: 'A freight forwarder is the professional who makes international shipping actually work — booking cargo space, preparing documents, navigating customs, and coordinating dozens of moving parts so your goods arrive safely. Here is everything you need to know about freight forwarding.',
+    seo: {
+      title: 'What Is Freight Forwarding? Complete Guide (2026) | Trackora',
+      description: 'Learn what freight forwarders do, how they differ from customs brokers and carriers, what they cost, and how to choose the right one for your import or export shipment.',
+    },
+    sections: [
+      {
+        heading: 'What Is a Freight Forwarder?',
+        body: "A freight forwarder is a logistics intermediary that organizes the shipment of goods on behalf of importers and exporters. They do not typically own ships, aircraft, or trucks — instead, they act as agents who arrange space with carriers, prepare documents, coordinate customs clearance, and manage the overall supply chain movement of your cargo.\n\nThink of a freight forwarder as the project manager of your international shipment. They know which carriers serve your route, what the current rates are, which documentation is required, how long clearance typically takes at your destination port, and what the local delivery options look like — so you don\'t have to figure all of this out yourself.",
+      },
+      {
+        heading: 'What Does a Freight Forwarder Do?',
+        body: "The services a freight forwarder typically provides include:\n\n**Booking cargo space:** Forwarders have established relationships and negotiated rates with ocean carriers, airlines, and trucking companies. They book space on your behalf and often secure better rates than you could negotiate directly, especially as a smaller shipper.\n\n**Documentation preparation:** International shipments require a bill of lading or air waybill, commercial invoice, packing list, certificate of origin, and various other documents depending on the product and destination. Errors in these documents cause customs delays. An experienced forwarder prepares and reviews them correctly.\n\n**Customs clearance:** Many forwarders are also licensed customs brokers, or work with customs brokers, to file import or export declarations with customs authorities. They calculate duties, classify goods under the correct HS code, and coordinate any physical examinations.\n\n**Cargo insurance:** Forwarders can arrange cargo insurance (also called marine insurance) to protect your goods against loss or damage in transit.\n\n**Warehousing and distribution:** Larger forwarders offer origin consolidation (grouping your cargo with others for LCL shipments), destination deconsolidation, warehousing, and last-mile delivery.",
+      },
+      {
+        heading: 'Freight Forwarder vs Customs Broker vs Carrier',
+        body: "These three roles are often confused:\n\n**A carrier** physically moves the cargo — a shipping line like Maersk or MSC, an airline like Emirates Cargo, or a trucking company. They issue the bill of lading or air waybill and are responsible for the cargo during transport.\n\n**A customs broker** is a licensed professional who files import and export declarations with customs authorities. In the US, customs brokers are licensed by CBP (Customs and Border Protection). They are responsible for compliance — correct classification, valuation, and duty payment.\n\n**A freight forwarder** coordinates both of the above. They are your single point of contact for the whole movement, subcontracting carriers and customs brokers as needed. Many forwarders are also licensed customs brokers, especially for destination clearance.\n\nFor most importers, a full-service forwarder acting as both freight agent and customs broker is the simplest and most cost-effective arrangement.",
+      },
+      {
+        heading: 'How Much Does a Freight Forwarder Cost?',
+        body: "Forwarder fees typically include:\n\n**Freight rate:** The cost to move the cargo. The forwarder marks this up from their negotiated carrier rate. Markup varies — typically 5–20% on ocean freight, 10–30% on air freight.\n\n**Origin charges:** Documentation fee, cargo receipt, export customs filing — typically $50–200 at origin.\n\n**Destination charges:** Customs brokerage ($100–300 per shipment), destination handling, port processing fees, delivery order fee. These vary significantly by country and port.\n\n**Customs duties and taxes:** These are government charges, not the forwarder\'s fee. The forwarder collects them on behalf of customs.\n\nAlways request a comprehensive, all-in quote. Ask the forwarder to list every charge separately so you can compare accurately across providers. Beware of quotes that show only the ocean/air freight rate — the destination charges can easily match or exceed the freight.",
+      },
+      {
+        heading: 'How to Choose a Freight Forwarder',
+        body: "Choosing the right forwarder matters more than most importers realize. Here is what to evaluate:\n\n**License and credentials:** In the US, ocean freight forwarders must be licensed by the Federal Maritime Commission (FMC). Air forwarders need IATA accreditation. Verify credentials before engaging.\n\n**Trade lane specialization:** A forwarder who ships heavily on China–Europe has better carrier relationships, more competitive rates, and better knowledge of that route\'s requirements than a generalist forwarder.\n\n**Customer service and communication:** You need a forwarder who responds quickly, provides proactive updates, and is reachable when problems arise. Test their responsiveness before committing.\n\n**Technology:** A good forwarder provides online shipment tracking, digital document management, and clear reporting. Avoid forwarders who operate entirely by email with no visibility platform.\n\n**References:** Ask for references from clients who ship similar goods on similar routes. A good forwarder will provide them willingly.",
+      },
+      {
+        heading: 'Documents Your Forwarder Will Need from You',
+        body: "When engaging a forwarder for an import shipment, have ready:\n\n- **Commercial invoice** from your supplier (showing value, quantity, HS code, Incoterms)\n- **Packing list** from your supplier\n- **Purchase order** (some forwarders request this)\n- **Import license** (for restricted goods)\n- **Product certificates** (CE, FCC, etc. where applicable)\n\nYour forwarder or supplier\'s export agent will prepare the export documents (bill of lading, certificate of origin, export declaration). Your forwarder prepares the import entry at destination.",
+      },
+      {
+        heading: 'Tracking Your Forwarded Shipment',
+        body: "Once your forwarder books the shipment, they will provide a Master Bill of Lading (MBL) number for sea freight or a Master Air Waybill (MAWB) number for air freight. Use Trackora to track these numbers in real time — see current vessel or aircraft position, port call events, departure and arrival confirmations, and estimated delivery.\n\nIf you\'re managing multiple shipments with different forwarders, Trackora\'s dashboard consolidates all your active shipments in one view so you can spot delays across your supply chain at a glance.",
+      },
+    ],
+  },
+  {
+    slug: 'lcl-vs-fcl-shipping',
+    title: 'LCL vs FCL Shipping: Which Container Option Is Right for Your Cargo?',
+    date: '2026-07-04',
+    readTime: '13 min read',
+    excerpt: 'Should you book a full container or share space with other shippers? The LCL vs FCL decision affects your cost, transit time, cargo risk, and supply chain flexibility. This guide gives you the framework to decide.',
+    seo: {
+      title: 'LCL vs FCL Shipping: Which Is Right for You? (2026 Guide) | Trackora',
+      description: 'Compare LCL (Less than Container Load) and FCL (Full Container Load) shipping across cost, transit time, risk, and suitability. Learn which option is right for your cargo volume and supply chain.',
+    },
+    sections: [
+      {
+        heading: 'LCL and FCL Defined',
+        body: "**FCL (Full Container Load):** You book an entire shipping container exclusively for your cargo. The most common container sizes are the 20-foot (TEU, approximately 25–28 CBM usable volume) and 40-foot (FEU, approximately 55–60 CBM usable volume). A 40-foot high cube container offers around 67–72 CBM. You pay a flat rate per container regardless of how full it is.\n\n**LCL (Less than Container Load):** Your cargo shares a container with shipments from other companies. You pay only for the space your cargo occupies, quoted per CBM (cubic meter) or per revenue tonne (whichever is higher). At origin, your cargo is consolidated into a container with others at a CFS (Container Freight Station). At destination, it is deconsolidated before delivery to you.",
+      },
+      {
+        heading: 'Cost: When LCL Wins, When FCL Wins',
+        body: "The breakeven point between LCL and FCL varies by trade lane and market conditions, but a useful rule of thumb is **around 10–15 CBM** on most major routes.\n\nFor cargo under 10 CBM, LCL is almost always cheaper — you only pay for the space you use.\n\nFor cargo over 15 CBM, FCL typically becomes more economical because you\'re paying per CBM for LCL but a flat rate per container for FCL. At 20 CBM, a 20-foot container rate divided by 20 CBM often beats the per-CBM LCL rate.\n\nAlways calculate both options when your shipment falls in the 8–15 CBM range. Get an FCL quote alongside an LCL quote and compare total landed cost.\n\n**Note:** LCL rates have additional handling charges — CFS pickup/delivery, deconsolidation fee, THC (Terminal Handling Charge) — that do not apply to FCL. Factor these into the comparison.",
+      },
+      {
+        heading: 'Transit Time: LCL vs FCL',
+        body: "FCL typically has faster effective transit time than LCL, even when the vessel transit is identical.\n\nWith FCL:\n- Your container moves directly from origin to destination without intermediate handling\n- CY (Container Yard) cutoff to CY delivery is the standard timeline\n\nWith LCL:\n- Cargo must be delivered to the CFS 3–7 days before vessel cutoff for consolidation\n- At destination, containers are deconsolidated at the CFS before your cargo is released — typically adding 3–7 days to the schedule\n- Effectively add 5–14 days to the vessel transit time for LCL vs FCL\n\nFor time-sensitive sea freight, FCL is faster even if the vessel voyage takes the same number of days.",
+      },
+      {
+        heading: 'Cargo Damage Risk',
+        body: "LCL cargo is handled more times than FCL cargo — at origin CFS, on the vessel, and at destination CFS. Each additional handling event introduces risk of damage, loss, or contamination from adjacent cargo.\n\nFor robust, non-fragile goods (machinery, textiles in bales, furniture in sturdy packaging), this risk is manageable. For fragile, high-value, or sensitive cargo, the additional handling in LCL consolidation/deconsolidation is a meaningful risk factor.\n\nWith FCL, your cargo goes into a container at the factory or origin warehouse and comes out at your destination warehouse — minimal intermediate handling, lower damage risk.\n\nFor fragile or high-value cargo above 8 CBM, FCL is worth the premium for the reduced handling risk alone.",
+      },
+      {
+        heading: 'Supply Chain Flexibility',
+        body: "LCL provides more supply chain flexibility because you can ship smaller volumes more frequently. Rather than accumulating inventory to fill a container, you can ship weekly or bi-weekly LCL loads matched to actual demand. This reduces inventory holding costs and allows faster replenishment cycles.\n\nFCL favors less frequent, larger shipments. If your demand forecasting is accurate and your suppliers can consolidate orders efficiently, FCL\'s lower cost per CBM rewards this batching.\n\n**A practical approach many importers use:** LCL for regular replenishment, FCL for seasonal stock builds (pre-Christmas, pre-summer) when you need large volumes and lead time allows.",
+      },
+      {
+        heading: 'Customs and Documentation',
+        body: "For FCL, your container has one bill of lading, one commercial invoice, one customs entry. The process is straightforward.\n\nFor LCL, there are two levels of documentation: a Master Bill of Lading (MBL) covering the whole container, and a House Bill of Lading (HBL) for your specific cargo within it. Your customs broker works with your HBL. The freight forwarder\'s consolidation agent releases the cargo after deconsolidation at destination.\n\nCustoms examination procedures can also differ — if customs decides to examine the container and your LCL cargo is in it, all cargo in the container may be delayed, not just yours.",
+      },
+      {
+        heading: 'Special Cargo Considerations',
+        body: "**Hazardous goods:** Certain hazmat classes can move in both LCL and FCL, but LCL has restrictions because mixing hazmat with non-hazmat cargo requires compliance checks and may be refused by consolidators. FCL is often easier for hazmat shipments.\n\n**Temperature-sensitive cargo:** Reefer (refrigerated) containers are available in both FCL and LCL, though reefer LCL services are less widely available and more expensive.\n\n**Oversize cargo:** Long or heavy items may not fit within LCL consolidation constraints. FCL gives you full control of the container interior.\n\n**Customs-sensitive goods:** If your goods are subject to strict examination or documentation requirements, the simplicity of FCL\'s single-owner container is an advantage.",
+      },
+      {
+        heading: 'Track Your LCL or FCL Shipment with Trackora',
+        body: "Both LCL and FCL shipments can be tracked with Trackora. Enter your container number (e.g., MSCU1234567) for FCL tracking — see the vessel name, current position, port calls, and estimated arrival. For LCL, enter your bill of lading number to track the consolidation container.\n\nTrackora\'s sea freight tracking covers major carriers including Maersk, MSC, CMA CGM, Evergreen, Hapag-Lloyd, COSCO, ONE, and more. Pro plan users receive email notifications at key milestone events — departure, arrival, customs release.",
+      },
+    ],
+  },
+  {
+    slug: 'guide-to-shipping-incoterms-2020',
+    title: 'Incoterms 2020 Explained: A Practical Guide for Buyers and Sellers',
+    date: '2026-07-05',
+    readTime: '16 min read',
+    excerpt: 'Incoterms define who pays for what and who is responsible for the goods at each point in the shipping journey. Using the wrong Incoterm — or misunderstanding one — can cost you thousands. This practical guide explains all 11 Incoterms 2020 rules in plain language.',
+    seo: {
+      title: 'Incoterms 2020 Explained: Complete Guide for Buyers & Sellers | Trackora',
+      description: 'Understand all 11 Incoterms 2020 rules in plain language. Learn which Incoterm to use for sea, air, and multimodal shipments and how each affects cost, risk, and responsibility.',
+    },
+    sections: [
+      {
+        heading: 'What Are Incoterms?',
+        body: "Incoterms (International Commercial Terms) are a set of internationally recognized rules published by the International Chamber of Commerce (ICC) that define the responsibilities of buyers and sellers in international trade. They specify:\n\n- **Who pays for freight** (ocean, air, or truck)\n- **Who arranges and pays for insurance**\n- **Where the risk of loss or damage transfers** from seller to buyer\n- **Who handles export and import customs clearance**\n\nIncoterms are not laws — they are contractual terms that parties agree to include in their purchase contracts. The current version, **Incoterms 2020**, was published by the ICC and took effect on January 1, 2020.\n\nAlways specify the version when using Incoterms in contracts: for example, **CIF Shanghai Incoterms 2020**.",
+      },
+      {
+        heading: 'The 11 Incoterms 2020 Rules',
+        body: "Incoterms 2020 has 11 rules divided into two groups:\n\n**Rules for any mode of transport (7 rules):**\n- EXW — Ex Works\n- FCA — Free Carrier\n- CPT — Carriage Paid To\n- CIP — Carriage and Insurance Paid To\n- DAP — Delivered at Place\n- DPU — Delivered at Place Unloaded\n- DDP — Delivered Duty Paid\n\n**Rules for sea and inland waterway transport only (4 rules):**\n- FAS — Free Alongside Ship\n- FOB — Free on Board\n- CFR — Cost and Freight\n- CIF — Cost, Insurance and Freight",
+      },
+      {
+        heading: 'EXW — Ex Works',
+        body: "**What it means:** The seller makes the goods available at their premises (factory, warehouse). The buyer takes responsibility for everything from that point — loading, export clearance, freight, import clearance, and delivery to destination.\n\n**Risk transfers:** When goods are made available at seller\'s premises.\n\n**Who does export customs:** The buyer.\n\n**Best for:** Buyers who have strong logistics capabilities and want maximum control over their supply chain. Not recommended for buyers new to importing — managing export customs in a foreign country is complex.",
+      },
+      {
+        heading: 'FCA — Free Carrier',
+        body: "**What it means:** The seller delivers the goods to a carrier nominated by the buyer at a specified place. If the place is the seller\'s premises, seller loads. If elsewhere (e.g., a freight terminal), seller delivers unloaded.\n\n**Risk transfers:** When goods are handed to the nominated carrier.\n\n**Who does export customs:** The seller.\n\n**Incoterms 2020 change:** FCA now allows a bill of lading with an on-board notation to be issued, which is important for buyers using letters of credit. This was not possible under Incoterms 2010.\n\n**Best for:** Most international shipments where the buyer arranges freight. FCA is the recommended alternative to FOB for containerized cargo because risk transfers before the goods reach the vessel (avoiding the ambiguous crane-hook risk transfer of FOB).",
+      },
+      {
+        heading: 'FOB — Free on Board',
+        body: "**What it means:** The seller delivers goods on board the vessel at the named port of shipment. Risk transfers when goods are on board the vessel. The buyer pays for ocean freight, insurance, and destination costs.\n\n**Risk transfers:** When goods are loaded on the vessel.\n\n**Who does export customs:** The seller.\n\n**Important note:** FOB is technically designed for bulk cargo (grain, coal, oil) loaded directly into a vessel\'s hold. For containerized cargo, the ICC recommends FCA instead — with FOB, risk passes at the crane hook when the container goes on board, but you as buyer have no control over events at the origin port.\n\n**Despite this,** FOB remains by far the most commonly used Incoterm in practice for container shipments, especially in Asia–Europe and Asia–North America trade. Chinese suppliers in particular default to FOB pricing.",
+      },
+      {
+        heading: 'CIF — Cost, Insurance and Freight',
+        body: "**What it means:** The seller pays for freight and insurance to the named destination port. However, risk transfers to the buyer when goods are on board the vessel at origin — the same point as FOB. The seller is paying for freight and insurance but the buyer bears the risk during transit.\n\n**Risk transfers:** When goods are loaded on the vessel at origin.\n\n**Who does import customs:** The buyer.\n\n**Important nuance:** Under CIF, the seller only needs to obtain minimum insurance coverage (Institute Cargo Clauses C). If you want fuller coverage, specify it in the contract or use CIP instead (which requires All Risks coverage under Incoterms 2020).\n\n**Best for:** Buyers who want the convenience of an all-in ocean freight price from the seller but are comfortable managing their own import customs clearance.",
+      },
+      {
+        heading: 'DAP, DPU, and DDP',
+        body: "These three \'D\' terms place the most responsibility on the seller:\n\n**DAP (Delivered at Place):** Seller delivers goods to the named destination, ready for unloading. Buyer unloads and handles import customs.\n\n**DPU (Delivered at Place Unloaded):** Like DAP but seller unloads at the destination. DPU is the only Incoterm that requires the seller to unload.\n\n**DDP (Delivered Duty Paid):** Maximum seller responsibility. Seller handles everything — export, freight, import customs clearance, duty payment, and delivery to the buyer\'s door. Buyer receives goods with no further logistics responsibility.\n\nDDP is convenient for buyers but gives sellers the highest cost and risk exposure. For buyers new to importing, asking for DDP quotes lets you compare a true all-in landed cost without managing logistics yourself.",
+      },
+      {
+        heading: 'Which Incoterm Should You Use?',
+        body: "**You are an importer buying from China by sea container:**\n→ FOB is the industry standard. Your forwarder picks up at origin port. You control freight costs and carrier selection.\n\n**You are a new importer without a freight forwarder yet:**\n→ CIF or DDP to get started. Let the seller handle freight — you focus on import clearance at destination.\n\n**You are buying high-value cargo and need all-risks insurance:**\n→ CIP instead of CIF. CIP requires the seller to provide all-risks (Institute Cargo Clauses A) coverage.\n\n**You are buying by air freight:**\n→ FCA (at named airport or seller\'s premises) or CPT/CIP for seller-arranged freight. Avoid FOB for air — it\'s a sea-only term.\n\n**You are a seller and want minimum responsibility:**\n→ EXW or FCA at your premises.",
+      },
+      {
+        heading: 'Common Incoterms Mistakes',
+        body: "**Using FOB for air freight:** FOB is a sea/waterway-only term. Technically, air shipments should use FCA. Using FOB for air creates ambiguity about where risk transfers.\n\n**Not specifying the named place clearly:** \"FOB\" alone is incomplete. It must be \"FOB Shanghai Yangshan Port, Incoterms 2020.\" The named place determines exactly where obligations transfer.\n\n**Assuming CIF means the seller pays import duties:** Under CIF, the buyer handles import customs and duties. Only DDP shifts import duty payment to the seller.\n\n**Not specifying the Incoterms version:** Always add the year — \"Incoterms 2020\" — to avoid disputes over which version applies.",
+      },
+      {
+        heading: 'Tracking Under Any Incoterm',
+        body: "Whatever Incoterm you agree to, knowing where your cargo is matters. Trackora tracks shipments regardless of who arranged the freight — enter your bill of lading, container number, air waybill, or express tracking number and see real-time status.\n\nIf you\'re buying CIF or DDP (seller-arranged freight), you can still track the shipment proactively by entering the bill of lading number your seller provides. Pro plan users get email alerts at key milestones — vessel departure, arrival at destination port, customs release — so you can coordinate your warehouse team and customs broker without waiting for updates from your supplier.",
+      },
+    ],
+  }
 ]
-
