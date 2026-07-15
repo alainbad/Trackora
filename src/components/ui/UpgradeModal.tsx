@@ -55,6 +55,9 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
   const copy = FEATURE_COPY[feature]
   const isNative = useIsNativeApp()
 
+  // Never show any upgrade/payment UI inside the native iOS/Android app
+  if (isNative) { onClose(); return null }
+
   function handleUpgrade() {
     if (onUpgrade) onUpgrade()
     window.open('https://badranalain.gumroad.com/l/impejho?offer_code=LAUNCH', '_blank')
