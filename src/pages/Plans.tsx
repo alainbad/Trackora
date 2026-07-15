@@ -67,31 +67,7 @@ export default function Plans() {
   const isNative = useIsNativeApp()
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
-  if (isNative) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '480px' }}>
-          <div style={{ fontSize: '48px', marginBottom: '20px' }}>🚀</div>
-          <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#f8fafc', marginBottom: '14px', letterSpacing: '-0.5px' }}>
-            Upgrade on the Web
-          </h1>
-          <p style={{ fontSize: '16px', color: 'rgba(248,250,252,0.6)', lineHeight: 1.7, marginBottom: '28px' }}>
-            Pro and Business plans are available at{' '}
-            <span style={{ color: '#818cf8', fontWeight: 600 }}>track-ora.com/plans</span>.
-            Open it in your browser to subscribe.
-          </p>
-          <div style={{
-            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
-            borderRadius: '14px', padding: '18px 20px', fontSize: '14px',
-            color: 'rgba(248,250,252,0.5)', lineHeight: 1.6,
-          }}>
-            Pro starts at $2.49 / first month · then $4.99/mo<br />
-            Business $9.99/mo · No hidden fees · Cancel anytime
-          </div>
-        </div>
-      </div>
-    )
-  }
+  if (isNative) return null
 
   return (
     <div style={{ minHeight: '100vh' }}>

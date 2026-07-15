@@ -777,11 +777,7 @@ export default function Dashboard() {
             <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.5)', maxWidth: '360px', marginBottom: '20px', lineHeight: 1.6 }}>
               Carrier performance, on-time rates, cost analysis &amp; CO₂ trends. Unlock with Pro.
             </p>
-            {isNative ? (
-              <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', margin: 0 }}>
-                Visit <span style={{ color: '#818cf8', fontWeight: 600 }}>track-ora.com/plans</span> to upgrade
-              </p>
-            ) : (
+            {!isNative && (
               <button
                 onClick={() => window.open('https://badranalain.gumroad.com/l/impejho', '_blank')}
                 style={{

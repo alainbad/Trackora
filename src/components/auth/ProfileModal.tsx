@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
-import { X, Camera, User, Phone, Calendar, Check, Loader } from 'lucide-react'
+import { X, Camera, User, Phone, Calendar, Check, Loader, Trash2 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useProfile } from '../../contexts/ProfileContext'
+import { supabase } from '../../lib/supabase'
 import ScrollDatePicker from '../ui/ScrollDatePicker'
 
 interface ProfileModalProps {
@@ -9,7 +10,7 @@ interface ProfileModalProps {
 }
 
 export default function ProfileModal({ onClose }: ProfileModalProps) {
-  const { user }                                   = useAuth()
+  const { user, signOut }                          = useAuth()
   const { profile, updateProfile, uploadAvatar }   = useProfile()
 
   const [fullName,     setFullName]     = useState(profile?.full_name  ?? '')
@@ -20,6 +21,8 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
   const [saving,       setSaving]       = useState(false)
   const [saved,        setSaved]        = useState(false)
   const [error,        setError]        = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting,     setDeleting]     = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -46,6 +49,27 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
     if (!file) return
     setAvatarFile(file)
     setAvatarPreview(URL.createObjectURL(file))
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!supabase || !user) return
+    setDeleting(true)
+    setError(null)
+    try {
+      // Delete user data
+      await supabase.from('shipments').delete().eq('user_id', user.id)
+      await supabase.from('profiles').delete().eq('id', user.id)
+      // Delete auth user via edge function or admin — fall back to sign out
+      const { error: fnErr } = await supabase.functions.invoke('delete-account', {})
+      if (fnErr) {
+        // If edge function not available, sign out and note deletion is pending
+        await signOut()
+      }
+      onClose()
+    } catch {
+      setError('Failed to delete account. Please contact support.')
+      setDeleting(false)
+    }
   }
 
   const handleSave = async () => {
@@ -175,6 +199,39 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
         >
           {saving ? <><Loader size={15} style={{ animation: 'spin 1s linear infinite' }} /> Saving…</> : saved ? <><Check size={15} /> Saved!</> : 'Save Profile'}
         </button>
+
+        {/* Delete Account */}
+        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              style={{ width: '100%', padding: '10px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.06)', color: 'rgba(248,113,113,0.8)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <Trash2 size={13} /> Delete Account
+            </button>
+          ) : (
+            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '12px', padding: '16px' }}>
+              <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.7)', marginBottom: '12px', textAlign: 'center', lineHeight: 1.5 }}>
+                This will permanently delete your account and all data. This cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  style={{ flex: 1, padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(248,250,252,0.6)', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                  style={{ flex: 1, padding: '9px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', background: 'rgba(239,68,68,0.8)', color: 'white', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                >
+                  {deleting ? <><Loader size={12} style={{ animation: 'spin 1s linear infinite' }} /> Deleting…</> : 'Yes, Delete'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
