@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Search, ArrowLeft, Share2, Bell, RefreshCw, ScanLine, Plus, X, Check, BellOff, Upload, FileText, Loader2, Mail, Zap } from 'lucide-react'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useIsNativeApp } from '../hooks/useIsNativeApp'
 import { useSEO } from '../hooks/useSEO'
 import type { Shipment } from '../data/mockShipments'
 import { fetchShipment, getCarrierTrackUrl } from '../lib/trackingApi'
@@ -66,6 +67,7 @@ export default function Track() {
   const { trackingId } = useParams()
   const navigate = useNavigate()
   const isMobile = useIsMobile()
+  const isNative = useIsNativeApp()
   const { user } = useAuth()
   const { planTier } = useProfile()
   const [searchParams] = useSearchParams()
@@ -235,8 +237,8 @@ export default function Track() {
           icon: '/favicon.ico',
         })
       }
-      // Gate sea freight API data for free users
-      if (user && planTier === 'free' && result.freightType === 'sea' && result.timeline.length > 0) {
+      // Gate sea freight API data for free users (skip gate in native app)
+      if (!isNative && user && planTier === 'free' && result.freightType === 'sea' && result.timeline.length > 0) {
         setUpgradeFeature('sea')
         setAnimating(false)
         setLastUpdated(new Date())
@@ -306,8 +308,8 @@ export default function Track() {
     // Guest limit: non-logged-in users get GUEST_LIMIT free tracks
     if (!checkGuestLimit()) return
 
-    // Free plan gate: air freight (MAWB) requires Pro
-    if (user && planTier === 'free') {
+    // Free plan gate: air freight (MAWB) requires Pro (skip gate in native app)
+    if (!isNative && user && planTier === 'free') {
       const detected = detectCarrierFromNumber(id.trim())
       if (detected?.carrier.category === 'air') {
         setUpgradeFeature('air')
