@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { X, Camera, User, Phone, Calendar, Check, Loader, Trash2 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useProfile } from '../../contexts/ProfileContext'
+import { useIsNativeApp } from '../../hooks/useIsNativeApp'
 import { supabase } from '../../lib/supabase'
 import ScrollDatePicker from '../ui/ScrollDatePicker'
 
@@ -12,6 +13,7 @@ interface ProfileModalProps {
 export default function ProfileModal({ onClose }: ProfileModalProps) {
   const { user, signOut }                          = useAuth()
   const { profile, updateProfile, uploadAvatar }   = useProfile()
+  const isNative = useIsNativeApp()
 
   const [fullName,     setFullName]     = useState(profile?.full_name  ?? '')
   const [mobile,       setMobile]       = useState(profile?.mobile     ?? '')
@@ -133,19 +135,21 @@ export default function ProfileModal({ onClose }: ProfileModalProps) {
 
         {/* Avatar */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
-          <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileInputRef.current?.click()}>
+          <div style={{ position: 'relative', cursor: isNative ? 'default' : 'pointer' }} onClick={() => !isNative && fileInputRef.current?.click()}>
             <div style={{ width: '88px', height: '88px', borderRadius: '50%', overflow: 'hidden', background: 'linear-gradient(135deg, #6366f1, #22d3ee)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid rgba(99,102,241,0.4)' }}>
               {avatarPreview
                 ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : <span style={{ fontSize: '28px', fontWeight: 700, color: 'white' }}>{initials}</span>
               }
             </div>
-            {/* Camera overlay */}
-            <div style={{ position: 'absolute', bottom: 0, right: 0, width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(10,15,30,0.98)' }}>
-              <Camera size={13} color="white" />
-            </div>
+            {/* Camera overlay — hidden in native to avoid camera permission crash */}
+            {!isNative && (
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(10,15,30,0.98)' }}>
+                <Camera size={13} color="white" />
+              </div>
+            )}
           </div>
-          <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
+          {!isNative && <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />}
         </div>
 
         {/* Fields */}
