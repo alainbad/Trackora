@@ -193,6 +193,14 @@ export function detectCarrier(raw: string): { carrier: DetectedCarrier; filledUr
     }
   }
 
+  // ── 9a. Ajex Logistics (Saudi Arabia): AJA + digits ─────────────────────
+  if (/^AJA\d+$/i.test(tn)) {
+    return {
+      carrier: { name: 'Ajex Logistics', slug: 'ajex', category: 'express', accentColor: '#E31837', confidence: 'high' },
+      filledUrl: `https://www.ajexlogistics.com/tracking?waybill=${encodeURIComponent(tn)}`,
+    }
+  }
+
   // ── 9. Amazon: TBA + 12 digits ───────────────────────────────────────────
   if (/^TBA\d{12}$/i.test(tn)) {
     return {
