@@ -391,10 +391,10 @@ export default function Dashboard() {
     return (
       <div style={{ minHeight: '100vh', paddingTop: '72px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ filter: 'blur(4px)', pointerEvents: 'none', userSelect: 'none', opacity: 0.4 }}>
-          <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08))', borderBottom: '1px solid rgba(99,102,241,0.2)', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+          {!isNative && <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.08))', borderBottom: '1px solid rgba(99,102,241,0.2)', padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
             <Zap size={14} color="#818cf8" />
             <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>You're on the <strong style={{ color: '#818cf8' }}>Free plan</strong>. Upgrade to Pro for unlimited shipments.</span>
-          </div>
+          </div>}
           <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
             <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#f8fafc', marginBottom: '24px' }}>Shipment Dashboard</h1>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
@@ -435,7 +435,7 @@ export default function Dashboard() {
               Save shipments, track status changes, and get email alerts — all in one place.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px', textAlign: 'left' }}>
-              {['Up to 10 saved shipments free', 'Email status alerts', 'Advanced analytics (Pro)'].map(b => (
+              {['Up to 10 saved shipments free', 'Email status alerts', ...(isNative ? [] : ['Advanced analytics (Pro)'])].map(b => (
                 <div key={b} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>
                   <span style={{ color: '#34d399', fontWeight: 700 }}>✓</span> {b}
                 </div>
@@ -758,8 +758,8 @@ export default function Dashboard() {
           </>
         )}
 
-        {/* ── Analytics (locked) ── */}
-        <div style={{
+        {/* ── Analytics (locked) — hidden in native ── */}
+        {!isNative && <div style={{
           padding: '40px', borderRadius: '20px',
           background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
           textAlign: 'center', position: 'relative', overflow: 'hidden',
@@ -775,7 +775,7 @@ export default function Dashboard() {
             </div>
             <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>Advanced Analytics</h3>
             <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.5)', maxWidth: '360px', marginBottom: '20px', lineHeight: 1.6 }}>
-              Carrier performance, on-time rates, cost analysis &amp; CO₂ trends. Unlock with Pro.
+              Carrier performance, on-time rates, cost analysis &amp; CO₂ trends.
             </p>
             {!isNative && (
               <button
@@ -799,7 +799,7 @@ export default function Dashboard() {
               <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: '6px 6px 0 0', background: `rgba(99,102,241,${0.3 + i * 0.02})` }} />
             ))}
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Analysis Report Modal */}
