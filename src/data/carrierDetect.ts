@@ -197,7 +197,7 @@ export function detectCarrier(raw: string): { carrier: DetectedCarrier; filledUr
   if (/^AJA\d+$/i.test(tn)) {
     return {
       carrier: { name: 'Ajex Logistics', slug: 'ajex', category: 'express', accentColor: '#E31837', confidence: 'high' },
-      filledUrl: `https://www.ajexlogistics.com/tracking?waybill=${encodeURIComponent(tn)}`,
+      filledUrl: `https://www.ajex.com.sa/tracking?id=${encodeURIComponent(tn)}`,
     }
   }
 
