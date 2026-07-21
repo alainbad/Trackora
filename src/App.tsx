@@ -57,7 +57,7 @@ export default function App() {
           <Navbar />
           <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
             <Routes>
-              <Route path="/"                   element={<Home />} />
+              <Route path="/"                   element={<HomeOrTrack />} />
               <Route path="/track"              element={<Track />} />
               <Route path="/tools"               element={<Tools />} />
               <Route path="/document-generator"  element={<DocumentGenerator />} />
