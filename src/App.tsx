@@ -1,5 +1,6 @@
 import { useEffect, lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useIsNativeApp } from './hooks/useIsNativeApp'
 import Home from './pages/Home'
 import Track from './pages/Track'
 import Dashboard from './pages/Dashboard'
@@ -42,7 +43,10 @@ function ScrollManager() {
   }, [pathname, hash])
   return null
 }
-
+  function HomeOrTrack() {
+  const isNative = useIsNativeApp()
+  return isNative ? <Navigate to="/track" replace /> : <Home />
+}
 export default function App() {
   return (
     <AuthProvider>
@@ -53,7 +57,7 @@ export default function App() {
           <Navbar />
           <Suspense fallback={<div style={{ minHeight: '60vh' }} />}>
             <Routes>
-              <Route path="/"                   element={<Home />} />
+              <Route path="/"                   element={<HomeOrTrack />} />
               <Route path="/track"              element={<Track />} />
               <Route path="/tools"               element={<Tools />} />
               <Route path="/document-generator"  element={<DocumentGenerator />} />
