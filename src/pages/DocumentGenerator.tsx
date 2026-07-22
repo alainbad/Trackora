@@ -4,6 +4,7 @@ import { FileText, Package, ClipboardList, Plus, Trash2, Printer, Copy, Upload, 
 import { useProfile } from '../contexts/ProfileContext'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useSEO } from '../hooks/useSEO'
+import { useIsNativeApp } from '../hooks/useIsNativeApp'
 
 // ── Style constants ────────────────────────────────────────────────────────
 
@@ -687,7 +688,8 @@ export default function DocumentGenerator() {
   }, [])
 
   // ── Pro gate ────────────────────────────────────────────────────────────
-  const isPro = profile?.plan_tier === 'pro' || profile?.plan_tier === 'business'
+  const isNative = useIsNativeApp()
+  const isPro = isNative || profile?.plan_tier === 'pro' || profile?.plan_tier === 'business'
 
   if (!isPro) {
     return (
