@@ -10,6 +10,7 @@ import About from './pages/About'
 import HowItWorks from './pages/HowItWorks'
 import CarrierPage from './pages/CarrierPage'
 import FreightLandingPage from './pages/FreightLandingPage'
+import LufthansaCargoPage from './pages/LufthansaCargoPage'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import FAQ from './pages/FAQ'
@@ -71,6 +72,8 @@ export default function App() {
               <Route path="/airports/london-heathrow" element={<PortLandingPage type="airport" slug="london-heathrow" />} />
               <Route path="/airports/singapore-sin"   element={<PortLandingPage type="airport" slug="singapore-sin" />} />
               <Route path="/airports/hong-kong-hkg"   element={<PortLandingPage type="airport" slug="hong-kong-hkg" />} />
+              <Route path="/air-cargo/lufthansa-cargo-tracking" element={<LufthansaCargoPage />} />
+              <Route path="/tracking/020" element={<Navigate to="/air-cargo/lufthansa-cargo-tracking" replace />} />
               <Route path="/track/bill-of-lading" element={<FreightLandingPage pageKey="bol" />} />
               <Route path="/track/container"      element={<FreightLandingPage pageKey="container" />} />
               <Route path="/track/sea-freight"    element={<FreightLandingPage pageKey="sea-freight" />} />
