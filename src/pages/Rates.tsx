@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Calculator, Package, Clock, ChevronDown, Zap, LogIn, Plane, Ship, Plus, X } from 'lucide-react'
 import { useSEO } from '../hooks/useSEO'
+import { useIsNativeApp } from '../hooks/useIsNativeApp'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useRateQuota } from '../hooks/useRateQuota'
 import { useAuth } from '../contexts/AuthContext'
@@ -794,6 +795,7 @@ export default function Rates() {
   })
 
   const isMobile = useIsMobile()
+  const isNative = useIsNativeApp()
   const { user } = useAuth()
   const { remaining, isLimited, isPro, consume } = useRateQuota()
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null)
@@ -1033,10 +1035,12 @@ export default function Rates() {
         ) : isLimited ? (
           <div style={{ padding: '18px', borderRadius: '14px', textAlign: 'center', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)' }}>
             <p style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '6px' }}>Monthly limit reached</p>
-            <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: '14px' }}>Free accounts get 30 rate searches/month. Upgrade to Pro for unlimited.</p>
-            <Link to="/plans" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '10px', textDecoration: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', fontSize: '14px', fontWeight: 700 }}>
-              <Zap size={14} /> Upgrade to Pro
-            </Link>
+            <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: isNative ? '0' : '14px' }}>Free accounts get 30 rate searches/month.{!isNative && ' Upgrade to Pro for unlimited.'}</p>
+            {!isNative && (
+              <Link to="/plans" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '10px', textDecoration: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', fontSize: '14px', fontWeight: 700 }}>
+                <Zap size={14} /> Upgrade to Pro
+              </Link>
+            )}
           </div>
         ) : (
           <>
@@ -1188,12 +1192,14 @@ export default function Rates() {
         ) : isLimited ? (
           <div style={{ padding: '18px', borderRadius: '14px', textAlign: 'center', background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)' }}>
             <p style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc', marginBottom: '6px' }}>Monthly limit reached</p>
-            <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: '14px' }}>
-              Free accounts get 30 rate searches/month. Upgrade to Pro for unlimited.
+            <p style={{ fontSize: '13px', color: 'rgba(248,250,252,0.5)', marginBottom: isNative ? '0' : '14px' }}>
+              Free accounts get 30 rate searches/month.{!isNative && ' Upgrade to Pro for unlimited.'}
             </p>
-            <Link to="/plans" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '10px', textDecoration: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', fontSize: '14px', fontWeight: 700 }}>
-              <Zap size={14} /> Upgrade to Pro
-            </Link>
+            {!isNative && (
+              <Link to="/plans" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 22px', borderRadius: '10px', textDecoration: 'none', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', fontSize: '14px', fontWeight: 700 }}>
+                <Zap size={14} /> Upgrade to Pro
+              </Link>
+            )}
           </div>
         ) : (
           <>
