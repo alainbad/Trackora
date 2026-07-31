@@ -1211,12 +1211,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'how-to-track-maersk-shipment',
     title: 'How to Track a Maersk Shipment: Complete Guide',
     excerpt: 'Step-by-step guide to tracking Maersk container shipments using bill of lading numbers, container numbers, and booking references.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'How to Track a Maersk Shipment: Complete Guide — Trackora',
+      description: 'Step-by-step guide to tracking Maersk container shipments using bill of lading numbers, container numbers, and booking references.',
+    },
     date: '2025-06-10',
     readTime: '10 min read',
-    category: 'Tracking Guides',
-    tags: ['Maersk', 'Container Tracking', 'Sea Freight'],
-    content: [
+    sections: [
       { heading: 'Understanding Maersk Tracking Numbers', body: 'Maersk uses several reference numbers for tracking. A booking number (7 characters starting with digits) is assigned when you book a shipment. A Bill of Lading (B/L) number identifies the shipment contract. A container number follows the ISO format: four letters (owner code) plus seven digits, e.g. MSKU1234567. You can use any of these on the Maersk website or Trackora to follow your cargo.' },
       { heading: 'How to Track on the Maersk Website', body: 'Go to maersk.com and click Track. Enter your booking number, B/L number, or container number in the search box. The results show the vessel name, current port, estimated arrival, and any transshipment ports. For B/L tracking you may need to register a free account. Maersk\'s portal updates every few hours as vessels report position via AIS and port systems.' },
       { heading: 'Tracking via Trackora', body: 'Trackora aggregates Maersk data alongside 50+ other carriers in one dashboard. Paste your Maersk container number or B/L into the search bar and get instant status, port history, and ETA — no account required. You can save multiple shipments and receive email alerts when status changes, which is especially useful when managing multiple Maersk containers across different voyages.' },
@@ -1229,12 +1230,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'demurrage-and-detention-charges-explained',
     title: 'Demurrage and Detention Charges Explained: How to Avoid Them',
     excerpt: 'Learn the difference between demurrage and detention, how free time works, and proven strategies to avoid costly port charges.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'Demurrage and Detention Charges Explained: How to Avoid Them — Trackora',
+      description: 'Learn the difference between demurrage and detention, how free time works, and proven strategies to avoid costly port charges.',
+    },
     date: '2025-06-15',
     readTime: '11 min read',
-    category: 'Freight Costs',
-    tags: ['Demurrage', 'Detention', 'Port Charges', 'Container'],
-    content: [
+    sections: [
       { heading: 'What Is Demurrage?', body: 'Demurrage is charged by the shipping line when an import container remains at the port terminal beyond the free time allowance without being picked up. Free time typically ranges from 3 to 7 calendar days after the vessel arrives. Once free time expires, daily demurrage charges accumulate — often $75–$250 per day for a 20ft container and $150–$450 for a 40ft, depending on the carrier and port. These charges escalate in tiers, with rates doubling or tripling after 5–10 days.' },
       { heading: 'What Is Detention?', body: 'Detention is a separate charge applied by the shipping line when an empty container is not returned to the carrier\'s depot within the allowed free time after being taken out of the terminal. After you pick up a full container and unload it, the clock starts on detention free time — usually 3–5 days. If you need to keep the empty container longer for loading or inspection, detention charges apply. Rates mirror demurrage: typically $75–$300 per day depending on carrier and container size.' },
       { heading: 'Combined Demurrage and Detention', body: 'Many carriers now offer a combined free time pool where a single block of days (e.g. 10 days) covers both the time the container sits at port and the time it is held after pickup. This simplifies calculation but requires careful planning. If you use 6 days at port, you have only 4 days of detention free time remaining. Always clarify with your carrier whether free time is split or combined.' },
@@ -1247,12 +1249,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'how-to-read-a-bill-of-lading',
     title: 'How to Read a Bill of Lading: Field-by-Field Guide',
     excerpt: 'A complete walkthrough of every field on an ocean bill of lading, what each means, and what to check before accepting the document.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'How to Read a Bill of Lading: Field-by-Field Guide — Trackora',
+      description: 'A complete walkthrough of every field on an ocean bill of lading, what each means, and what to check before accepting the document.',
+    },
     date: '2025-06-20',
     readTime: '12 min read',
-    category: 'Documentation',
-    tags: ['Bill of Lading', 'Documentation', 'Import', 'Export'],
-    content: [
+    sections: [
       { heading: 'What Is a Bill of Lading?', body: 'A Bill of Lading (B/L) is a legal document issued by the carrier to the shipper. It serves three functions simultaneously: a receipt for cargo, evidence of the contract of carriage, and a document of title that controls who can claim the goods. Original B/Ls are negotiable — whoever holds them can claim the cargo. Seaway bills (express release) are non-negotiable and release cargo to the named consignee without presenting originals.' },
       { heading: 'Shipper and Consignee Fields', body: 'The Shipper is the exporter or seller who hands the goods to the carrier. The Consignee is the importer or buyer. If the B/L is made out "To Order" or "To Order of [Bank]", it means a bank or third party controls release — common in documentary credit transactions. The Notify Party receives arrival notices from the carrier; this is often the freight forwarder or customs broker at destination.' },
       { heading: 'Vessel, Voyage, and Port Fields', body: 'Port of Loading is where the container was loaded onto the vessel. Port of Discharge is where the container comes off the vessel. Place of Receipt and Place of Delivery appear on multimodal B/Ls and refer to the inland origins and destinations beyond the sea ports. The vessel name and voyage number identify the specific ship and journey — these are what you use to track on vessel tracking websites.' },
@@ -1266,12 +1269,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'air-freight-tracking-complete-guide',
     title: 'Air Freight Tracking: Complete Guide to AWB and Cargo Tracking',
     excerpt: 'Everything you need to know about tracking air freight shipments using Air Waybill numbers, IATA codes, and cargo tracking portals.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'Air Freight Tracking: Complete Guide to AWB and Cargo Tracking — Trackora',
+      description: 'Everything you need to know about tracking air freight shipments using Air Waybill numbers, IATA codes, and cargo tracking portals.',
+    },
     date: '2025-07-01',
     readTime: '10 min read',
-    category: 'Tracking Guides',
-    tags: ['Air Freight', 'AWB', 'Cargo Tracking', 'IATA'],
-    content: [
+    sections: [
       { heading: 'Understanding Air Waybill Numbers', body: 'An Air Waybill (AWB) is the shipping document for air cargo. Unlike ocean B/Ls, AWBs are non-negotiable — cargo releases to the named consignee without surrendering the original. Each AWB has an 11-digit number: the first three digits identify the airline (prefix), followed by eight digits. For example, 020 is Lufthansa Cargo, 057 is Lufthansa, 180 is Korean Air Cargo, 235 is Turkish Cargo. The prefix tells you which carrier to track with.' },
       { heading: 'MAWB vs HAWB', body: 'A Master Air Waybill (MAWB) is issued by the airline to the freight forwarder. A House Air Waybill (HAWB) is issued by the forwarder to the shipper. If you receive a HAWB, you can track the physical shipment using the MAWB number — your forwarder can provide it. The HAWB tracks within the forwarder\'s system and gives you cargo-specific details, while the MAWB tracks the consolidated shipment at the airline level.' },
       { heading: 'How to Track Using AWB Number', body: 'Go to the airline\'s cargo tracking portal or use Trackora. Enter the full 11-digit AWB number. Status updates show: Freight Accepted (received at origin airport), Departed (loaded on aircraft), Arrived (landed at destination airport), Freight on Hand (at destination cargo facility), and Delivered or Available for Pickup. Major airlines update their tracking systems within 1–2 hours of each event. Trackora aggregates multiple airline systems so you can track shipments from different carriers in one place.' },
@@ -1284,12 +1288,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'fedex-tracking-complete-guide',
     title: 'FedEx Tracking Complete Guide: All Reference Types Explained',
     excerpt: 'Master FedEx tracking — from tracking numbers to door tags, delivery exceptions, and how to redirect packages in transit.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'FedEx Tracking Complete Guide: All Reference Types Explained — Trackora',
+      description: 'Master FedEx tracking — from tracking numbers to door tags, delivery exceptions, and how to redirect packages in transit.',
+    },
     date: '2025-07-05',
     readTime: '9 min read',
-    category: 'Tracking Guides',
-    tags: ['FedEx', 'Express Tracking', 'Parcel', 'Delivery'],
-    content: [
+    sections: [
       { heading: 'FedEx Tracking Number Formats', body: 'FedEx uses several tracking number formats. Standard FedEx Express and Ground tracking numbers are 12 or 15 digits. FedEx Express international shipments often use 12-digit numbers starting with 7489, 7491, or similar. FedEx Freight tracking numbers are typically 9 digits. Door tags use a 34-digit barcode but you can enter the last 12 digits. Reference numbers (PO numbers, invoice numbers) can also be used if the shipper set them up, but results may return multiple shipments.' },
       { heading: 'FedEx Service Types and Transit Times', body: 'FedEx First Overnight delivers by 8am next business day. FedEx Priority Overnight delivers by 10:30am. FedEx Standard Overnight delivers by 3pm. FedEx 2Day AM delivers by 10:30am on the second business day. FedEx 2Day delivers by 4:30pm. FedEx Express Saver delivers in 3 business days. FedEx Ground is 1–5 business days based on distance. FedEx International Priority is 1–3 business days internationally. Transit time guarantees apply to most express services.' },
       { heading: 'Understanding FedEx Tracking Statuses', body: 'Shipment information sent to FedEx means a label was created but the package not yet picked up. Picked up confirms collection. In transit means en route through the FedEx network. At destination facility means the package is at the local FedEx facility. Out for delivery means a driver has the package. Delivery exception means something prevented delivery — common reasons include: no one available to sign, business closed, address issue, or weather delay. Delivered with a timestamp and location confirms completion.' },
@@ -1302,12 +1307,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'how-to-import-from-alibaba',
     title: 'How to Import from Alibaba: Step-by-Step Guide for Beginners',
     excerpt: 'A complete walkthrough of sourcing products on Alibaba, placing your first order, managing shipping, and clearing customs.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'How to Import from Alibaba: Step-by-Step Guide for Beginners — Trackora',
+      description: 'A complete walkthrough of sourcing products on Alibaba, placing your first order, managing shipping, and clearing customs.',
+    },
     date: '2025-07-08',
     readTime: '13 min read',
-    category: 'Import Guide',
-    tags: ['Alibaba', 'Import', 'China Sourcing', 'Customs'],
-    content: [
+    sections: [
       { heading: 'Finding Reliable Suppliers on Alibaba', body: 'Search for your product and filter by Trade Assurance (Alibaba\'s escrow-style payment protection), Verified Supplier (third-party audit completed), and Gold Supplier (paid membership, not a quality guarantee alone). Check how long the company has been on Alibaba, the response rate, and transaction history. Read reviews carefully — look for comments about quality consistency and communication, not just positive sentiment. Request samples from 3–5 suppliers before committing to a large order.' },
       { heading: 'Requesting Quotes and Negotiating', body: 'Send an RFQ (Request for Quotation) specifying exact product specifications, quantity, packaging requirements, and target price. Ask for the FOB price (Free on Board at Chinese port) — this separates the product cost from shipping so you can compare quotes fairly. Negotiate MOQ (Minimum Order Quantity) — many suppliers will lower MOQ for a higher unit price. Ask about OEM (your branding) and ODM (supplier\'s design with your branding) options. Get quotes in writing and confirm payment terms before proceeding.' },
       { heading: 'Payment Methods and Trade Assurance', body: 'For small orders, use Trade Assurance through Alibaba — it holds payment until you confirm receipt and quality. For larger orders, T/T (Telegraphic Transfer) is common: typically 30% deposit and 70% balance after production. L/C (Letter of Credit) provides bank-backed protection but is complex and expensive for small importers. Avoid Western Union or direct transfers outside Alibaba for new suppliers. PayPal offers buyer protection for samples but suppliers typically add a surcharge.' },
@@ -1321,12 +1327,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'shipping-dangerous-goods-guide',
     title: 'Shipping Dangerous Goods: IATA, IMDG, and ADR Compliance Guide',
     excerpt: 'How to classify, package, label, and document dangerous goods for air, sea, and road shipment — and avoid costly rejections.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'Shipping Dangerous Goods: IATA, IMDG, and ADR Compliance Guide — Trackora',
+      description: 'How to classify, package, label, and document dangerous goods for air, sea, and road shipment — and avoid costly rejections.',
+    },
     date: '2025-07-10',
     readTime: '11 min read',
-    category: 'Compliance',
-    tags: ['Dangerous Goods', 'IATA', 'IMDG', 'Hazmat', 'Compliance'],
-    content: [
+    sections: [
       { heading: 'What Are Dangerous Goods?', body: 'Dangerous goods (also called hazardous materials or hazmat) are substances or articles that pose a risk to health, safety, property, or the environment during transport. They are classified into 9 classes: Class 1 Explosives, Class 2 Gases, Class 3 Flammable Liquids, Class 4 Flammable Solids, Class 5 Oxidisers and Organic Peroxides, Class 6 Toxic and Infectious Substances, Class 7 Radioactive Material, Class 8 Corrosives, and Class 9 Miscellaneous. Many everyday products — lithium batteries, perfumes, paints, cleaning chemicals — are dangerous goods.' },
       { heading: 'Regulations by Transport Mode', body: 'Air transport is governed by IATA DGR (Dangerous Goods Regulations), updated annually. Sea transport follows IMDG Code (International Maritime Dangerous Goods), revised every two years. Road transport in Europe follows ADR (European Agreement on Road Transport of Dangerous Goods). Rail follows RID. Each mode has different packaging, labelling, and documentation requirements. A shipper must comply with the regulations for every mode used in a multimodal shipment — the most restrictive rules apply.' },
       { heading: 'Classification and UN Numbers', body: 'Every dangerous good has a UN number — a 4-digit code assigned by the UN that identifies the substance. For example, UN1950 is Aerosols, UN3480 is Lithium Ion Batteries. The UN number determines the proper shipping name, class, packing group (I, II, or III, indicating severity of hazard), and special provisions that apply. Look up UN numbers in the IATA DGR or IMDG Code, or use a certified DG software tool. Misclassification is a serious offence that can result in fines up to $75,000 per violation in the US.' },
@@ -1340,12 +1347,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'express-shipping-vs-air-freight-vs-sea-freight',
     title: 'Express Shipping vs Air Freight vs Sea Freight: Which Should You Choose?',
     excerpt: 'A detailed comparison of express courier, air freight, and sea freight — covering cost, speed, reliability, and when to use each.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'Express Shipping vs Air Freight vs Sea Freight: Which Should You Choose? — Trackora',
+      description: 'A detailed comparison of express courier, air freight, and sea freight — covering cost, speed, reliability, and when to use each.',
+    },
     date: '2025-07-12',
     readTime: '10 min read',
-    category: 'Shipping Strategy',
-    tags: ['Express Shipping', 'Air Freight', 'Sea Freight', 'Comparison'],
-    content: [
+    sections: [
       { heading: 'Express Courier: Fast but Premium', body: 'Express courier services (DHL Express, FedEx, UPS, TNT) offer door-to-door delivery with full customs clearance included. Transit times are 1–5 days internationally. They are ideal for shipments under 70kg that need speed and simplicity. The courier handles all documentation, customs brokerage, and last-mile delivery. Rates are weight-based with a dimensional weight formula. For small high-value items — electronics, medical samples, urgent documents — express is often the best choice despite premium pricing.' },
       { heading: 'Air Freight: The Middle Ground', body: 'Air freight via a freight forwarder is the right choice for shipments between 50kg and 1,000kg that need to arrive in 3–10 days. Unlike express, air freight requires you to arrange customs clearance separately (or through your forwarder) and organise delivery from the airport. It is significantly cheaper per kg than express for larger volumes. Carriers include belly cargo on passenger flights and dedicated freighters. Air freight is priced on chargeable weight — the higher of actual weight and volumetric weight (length × width × height in cm ÷ 6,000).' },
       { heading: 'Sea Freight: High Volume, Low Cost', body: 'Sea freight is the most economical option for large shipments — typically anything above 1–2 cubic metres or 500kg where transit time is not critical. LCL (Less than Container Load) consolidates your cargo with others in a shared container. FCL (Full Container Load) gives you exclusive use of a 20ft or 40ft container. Transit times are 10–40 days depending on origin and destination. Sea freight is 4–6 times cheaper per kg than air for large volumes, making it the default for regular import/export of goods.' },
@@ -1358,12 +1366,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'shipping-terms-glossary',
     title: 'Shipping and Freight Terms Glossary: 80 Terms Every Importer Should Know',
     excerpt: 'A comprehensive glossary of shipping, freight, and customs terms — from Incoterms to HS codes, demurrage to FCL.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'Shipping and Freight Terms Glossary: 80 Terms Every Importer Should Know — Trackora',
+      description: 'A comprehensive glossary of shipping, freight, and customs terms — from Incoterms to HS codes, demurrage to FCL.',
+    },
     date: '2025-07-15',
     readTime: '14 min read',
-    category: 'Reference',
-    tags: ['Glossary', 'Freight Terms', 'Incoterms', 'Reference'],
-    content: [
+    sections: [
       { heading: 'Basic Shipment Terms', body: 'AWB (Air Waybill): Shipping document for air cargo. B/L (Bill of Lading): Shipping document and title document for sea cargo. Booking: Reservation of space on a vessel or aircraft. Cargo: Goods being transported. Carrier: The company operating the transport (airline, shipping line, trucking company). Consignee: The recipient of the shipment. Consignor/Shipper: The sender of the shipment. Container: Standardised steel box (20ft, 40ft, 40ft high cube) used for sea freight. Courier: Express delivery service providing door-to-door delivery with integrated customs.' },
       { heading: 'Container and Sea Freight Terms', body: 'FCL (Full Container Load): Shipper has exclusive use of one or more containers. LCL (Less than Container Load): Cargo from multiple shippers consolidated in one container. TEU (Twenty-foot Equivalent Unit): Standard measure of container capacity. Transshipment: Transfer of cargo from one vessel to another at an intermediate port. Vessel: The ship carrying cargo. Feeder vessel: Smaller ship connecting regional ports to main hub ports. Mother vessel: Large ocean-going vessel on main trade lanes. Port of Loading (POL): Port where cargo is loaded. Port of Discharge (POD): Port where cargo is unloaded.' },
       { heading: 'Incoterms (Trade Terms)', body: 'EXW (Ex Works): Buyer arranges all transport from seller\'s premises. FOB (Free on Board): Seller delivers to named port; buyer arranges ocean freight and beyond. CIF (Cost, Insurance, Freight): Seller pays ocean freight and insurance to destination port; buyer arranges import clearance and delivery. DAP (Delivered at Place): Seller delivers to named destination; buyer handles import duties. DDP (Delivered Duty Paid): Seller handles everything including import duties — maximum obligation for seller. FCA (Free Carrier): Seller delivers to named carrier; flexible for multimodal transport and containerised cargo.' },
@@ -1377,12 +1386,13 @@ export const BLOG_POSTS: BlogPost[] = [
     slug: 'how-to-reduce-shipping-costs',
     title: 'How to Reduce Shipping Costs: 12 Proven Strategies for Importers',
     excerpt: 'Practical strategies to cut your freight spend without sacrificing service — from negotiating rates to optimising packaging and choosing the right Incoterms.',
-    author: 'Trackora Team',
+    seo: {
+      title: 'How to Reduce Shipping Costs: 12 Proven Strategies for Importers — Trackora',
+      description: 'Practical strategies to cut your freight spend without sacrificing service — from negotiating rates to optimising packaging and choosing the right Incoterms.',
+    },
     date: '2025-07-18',
     readTime: '12 min read',
-    category: 'Cost Optimisation',
-    tags: ['Shipping Costs', 'Cost Reduction', 'Freight', 'Strategy'],
-    content: [
+    sections: [
       { heading: 'Audit Your Current Freight Spend', body: 'Before optimising, understand your baseline. Collect 12 months of freight invoices and categorise by lane (origin-destination pair), mode (air, sea, express), carrier, and shipment weight. Identify your top 5 lanes by spend — these are where improvements will have the most impact. Calculate your average cost per kg and cost per CBM by mode. Compare against Trackora\'s rate benchmarks for your lanes. Many importers find they are paying 20–35% above market rates simply because they have never benchmarked or renegotiated.' },
       { heading: 'Consolidate Shipments', body: 'Frequent small shipments are expensive. Moving from weekly to biweekly or monthly shipments reduces the number of customs entries, handling charges, and per-shipment fixed fees. LCL to FCL conversion: if your monthly volume exceeds 12–15 CBM on a lane, a dedicated FCL container often costs less than multiple LCL shipments plus reducing transshipment risk. Air to sea conversion: shifting even 20% of air volume to sea can cut freight costs on those units by 70–80%, though it requires more safety stock to buffer the longer lead time.' },
       { heading: 'Consolidate and Optimise Packaging', body: 'Consolidating multiple small shipments into one reduces per-unit freight costs significantly. For sea freight, moving from LCL to FCL as volume grows saves 30–50% per unit. Freight is charged on chargeable weight which is the higher of actual and volumetric weight. Reducing package dimensions by 5% in each direction cuts volumetric weight by 14%. Work with suppliers to improve packaging density before production starts.' },
