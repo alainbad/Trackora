@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './AuthContext'
-import { useIsNativeApp } from '../hooks/useIsNativeApp'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 export interface Profile {
@@ -91,9 +90,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     return { error: null, url }
   }
 
-  const isNative = useIsNativeApp()
-  // In native app all users are treated as free — Pro/Business must be purchased via IAP
-  const planTier: 'free' | 'pro' | 'business' = isNative ? 'free' : (profile?.plan_tier ?? 'free')
+  
+  
+    const planTier: 'free' | 'pro' | 'business' = profile?.plan_tier ?? 'free'
 
   return (
     <ProfileContext.Provider value={{ profile, loading, planTier, updateProfile, uploadAvatar, refetch: fetchProfile }}>
