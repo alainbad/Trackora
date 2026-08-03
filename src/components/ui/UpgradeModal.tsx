@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { X, Zap, Check, Lock } from 'lucide-react'
+import IAPPaywall from './IAPPaywall'
 import { useIsNativeApp } from '../../hooks/useIsNativeApp'
 
 interface UpgradeModalProps {
@@ -55,8 +57,8 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
   const copy = FEATURE_COPY[feature]
   const isNative = useIsNativeApp()
 
-  // Never show any upgrade/payment UI inside the native iOS/Android app
-  if (isNative) { onClose(); return null }
+    const [showIAP, setShowIAP] = useState(false)
+  if (isNative && showIAP) return <IAPPaywall onClose={onClose} defaultTier="pro" />
 
   function handleUpgrade() {
     if (onUpgrade) onUpgrade()
@@ -138,18 +140,7 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           ))}
         </ul>
 
-        {isNative ? (
-          <div style={{
-            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)',
-            borderRadius: '12px', padding: '16px', textAlign: 'center', marginBottom: '16px',
-          }}>
-            <p style={{ fontSize: '14px', color: 'rgba(248,250,252,0.7)', lineHeight: 1.6, margin: 0 }}>
-              Visit{' '}
-              <span style={{ color: '#818cf8', fontWeight: 600 }}>track-ora.com/plans</span>{' '}
-              in your browser to subscribe to Pro or Business.
-            </p>
-          </div>
-        ) : (
+      track-ora.com/plans
           <>
             {/* Pricing note */}
             <div style={{ textAlign: 'center', marginBottom: '16px' }}>
