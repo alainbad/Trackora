@@ -48,6 +48,7 @@ const MAWB_CARRIERS: Record<string, CarrierBase> = {
   '356': { name:'Cargolux',             slug:'cargolux',                category:'air', accentColor:'#003087', trackUrl:'https://www.cargolux.com/tracking?awb={n}' },
   '369': { name:'Qatar Cargo',          slug:'qatar-cargo',             category:'air', accentColor:'#5C0632', logoUrl:'/logos/qatar.svg', trackUrl:'https://www.qrcargo.com/s/track-shipment?trackingNumber={n}' },
   '406': { name:'FedEx',                slug:'fedex',                   category:'express', accentColor:'#FF6200', logoUrl:'/logos/fedex.svg', trackUrl:'https://www.fedex.com/fedextrack/?trknbr={n}' },
+  '512': { name:'Royal Jordanian Cargo', slug:'royal-jordanian-cargo', category:'air', accentColor:'#9B1B2A', trackUrl:'https://rjcargo.rj.com/en/tracking?awb={n}' },
   '518': { name:'UPS',                  slug:'ups',                     category:'express', accentColor:'#8B5E3C', trackUrl:'https://www.ups.com/track?tracknum={n}' },
   '549': { name:'DHL',                  slug:'dhl',                     category:'express', accentColor:'#FFCC00', logoUrl:'/logos/dhl.svg', trackUrl:'https://www.dhl.com/global-en/home/tracking.html?tracking-id={n}' },
   '607': { name:'Etihad Cargo',         slug:'etihad-cargo',            category:'air', accentColor:'#A07C50', trackUrl:'https://www.etihadcargo.com/en/track-a-shipment?awbNumber={n}' },
