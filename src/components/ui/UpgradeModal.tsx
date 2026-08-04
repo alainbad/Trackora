@@ -56,8 +56,8 @@ const PRO_FEATURES = [
 export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeModalProps) {
   const copy = FEATURE_COPY[feature]
   const isNative = useIsNativeApp()
+  const [showIAP, setShowIAP] = useState(false)
 
-    const [showIAP, setShowIAP] = useState(false)
   if (isNative && showIAP) return <IAPPaywall onClose={onClose} defaultTier="pro" />
 
   function handleUpgrade() {
@@ -85,7 +85,6 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
         boxShadow: '0 0 80px rgba(99,102,241,0.2), 0 24px 64px rgba(0,0,0,0.6)',
         position: 'relative',
       }}>
-        {/* Close */}
         <button
           onClick={onClose}
           style={{
@@ -98,7 +97,6 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           <X size={16} />
         </button>
 
-        {/* Lock icon */}
         <div style={{
           width: '52px', height: '52px', borderRadius: '14px', marginBottom: '20px',
           background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))',
@@ -108,7 +106,6 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           <Lock size={24} color="#818cf8" />
         </div>
 
-        {/* Feature icon + title */}
         <div style={{ marginBottom: '6px', fontSize: '24px' }}>{copy.icon}</div>
         <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#f8fafc', marginBottom: '10px', letterSpacing: '-0.5px' }}>
           Unlock {copy.title}
@@ -117,7 +114,6 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           {copy.subtitle}
         </p>
 
-        {/* Highlight box */}
         <div style={{
           padding: '14px 16px', borderRadius: '12px', marginBottom: '20px',
           background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
@@ -130,7 +126,6 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           </div>
         </div>
 
-        {/* Pro features list */}
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
           {PRO_FEATURES.map(f => (
             <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'rgba(248,250,252,0.7)' }}>
@@ -140,17 +135,27 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           ))}
         </ul>
 
+        {isNative ? (
+          <button
+            onClick={() => setShowIAP(true)}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              width: '100%', padding: '14px', borderRadius: '14px', cursor: 'pointer',
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
+              boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
+            }}
+          >
+            <Zap size={16} />
+            View Plans & Pricing
+          </button>
+        ) : (
           <>
-            {/* Pricing note */}
             <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-              <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}>
-                Starting at{' '}
-              </span>
+              <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}>Starting at </span>
               <span style={{ fontSize: '20px', fontWeight: 800, color: '#f8fafc' }}>$2.49</span>
               <span style={{ fontSize: '13px', color: 'rgba(248,250,252,0.4)' }}> first month · then $4.99/mo</span>
             </div>
-
-            {/* CTA */}
             <button
               onClick={handleUpgrade}
               style={{
