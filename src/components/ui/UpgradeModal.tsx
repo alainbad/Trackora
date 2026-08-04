@@ -140,7 +140,6 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
           ))}
         </ul>
 
-      track-ora.com/plans
           <>
             {/* Pricing note */}
             <div style={{ textAlign: 'center', marginBottom: '16px' }}>
