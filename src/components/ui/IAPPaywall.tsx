@@ -15,8 +15,10 @@ export default function IAPPaywall({ onClose, defaultTier = 'pro' }: Props) {
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'annual'>('annual')
 
   const handlePurchaseComplete = async (tier: 'pro' | 'business') => {
-    if (!user) return
-await supabase?.from('profiles').upsert({ id: user.id, plan_tier: tier })
+    if (!user || !supabase) return
+    await supabase.from('profiles').upsert({ id: user.id, plan_tier: tier })
+  }
+
   const { products, purchaseState, error, ready, purchase, restorePurchases } = useIAP(handlePurchaseComplete)
 
   const proFeatures = [

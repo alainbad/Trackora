@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, Zap, Check, Lock } from 'lucide-react'
-import IAPPaywall from './IAPPaywall'
 import { useIsNativeApp } from '../../hooks/useIsNativeApp'
+import IAPPaywall from './IAPPaywall'
 
 interface UpgradeModalProps {
   feature: 'air' | 'sea' | 'analytics' | 'alerts' | 'saved'
