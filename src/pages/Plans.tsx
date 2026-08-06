@@ -4,6 +4,7 @@ import { useSEO } from '../hooks/useSEO'
 import { useIsMobile } from '../hooks/useIsMobile'
 import { useIsNativeApp } from '../hooks/useIsNativeApp'
 import PricingSection from '../components/home/PricingSection'
+import IAPPaywall from '../components/ui/IAPPaywall'
 
 const features = [
   { label: 'Shipment tracking (express & land)', free: true, pro: true, business: true },
@@ -67,8 +68,7 @@ export default function Plans() {
   const isNative = useIsNativeApp()
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
-  if (isNative) return null
-
+if (isNative) return <IAPPaywall onClose={() => window.history.back()} />
   return (
     <div style={{ minHeight: '100vh' }}>
       <PricingSection />
