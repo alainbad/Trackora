@@ -68,7 +68,7 @@ export default function Navbar() {
         backdropFilter: (scrolled || menuOpen) ? 'blur(20px)' : 'none',
         borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
       }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 20px' }}>
+          <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 20px', paddingTop: isNative ? 'env(safe-area-inset-top)' : undefined }}>
           {/* ── Main bar ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
 
