@@ -147,6 +147,13 @@ export function detectCarrier(raw: string): { carrier: DetectedCarrier; filledUr
     }
   }
 
+    // ── 4b. ECU Worldwide B/L: XXX/XXX/NNNNN ────────────────────────────────
+  if (/^[A-Z]{2,4}\/[A-Z]{2,4}\/\d{4,7}$/i.test(tn)) {
+    return {
+      carrier: { name: 'ECU Worldwide', slug: 'ecu-worldwide', category: 'sea', accentColor: '#F7A800', confidence: 'high', hint: 'ECU Worldwide B/L' },
+      filledUrl: `https://www.ecuworldwide.com/en/track-and-trace?bl=${encodeURIComponent(tn)}`,
+    }
+  }
   // ── 4. UPS: 1Z + 16 alphanumeric ─────────────────────────────────────────
   if (/^1Z[0-9A-Z]{16}$/i.test(tn)) {
     return {
