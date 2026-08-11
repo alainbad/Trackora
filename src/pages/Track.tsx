@@ -852,7 +852,7 @@ export default function Track() {
         )}
 
         {/* Not found */}
-        {!animating && notFound && (
+        {!animating && notFound && !detectedRedirect && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Sea freight fallback — shown for any "not found" result */}
             <div style={{
