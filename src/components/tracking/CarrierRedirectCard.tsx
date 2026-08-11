@@ -1,4 +1,5 @@
-import { ExternalLink, Loader2 } from 'lucide-react'
+import { ExternalLink, Loader2, Copy, Check } from 'lucide-react'
+import { useState } from 'react'
 import type { DetectedCarrier } from '../../data/carrierDetect'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
@@ -6,7 +7,7 @@ interface Props {
   carrier:      DetectedCarrier
   trackingNumber: string
   filledUrl:    string
-  loading?:     boolean   // true while inline API fetch is in progress
+  loading?:     boolean
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -23,6 +24,14 @@ const CATEGORY_EMOJI: Record<string, string> = {
 
 export default function CarrierRedirectCard({ carrier, trackingNumber, filledUrl, loading }: Props) {
   const isMobile = useIsMobile()
+  const [copied, setCopied] = useState(false)
+
+  function copyNumber() {
+    navigator.clipboard.writeText(trackingNumber).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   return (
     <div style={{
@@ -33,14 +42,12 @@ export default function CarrierRedirectCard({ carrier, trackingNumber, filledUrl
       boxShadow: `0 0 50px ${carrier.accentColor}15`,
     }}>
 
-      {/* Header */}
       <div style={{
         padding: isMobile ? '20px 20px 16px' : '26px 28px 20px',
         background: `linear-gradient(135deg, ${carrier.accentColor}20, transparent 70%)`,
         borderBottom: `1px solid ${carrier.accentColor}20`,
         display: 'flex', alignItems: 'center', gap: '16px',
       }}>
-        {/* Logo / colour swatch */}
         <div style={{
           width: '56px', height: '56px', borderRadius: '14px', flexShrink: 0,
           background: carrier.logoUrl ? '#fff' : `${carrier.accentColor}25`,
@@ -73,7 +80,6 @@ export default function CarrierRedirectCard({ carrier, trackingNumber, filledUrl
           </h2>
         </div>
 
-        {/* Confidence badge */}
         <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
           <span style={{
             fontSize: '10px', fontWeight: 700, padding: '4px 10px',
@@ -88,28 +94,42 @@ export default function CarrierRedirectCard({ carrier, trackingNumber, filledUrl
         </div>
       </div>
 
-      {/* Body */}
       <div style={{ padding: isMobile ? '20px' : '24px 28px' }}>
 
-        {/* Tracking number pill */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '8px',
-          padding: '9px 16px', borderRadius: '10px', marginBottom: '22px',
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.1)',
-        }}>
-          <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(248,250,252,0.35)' }}>
-            Tracking #
-          </span>
-          <span style={{
-            fontFamily: 'monospace', fontSize: '15px', letterSpacing: '1.5px',
-            color: '#f8fafc', fontWeight: 700,
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '22px' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            padding: '9px 16px', borderRadius: '10px',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            flex: 1, minWidth: 0,
           }}>
-            {trackingNumber}
-          </span>
+            <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: 'rgba(248,250,252,0.35)', flexShrink: 0 }}>
+              Tracking #
+            </span>
+            <span style={{
+              fontFamily: 'monospace', fontSize: '15px', letterSpacing: '1.5px',
+              color: '#f8fafc', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {trackingNumber}
+            </span>
+          </div>
+          <button
+            onClick={copyNumber}
+            title="Copy tracking number"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
+              background: copied ? 'rgba(52,211,153,0.15)' : 'rgba(255,255,255,0.06)',
+              border: copied ? '1px solid rgba(52,211,153,0.3)' : '1px solid rgba(255,255,255,0.1)',
+              color: copied ? '#34d399' : 'rgba(248,250,252,0.5)',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+          >
+            {copied ? <Check size={16} /> : <Copy size={16} />}
+          </button>
         </div>
 
-        {/* Status while loading inline data */}
         {loading && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: '10px',
@@ -123,18 +143,16 @@ export default function CarrierRedirectCard({ carrier, trackingNumber, filledUrl
           </div>
         )}
 
-        {/* Instruction */}
         <p style={{
           margin: '0 0 22px', fontSize: '14px',
           color: 'rgba(248,250,252,0.55)', lineHeight: 1.65,
         }}>
           Click below to open{' '}
           <strong style={{ color: 'rgba(248,250,252,0.85)' }}>{carrier.name}</strong>'s
-          official tracking page — your tracking number is pre-filled and results
-          will load instantly.
+          official tracking page. Copy your tracking number above and paste it
+          into their search box.
         </p>
 
-        {/* Primary CTA */}
         <a
           href={filledUrl}
           target="_blank"
