@@ -51,6 +51,7 @@ export const CARRIERS: Carrier[] = [
   { name: 'Yang Ming',           slug: 'yang-ming',                 mode: 'sea' },
   { name: 'ZIM',                 slug: 'zim',                       mode: 'sea' },
   { name: 'HMM',                 slug: 'hmm',                       mode: 'sea' },
+  { name: 'ECU Worldwide',       slug: 'ecu-worldwide',             mode: 'sea' },
 
   // ── Land / Road Freight ───────────────────────────────────────────
   { name: 'DB Schenker',         slug: 'db-schenker',               mode: 'land' },
