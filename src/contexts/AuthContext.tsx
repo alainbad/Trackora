@@ -165,18 +165,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) return { error: 'Auth not configured — add Supabase env vars to .env.local' }
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error ? friendlyAuthError(error.message) : null }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      return { error: error ? friendlyAuthError(error.message) : null }
+    } catch (err: unknown) {
+      return { error: err instanceof Error ? err.message : 'Sign in failed. Please check your connection and try again.' }
+    }
   }
 
   const signUp = async (email: string, password: string) => {
     if (!supabase) return { error: 'Auth not configured — add Supabase env vars to .env.local', needsConfirmation: false }
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) return { error: friendlyAuthError(error.message), needsConfirmation: false }
-    if (typeof window !== 'undefined') {
-      ;((window as any).dataLayer = (window as any).dataLayer || []).push({ event: 'sign_up', method: 'email' })
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password })
+      if (error) return { error: friendlyAuthError(error.message), needsConfirmation: false }
+      if (typeof window !== 'undefined') {
+        ;((window as any).dataLayer = (window as any).dataLayer || []).push({ event: 'sign_up', method: 'email' })
+      }
+      return { error: null, needsConfirmation: !data.session }
+    } catch (err: unknown) {
+      return { error: err instanceof Error ? err.message : 'Sign up failed. Please check your connection and try again.', needsConfirmation: false }
     }
-    return { error: null, needsConfirmation: !data.session }
   }
 
   const signOut = async () => {

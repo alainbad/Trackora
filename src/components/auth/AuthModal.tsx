@@ -90,6 +90,8 @@ export default function AuthModal({ initialMode = 'signin', onClose, guestLimitM
         else if (needsConfirmation) setDone(true)
         else onClose()   // email confirm disabled → auto signed-in
       }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
