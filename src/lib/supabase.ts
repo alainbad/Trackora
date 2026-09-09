@@ -3,20 +3,20 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL?.trim() as string | undefined
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() as string | undefined
 
-// On iOS/Capacitor, cross-origin fetch is blocked by WKWebView CORS policy.
-// Route all Supabase calls through CapacitorHttp.request() — the direct native
-// plugin call that uses URLSession and forwards all custom headers correctly.
-// Avoid new Headers() constructor — it throws in Capacitor's patched environment.
 async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const cap = (window as any).Capacitor
   const plugin = cap?.Plugins?.CapacitorHttp ?? cap?.Plugins?.Http
-  if (!plugin?.request) return fetch(input, init)
+  console.log('[TK] cap:', !!cap, 'plugin:', !!plugin, 'request:', typeof plugin?.request)
+
+  if (!plugin?.request) {
+    console.log('[TK] falling back to fetch')
+    return fetch(input, init)
+  }
 
   const reqUrl = typeof input === 'string' ? input
     : input instanceof URL ? input.href
     : (input as Request).url
 
-  // Build headers as plain object WITHOUT new Headers() (throws in Capacitor env)
   const headers: Record<string, string> = {}
   if (init?.headers) {
     const h = init.headers
@@ -28,16 +28,22 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
       })
     }
   }
+  console.log('[TK] calling plugin.request with headers:', Object.keys(headers).join(','))
 
-  const res = await plugin.request({
-    url: reqUrl,
-    method: (init?.method ?? 'GET').toUpperCase(),
-    headers,
-    data: typeof init?.body === 'string' ? init.body : undefined,
-  })
-
-  const body = typeof res.data === 'string' ? res.data : JSON.stringify(res.data)
-  return new Response(body, { status: res.status, headers: res.headers ?? {} })
+  try {
+    const res = await plugin.request({
+      url: reqUrl,
+      method: (init?.method ?? 'GET').toUpperCase(),
+      headers,
+      data: typeof init?.body === 'string' ? init.body : undefined,
+    })
+    console.log('[TK] plugin.request status:', res?.status)
+    const body = typeof res.data === 'string' ? res.data : JSON.stringify(res.data)
+    return new Response(body, { status: res.status, headers: res.headers ?? {} })
+  } catch (e) {
+    console.error('[TK] plugin.request threw:', e)
+    throw e
+  }
 }
 
 function makeClient() {
