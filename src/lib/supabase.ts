@@ -12,33 +12,54 @@ function parseXHRHeaders(raw: string): Headers {
   return h
 }
 
-// On iOS/Capacitor, use XHR which is patched to route through native URLSession.
-// plugin.request() throws a Type error; patched XHR works (Bing analytics prove it).
 async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   if (!(window as any).Capacitor) return fetch(input, init)
 
   return new Promise((resolve, reject) => {
-    const reqUrl = typeof input === 'string' ? input
-      : input instanceof URL ? input.href
-      : (input as Request).url
+    try {
+      const reqUrl = typeof input === 'string' ? input
+        : input instanceof URL ? input.href
+        : (input as Request).url
 
-    const xhr = new XMLHttpRequest()
-    xhr.open(init?.method?.toUpperCase() ?? 'GET', reqUrl)
+      console.log('[TK] XHR start:', init?.method, reqUrl.substring(0, 60))
+      const xhr = new XMLHttpRequest()
+      console.log('[TK] XHR created')
 
-    if (init?.headers) {
-      new Headers(init.headers).forEach((v, k) => xhr.setRequestHeader(k, v))
+      xhr.open(init?.method?.toUpperCase() ?? 'GET', reqUrl)
+      console.log('[TK] XHR opened')
+
+      if (init?.headers) {
+        new Headers(init.headers).forEach((v, k) => {
+          console.log('[TK] header:', k)
+          xhr.setRequestHeader(k, v)
+        })
+      }
+      console.log('[TK] headers set')
+
+      xhr.onload = () => {
+        console.log('[TK] onload status:', xhr.status)
+        try {
+          resolve(new Response(xhr.responseText, {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            headers: parseXHRHeaders(xhr.getAllResponseHeaders()),
+          }))
+        } catch (e) {
+          console.error('[TK] Response build error:', e)
+          reject(e)
+        }
+      }
+
+      xhr.onerror = (e) => { console.error('[TK] onerror', e); reject(new TypeError('Network request failed')) }
+      xhr.ontimeout = () => reject(new TypeError('Network request timed out'))
+
+      console.log('[TK] sending body type:', typeof init?.body)
+      xhr.send(typeof init?.body === 'string' ? init.body : null)
+      console.log('[TK] sent')
+    } catch (e) {
+      console.error('[TK] caught synchronous error:', e)
+      fetch(input, init).then(resolve, reject)
     }
-
-    xhr.onload = () => resolve(new Response(xhr.responseText, {
-      status: xhr.status,
-      statusText: xhr.statusText,
-      headers: parseXHRHeaders(xhr.getAllResponseHeaders()),
-    }))
-
-    xhr.onerror = () => reject(new TypeError('Network request failed'))
-    xhr.ontimeout = () => reject(new TypeError('Network request timed out'))
-
-    xhr.send(typeof init?.body === 'string' ? init.body : null)
   })
 }
 
