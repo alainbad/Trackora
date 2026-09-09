@@ -30,12 +30,16 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
   if (key && !headers['apikey']) headers['apikey'] = key
   if (key && !headers['Authorization']) headers['Authorization'] = `Bearer ${key}`
 
-  console.log('[TK] isNative:', isNative, 'headers:', Object.keys(headers).join(','))
-  console.log('[TK] apikey len:', headers['apikey']?.length, 'auth len:', headers['Authorization']?.length)
+  console.log('[TK] isNative:', isNative, 'method:', init?.method, 'bodyType:', typeof init?.body)
 
-  // Use Capacitor's patched window.fetch (routes through native URLSession,
-  // bypassing WKWebView CORS) with the plain-object headers.
-  return fetch(input, { ...init, headers })
+  // Pass only the options Capacitor's native HTTP bridge supports.
+  // Spreading the full `init` causes TypeError because Capacitor's patched
+  // fetch doesn't handle AbortSignal, mode, credentials, or other options.
+  return fetch(input, {
+    method: init?.method ?? 'GET',
+    headers,
+    body: init?.body as BodyInit | undefined,
+  })
 }
 
 function makeClient() {
