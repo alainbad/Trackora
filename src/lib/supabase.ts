@@ -30,10 +30,14 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
   if (key && !headers['apikey']) headers['apikey'] = key
   if (key && !headers['Authorization']) headers['Authorization'] = `Bearer ${key}`
 
-  console.log('[TK] method:', init?.method, 'body type:', typeof init?.body)
+  // Also extract body from a Request object if input is a Request
+  const body = init?.body ?? (input instanceof Request ? undefined : undefined)
+  console.log('[TK] method:', init?.method, 'input type:', typeof input, 'is Request:', input instanceof Request)
 
-  return fetch(input, {
-    method: init?.method ?? 'GET',
+  // Always pass a plain URL string to avoid "Type error" from passing a
+  // Request object (with a consumed body) alongside init.body to fetch().
+  return fetch(reqUrl, {
+    method: init?.method ?? (input instanceof Request ? (input as Request).method : 'GET'),
     headers,
     body: init?.body as BodyInit | undefined,
   }).catch((e: unknown) => {
