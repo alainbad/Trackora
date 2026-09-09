@@ -3,47 +3,41 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL?.trim() as string | undefined
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() as string | undefined
 
+// On iOS/Capacitor, cross-origin fetch is blocked by WKWebView CORS policy.
+// Route all Supabase calls through CapacitorHttp.request() — the direct native
+// plugin call that uses URLSession and forwards all custom headers correctly.
+// Avoid new Headers() constructor — it throws in Capacitor's patched environment.
 async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  if (!(window as any).Capacitor) return fetch(input, init)
+  const cap = (window as any).Capacitor
+  const plugin = cap?.Plugins?.CapacitorHttp ?? cap?.Plugins?.Http
+  if (!plugin?.request) return fetch(input, init)
 
   const reqUrl = typeof input === 'string' ? input
     : input instanceof URL ? input.href
     : (input as Request).url
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open(init?.method?.toUpperCase() ?? 'GET', reqUrl)
-
-    const h = init?.headers
-    console.log('[TK] headers type:', typeof h, h instanceof Headers ? 'Headers' : Array.isArray(h) ? 'array' : typeof h === 'object' ? 'object' : 'other')
-    if (h) {
-      const entries: [string, string][] = []
-      if (h instanceof Headers) {
-        h.forEach((v, k) => entries.push([k, v]))
-      } else if (Array.isArray(h)) {
-        (h as [string, string][]).forEach(pair => entries.push(pair))
-      } else {
-        Object.entries(h as Record<string, string>).forEach(([k, v]) => { if (v != null) entries.push([k, String(v)]) })
-      }
-      console.log('[TK] header keys:', entries.map(([k]) => k).join(','))
-      entries.forEach(([k, v]) => {
-        try {
-          xhr.setRequestHeader(k, v)
-          console.log('[TK] header set ok:', k)
-        } catch (e) {
-          console.error('[TK] header FAILED:', k, String(e))
-        }
+  // Build headers as plain object WITHOUT new Headers() (throws in Capacitor env)
+  const headers: Record<string, string> = {}
+  if (init?.headers) {
+    const h = init.headers
+    if (typeof (h as any).forEach === 'function') {
+      try { (h as Headers).forEach((v, k) => { headers[k] = v }) } catch {}
+    } else {
+      Object.entries(h as Record<string, string>).forEach(([k, v]) => {
+        if (v != null) headers[k] = String(v)
       })
     }
+  }
 
-    xhr.onload = () => {
-      console.log('[TK] onload status:', xhr.status, 'body:', xhr.responseText.substring(0, 80))
-      resolve(new Response(xhr.responseText, { status: xhr.status, statusText: xhr.statusText }))
-    }
-    xhr.onerror = () => reject(new TypeError('Network request failed'))
-    xhr.ontimeout = () => reject(new TypeError('Network request timed out'))
-    try { xhr.send(typeof init?.body === 'string' ? init.body : null) } catch (e) { reject(e) }
+  const res = await plugin.request({
+    url: reqUrl,
+    method: (init?.method ?? 'GET').toUpperCase(),
+    headers,
+    data: typeof init?.body === 'string' ? init.body : undefined,
   })
+
+  const body = typeof res.data === 'string' ? res.data : JSON.stringify(res.data)
+  return new Response(body, { status: res.status, headers: res.headers ?? {} })
 }
 
 function makeClient() {
