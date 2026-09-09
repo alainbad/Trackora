@@ -5,18 +5,16 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() as string | undefined
 
 async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const cap = (window as any).Capacitor
-  const plugin = cap?.Plugins?.CapacitorHttp ?? cap?.Plugins?.Http
-  console.log('[TK] cap:', !!cap, 'plugin:', !!plugin, 'request:', typeof plugin?.request)
+  const isNative = !!(cap?.isNativePlatform?.() ?? cap?.isNative)
 
-  if (!plugin?.request) {
-    console.log('[TK] falling back to fetch')
+  if (!isNative) {
     return fetch(input, init)
   }
 
-  const reqUrl = typeof input === 'string' ? input
-    : input instanceof URL ? input.href
-    : (input as Request).url
-
+  // Pre-convert headers to a plain object.
+  // Capacitor's patched fetch (and Supabase JS internals) throw TypeError
+  // when they call `new Headers(existingHeaders)` in WKWebView — converting
+  // to a plain object first avoids the constructor call entirely.
   const headers: Record<string, string> = {}
   if (init?.headers) {
     const h = init.headers
@@ -28,33 +26,16 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
       })
     }
   }
-  // Ensure apikey is always present using the module-level key
+  // Belt-and-suspenders: ensure auth headers are always present
   if (key && !headers['apikey']) headers['apikey'] = key
   if (key && !headers['Authorization']) headers['Authorization'] = `Bearer ${key}`
 
-  // Capacitor CapacitorHttp drops non-standard headers (like apikey) in URLSession.
-  // Supabase accepts apikey as a query parameter as a fallback.
-  let finalUrl = reqUrl
-  if (key && url && reqUrl.startsWith(url)) {
-    const sep = reqUrl.includes('?') ? '&' : '?'
-    finalUrl = `${reqUrl}${sep}apikey=${encodeURIComponent(key)}`
-  }
-  console.log('[TK] finalUrl includes apikey param:', finalUrl.includes('apikey='))
+  console.log('[TK] isNative:', isNative, 'headers:', Object.keys(headers).join(','))
+  console.log('[TK] apikey len:', headers['apikey']?.length, 'auth len:', headers['Authorization']?.length)
 
-  try {
-    const res = await plugin.request({
-      url: finalUrl,
-      method: (init?.method ?? 'GET').toUpperCase(),
-      headers,
-      data: typeof init?.body === 'string' ? init.body : undefined,
-    })
-    console.log('[TK] plugin.request status:', res?.status)
-    const body = typeof res.data === 'string' ? res.data : JSON.stringify(res.data)
-    return new Response(body, { status: res.status, headers: res.headers ?? {} })
-  } catch (e) {
-    console.error('[TK] plugin.request threw:', e)
-    throw e
-  }
+  // Use Capacitor's patched window.fetch (routes through native URLSession,
+  // bypassing WKWebView CORS) with the plain-object headers.
+  return fetch(input, { ...init, headers })
 }
 
 function makeClient() {
