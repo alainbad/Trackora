@@ -18,14 +18,9 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
     new Headers(init.headers).forEach((v, k) => { headers[k] = v })
   }
 
-  let data: any = undefined
-  if (init?.body) {
-    const body = init.body
-    if (typeof body === 'string') {
-      try { data = JSON.parse(body) } catch { data = body }
-    } else {
-      data = body
-    }
+  let data: string | undefined = undefined
+  if (init?.body && typeof init.body === 'string') {
+    data = init.body
   }
 
   const res = await plugin.request({
@@ -45,8 +40,8 @@ function makeClient() {
     return null
   }
   try {
-    const isCapacitor = typeof window !== 'undefined' && !!(window as any).Capacitor
-    return createClient(url, key, isCapacitor ? { global: { fetch: nativeFetch } } : {})
+    // Always pass nativeFetch — it falls back to global fetch when Capacitor is absent
+    return createClient(url, key, { global: { fetch: nativeFetch } })
   } catch (err) {
     // A malformed URL/key must never white-screen the whole app
     console.error('[Trackora] Failed to initialise Supabase client — check VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY values:', err)
