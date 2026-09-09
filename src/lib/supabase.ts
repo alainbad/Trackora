@@ -28,7 +28,11 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
       })
     }
   }
+  // Ensure apikey is always present using the module-level key
+  if (key && !headers['apikey']) headers['apikey'] = key
+  if (key && !headers['Authorization']) headers['Authorization'] = `Bearer ${key}`
   console.log('[TK] calling plugin.request with headers:', Object.keys(headers).join(','))
+  console.log('[TK] apikey value present:', !!headers['apikey'], 'len:', headers['apikey']?.length)
 
   try {
     const res = await plugin.request({
