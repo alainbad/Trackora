@@ -3,55 +3,44 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL?.trim() as string | undefined
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() as string | undefined
 
-function parseXHRHeaders(raw: string): Headers {
-  const h = new Headers()
-  raw.trim().split('\r\n').forEach(line => {
-    const i = line.indexOf(': ')
-    if (i > 0) {
-      try { h.append(line.substring(0, i), line.substring(i + 2)) } catch { /* skip */ }
-    }
-  })
-  return h
-}
-
 async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   if (!(window as any).Capacitor) return fetch(input, init)
 
-  return new Promise((resolve, reject) => {
-    const reqUrl = typeof input === 'string' ? input
-      : input instanceof URL ? input.href
-      : (input as Request).url
+  const reqUrl = typeof input === 'string' ? input
+    : input instanceof URL ? input.href
+    : (input as Request).url
 
-    const xhr = new XMLHttpRequest()
-    xhr.open(init?.method?.toUpperCase() ?? 'GET', reqUrl)
-
-    if (init?.headers) {
-      new Headers(init.headers).forEach((v, k) => {
-        try { xhr.setRequestHeader(k, v) } catch { /* bridge rejects this header — skip it */ }
-      })
+  // Build header map
+  const headers: Record<string, string> = {}
+  if (init?.headers) {
+    try {
+      new Headers(init.headers).forEach((v, k) => { headers[k] = v })
+      console.log('[TK] headers built:', Object.keys(headers).join(','))
+    } catch (e) {
+      console.error('[TK] headers build failed:', e)
     }
+  }
+
+  // Try XHR without setting any headers — just open + send
+  console.log('[TK] Trying XHR no-headers to:', reqUrl.substring(0, 50))
+  const result = await new Promise<Response>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    try { xhr.open(init?.method?.toUpperCase() ?? 'GET', reqUrl) } catch (e) { console.error('[TK] open failed:', e); reject(e); return }
+    console.log('[TK] opened ok')
 
     xhr.onload = () => {
-      try {
-        resolve(new Response(xhr.responseText, {
-          status: xhr.status,
-          statusText: xhr.statusText,
-          headers: parseXHRHeaders(xhr.getAllResponseHeaders()),
-        }))
-      } catch (e) {
-        reject(e)
-      }
+      console.log('[TK] onload status:', xhr.status)
+      resolve(new Response(xhr.responseText, { status: xhr.status }))
     }
-
-    xhr.onerror = () => reject(new TypeError('Network request failed'))
+    xhr.onerror = (e) => { console.error('[TK] onerror:', e); reject(new TypeError('Network request failed')) }
     xhr.ontimeout = () => reject(new TypeError('Network request timed out'))
 
-    try {
-      xhr.send(typeof init?.body === 'string' ? init.body : null)
-    } catch (e) {
-      reject(e)
-    }
+    try { xhr.send(typeof init?.body === 'string' ? init.body : null) } catch (e) { console.error('[TK] send failed:', e); reject(e) }
+    console.log('[TK] send ok')
   })
+
+  console.log('[TK] XHR result status:', result.status)
+  return result
 }
 
 function makeClient() {
