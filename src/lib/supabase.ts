@@ -31,12 +31,19 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
   // Ensure apikey is always present using the module-level key
   if (key && !headers['apikey']) headers['apikey'] = key
   if (key && !headers['Authorization']) headers['Authorization'] = `Bearer ${key}`
-  console.log('[TK] calling plugin.request with headers:', Object.keys(headers).join(','))
-  console.log('[TK] apikey value present:', !!headers['apikey'], 'len:', headers['apikey']?.length)
+
+  // Capacitor CapacitorHttp drops non-standard headers (like apikey) in URLSession.
+  // Supabase accepts apikey as a query parameter as a fallback.
+  let finalUrl = reqUrl
+  if (key && url && reqUrl.startsWith(url)) {
+    const sep = reqUrl.includes('?') ? '&' : '?'
+    finalUrl = `${reqUrl}${sep}apikey=${encodeURIComponent(key)}`
+  }
+  console.log('[TK] finalUrl includes apikey param:', finalUrl.includes('apikey='))
 
   try {
     const res = await plugin.request({
-      url: reqUrl,
+      url: finalUrl,
       method: (init?.method ?? 'GET').toUpperCase(),
       headers,
       data: typeof init?.body === 'string' ? init.body : undefined,
