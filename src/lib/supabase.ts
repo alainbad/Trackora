@@ -3,8 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 const url = import.meta.env.VITE_SUPABASE_URL?.trim() as string | undefined
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() as string | undefined
 
-// On iOS/Capacitor, new Headers(init.headers) throws TypeError in the patched
-// environment. Use Object.entries() to iterate headers without that constructor.
 async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   if (!(window as any).Capacitor) return fetch(input, init)
 
@@ -16,36 +14,34 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
     const xhr = new XMLHttpRequest()
     xhr.open(init?.method?.toUpperCase() ?? 'GET', reqUrl)
 
-    if (init?.headers) {
-      const h = init.headers
-      try {
-        // Avoid new Headers() constructor — it throws in Capacitor's patched env.
-        // Use Object.entries() for plain objects, or the native forEach for Headers instances.
-        if (typeof (h as any).forEach === 'function') {
-          (h as Headers).forEach((v, k) => { try { xhr.setRequestHeader(k, v) } catch {} })
-        } else {
-          Object.entries(h as Record<string, string>).forEach(([k, v]) => {
-            if (v != null) try { xhr.setRequestHeader(k, String(v)) } catch {}
-          })
+    const h = init?.headers
+    console.log('[TK] headers type:', typeof h, h instanceof Headers ? 'Headers' : Array.isArray(h) ? 'array' : typeof h === 'object' ? 'object' : 'other')
+    if (h) {
+      const entries: [string, string][] = []
+      if (h instanceof Headers) {
+        h.forEach((v, k) => entries.push([k, v]))
+      } else if (Array.isArray(h)) {
+        (h as [string, string][]).forEach(pair => entries.push(pair))
+      } else {
+        Object.entries(h as Record<string, string>).forEach(([k, v]) => { if (v != null) entries.push([k, String(v)]) })
+      }
+      console.log('[TK] header keys:', entries.map(([k]) => k).join(','))
+      entries.forEach(([k, v]) => {
+        try {
+          xhr.setRequestHeader(k, v)
+          console.log('[TK] header set ok:', k)
+        } catch (e) {
+          console.error('[TK] header FAILED:', k, String(e))
         }
-      } catch {}
+      })
     }
 
     xhr.onload = () => {
-      const responseHeaders: Record<string, string> = {}
-      xhr.getAllResponseHeaders().trim().split('\r\n').forEach(line => {
-        const i = line.indexOf(': ')
-        if (i > 0) responseHeaders[line.substring(0, i).toLowerCase()] = line.substring(i + 2)
-      })
-      resolve(new Response(xhr.responseText, {
-        status: xhr.status,
-        statusText: xhr.statusText,
-      }))
+      console.log('[TK] onload status:', xhr.status, 'body:', xhr.responseText.substring(0, 80))
+      resolve(new Response(xhr.responseText, { status: xhr.status, statusText: xhr.statusText }))
     }
-
     xhr.onerror = () => reject(new TypeError('Network request failed'))
     xhr.ontimeout = () => reject(new TypeError('Network request timed out'))
-
     try { xhr.send(typeof init?.body === 'string' ? init.body : null) } catch (e) { reject(e) }
   })
 }
