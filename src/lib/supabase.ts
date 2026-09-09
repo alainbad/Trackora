@@ -11,10 +11,11 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
     return fetch(input, init)
   }
 
-  // Pre-convert headers to a plain object.
-  // Capacitor's patched fetch (and Supabase JS internals) throw TypeError
-  // when they call `new Headers(existingHeaders)` in WKWebView — converting
-  // to a plain object first avoids the constructor call entirely.
+  const reqUrl = typeof input === 'string' ? input
+    : input instanceof URL ? input.href
+    : (input as Request).url
+  console.log('[TK] url:', reqUrl.substring(0, 70))
+
   const headers: Record<string, string> = {}
   if (init?.headers) {
     const h = init.headers
@@ -26,19 +27,18 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
       })
     }
   }
-  // Belt-and-suspenders: ensure auth headers are always present
   if (key && !headers['apikey']) headers['apikey'] = key
   if (key && !headers['Authorization']) headers['Authorization'] = `Bearer ${key}`
 
-  console.log('[TK] isNative:', isNative, 'method:', init?.method, 'bodyType:', typeof init?.body)
+  console.log('[TK] method:', init?.method, 'body type:', typeof init?.body)
 
-  // Pass only the options Capacitor's native HTTP bridge supports.
-  // Spreading the full `init` causes TypeError because Capacitor's patched
-  // fetch doesn't handle AbortSignal, mode, credentials, or other options.
   return fetch(input, {
     method: init?.method ?? 'GET',
     headers,
     body: init?.body as BodyInit | undefined,
+  }).catch((e: unknown) => {
+    console.error('[TK] fetch error:', (e as Error)?.name, (e as Error)?.message)
+    throw e
   })
 }
 
