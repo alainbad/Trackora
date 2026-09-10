@@ -21,12 +21,14 @@ serve(async (req: Request) => {
     return new Response(null, { status: 204, headers: CORS })
   }
 
-  // Path after /functions/v1/auth-proxy → forward to Supabase Auth
-  // e.g. /functions/v1/auth-proxy/token?grant_type=password
-  //   →  SUPABASE_URL/auth/v1/token?grant_type=password
+  // Supabase's API gateway doesn't pass sub-paths to edge functions, so the
+  // client encodes the auth path as ?_p=/token and other query params normally.
+  // e.g. ?_p=/token&grant_type=password → SUPABASE_URL/auth/v1/token?grant_type=password
   const url = new URL(req.url)
-  const subpath = url.pathname.replace(/^\/functions\/v1\/auth-proxy/, '') || '/'
-  const targetUrl = `${SUPABASE_URL}/auth/v1${subpath}${url.search}`
+  const subpath = url.searchParams.get('_p') || '/token'
+  url.searchParams.delete('_p')
+  const qs = url.searchParams.toString()
+  const targetUrl = `${SUPABASE_URL}/auth/v1${subpath}${qs ? '?' + qs : ''}`
 
   const body = req.method !== 'GET' ? await req.arrayBuffer() : undefined
 

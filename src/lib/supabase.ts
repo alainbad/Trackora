@@ -46,9 +46,16 @@ async function nativeFetch(input: RequestInfo | URL, init?: RequestInit): Promis
 
   // Redirect auth requests through the Edge Function proxy so apikey header
   // is added server-side (Capacitor's XHR drops custom headers).
+  // Note: Supabase gateway doesn't route sub-paths to edge functions, so we
+  // encode the auth sub-path as a query param ?_p=<path> instead.
   if (AUTH_PROXY && reqUrl.includes('/auth/v1/')) {
-    reqUrl = reqUrl.replace(`${url}/auth/v1`, AUTH_PROXY)
-    console.log('[TK] proxy:', init?.method, reqUrl.substring(0, 80))
+    const authUrl = new URL(reqUrl)
+    const subpath = authUrl.pathname.replace('/auth/v1', '') // e.g. /token
+    const proxyUrl = new URL(AUTH_PROXY)
+    authUrl.searchParams.forEach((v, k) => proxyUrl.searchParams.set(k, v))
+    proxyUrl.searchParams.set('_p', subpath)
+    reqUrl = proxyUrl.toString()
+    console.log('[TK] proxy:', init?.method, reqUrl.substring(0, 100))
   } else {
     console.log('[TK] XHR:', init?.method, reqUrl.substring(0, 80))
   }
