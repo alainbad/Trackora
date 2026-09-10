@@ -17,7 +17,14 @@ function xhrFetch(reqUrl: string, init?: RequestInit): Promise<Response> {
     // Set Content-Type — may be dropped by Capacitor but worth trying
     try { xhr.setRequestHeader('Content-Type', 'application/json') } catch {}
 
-    xhr.onload = () => resolve(new Response(xhr.responseText, { status: xhr.status }))
+    xhr.onload = () => {
+      const ct = xhr.getResponseHeader('Content-Type') ?? 'application/json'
+      console.log('[TK] XHR response:', xhr.status, xhr.responseText.substring(0, 120))
+      resolve(new Response(xhr.responseText, {
+        status: xhr.status,
+        headers: { 'Content-Type': ct },
+      }))
+    }
     xhr.onerror = () => reject(new TypeError('XHR network error'))
     xhr.ontimeout = () => reject(new TypeError('XHR timeout'))
 
