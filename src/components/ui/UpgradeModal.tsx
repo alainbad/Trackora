@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import { X, Zap, Check, Lock } from 'lucide-react'
 import { useIsNativeApp } from '../../hooks/useIsNativeApp'
-import IAPPaywall from './IAPPaywall'
 
 interface UpgradeModalProps {
   feature: 'air' | 'sea' | 'analytics' | 'alerts' | 'saved'
@@ -56,9 +54,6 @@ const PRO_FEATURES = [
 export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeModalProps) {
   const copy = FEATURE_COPY[feature]
   const isNative = useIsNativeApp()
-  const [showIAP, setShowIAP] = useState(false)
-
-  if (isNative && showIAP) return <IAPPaywall onClose={onClose} defaultTier="pro" />
 
   function handleUpgrade() {
     if (onUpgrade) onUpgrade()
@@ -136,19 +131,16 @@ export default function UpgradeModal({ feature, onClose, onUpgrade }: UpgradeMod
         </ul>
 
         {isNative ? (
-          <button
-            onClick={() => setShowIAP(true)}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              width: '100%', padding: '14px', borderRadius: '14px', cursor: 'pointer',
-              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: 'white', fontSize: '15px', fontWeight: 700,
-              boxShadow: '0 4px 20px rgba(99,102,241,0.4)',
-            }}
-          >
-            <Zap size={16} />
-            View Plans & Pricing
-          </button>
+          <div style={{
+            textAlign: 'center', padding: '16px',
+            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
+            borderRadius: '14px',
+          }}>
+            <p style={{ color: 'rgba(248,250,252,0.7)', fontSize: '14px', lineHeight: 1.6, marginBottom: '4px' }}>
+              To upgrade your plan, visit us at
+            </p>
+            <p style={{ color: '#a5b4fc', fontWeight: 700, fontSize: '15px' }}>track-ora.com</p>
+          </div>
         ) : (
           <>
             <div style={{ textAlign: 'center', marginBottom: '16px' }}>
